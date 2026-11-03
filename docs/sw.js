@@ -1,5 +1,5 @@
 // Offline cache. The build stamps a new version on every change, which clears the old cache.
-const CACHE = "pocket-trainer-c7e619bbe9";
+const CACHE = "pocket-trainer-52cfec231a";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 

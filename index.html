@@ -4,7 +4,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@600;800&display=swap">
 <style>
-/* Layout: one-screen field tool. Train = module picker -> guided step (what to mark) + marker pad. Tab bar at the bottom. */
+/* Layout: Today (one next session) / Skills / Settings tabs. Training is a full screen with no tab bar:
+   one line of what to mark, the try dots, a giant pad in the thumb zone, and the secondary markers under it. */
 :root {
   --bg: #eef0ea;          /* sun-readable light, faint grass tint */
   --surface: #ffffff;
@@ -41,14 +42,13 @@ body {
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; overflow: hidden;
 }
 .app { height: 100%; display: flex; flex-direction: column; }
-.screen, .view {
-  flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
-}
 .screen {
-  padding-block: 12px;
+  flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+  padding-block: 12px 88px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
+.screen.run { padding-bottom: 12px; overflow: hidden; }
 h1, h2 { font-family: var(--font-display); font-weight: 800; letter-spacing: .02em; margin: 0; text-wrap: balance; }
 h1 { font-size: 1.6rem; text-transform: uppercase; }
 h2 { font-size: 1.15rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
@@ -56,8 +56,57 @@ p { margin: 0; line-height: 1.45; max-width: 60ch; }
 .muted { color: var(--muted); font-size: .9rem; }
 .num { font-variant-numeric: tabular-nums; }
 .eyebrow { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 700; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row.between { justify-content: space-between; }
+.btn {
+  font: inherit; font-weight: 700; border-radius: 12px; border: 2px solid var(--fg); background: transparent; color: var(--fg);
+  padding: 10px 16px; min-height: 44px; cursor: pointer;
+}
+.btn.solid { background: var(--fg); color: var(--bg); }
+.linkbtn { font: inherit; font-size: .88rem; font-weight: 700; color: var(--catch); background: none; border: 0; padding: 6px 0; cursor: pointer; }
+.linkbtn:disabled { color: var(--muted); opacity: .5; cursor: default; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 12px; }
 
-/* Module picker */
+/* Today */
+.todayhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.next {
+  font: inherit; text-align: left; border: 0; border-radius: 20px; background: var(--accent); color: var(--accent-ink);
+  padding: 16px; display: grid; gap: 4px; cursor: pointer;
+}
+.next .eyebrow { color: inherit; opacity: .85; }
+.next b { font-family: var(--font-display); font-weight: 800; font-size: 2.6rem; line-height: .95; text-transform: uppercase; }
+.next .sub { font-weight: 700; }
+.next .mk-line { opacity: .9; font-size: .95rem; line-height: 1.35; }
+.next .go {
+  margin-top: 10px; background: var(--accent-ink); color: var(--accent); border-radius: 12px; padding: 12px; text-align: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; letter-spacing: .04em;
+}
+.later { display: grid; gap: 8px; }
+.later button {
+  font: inherit; color: var(--fg); text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; cursor: pointer;
+}
+.later b { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; text-transform: uppercase; }
+.later span { font-size: .85rem; color: var(--muted); }
+.later .done b { text-decoration: line-through; color: var(--muted); }
+.later .tick { grid-row: 1 / span 2; grid-column: 2; font-weight: 700; color: var(--keep); }
+.summary { gap: 8px; }
+.summary .figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.fig { display: flex; flex-direction: column; gap: 2px; }
+.fig b { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.fig span { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.fig.slow b { color: var(--warn); }
+.field { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+.field label { font-weight: 700; }
+input[type="text"], input[type="number"] {
+  font: inherit; padding: 10px; border-radius: 10px; border: 2px solid var(--line); background: var(--bg); color: var(--fg); min-width: 0;
+  -webkit-user-select: text; user-select: text;
+}
+input[type="number"] { width: 5.5rem; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--accent); }
+
+/* Skills */
 .starter { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .tile {
   font: inherit; text-align: left; color: var(--fg); background: var(--surface); border: 2px solid var(--line);
@@ -78,108 +127,70 @@ p { margin: 0; line-height: 1.45; max-width: 60ch; }
 .mod .lvl i::after { content: ""; display: block; height: 100%; width: var(--p, 0%); background: var(--keep); }
 .mod.done .lvl { color: var(--keep); font-weight: 700; }
 
-/* Guided step */
-.runhead { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; }
+/* Training screen */
+.runhead { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; flex: none; }
 .iconbtn {
   font: inherit; font-weight: 700; font-size: 1.3rem; width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--line);
   background: var(--surface); color: var(--fg); cursor: pointer; display: grid; place-items: center; line-height: 1;
 }
-.iconbtn:disabled { opacity: .35; cursor: default; }
 .runtitle { display: grid; min-width: 0; }
 .runtitle b { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; line-height: 1.05; }
-.runtitle span { font-size: .8rem; color: var(--muted); }
-.stepnav { display: flex; gap: 6px; }
-.stepcard { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; display: grid; overflow: hidden; flex: none; min-height: 162px; }
-.stepbody, .coach { grid-area: 1 / 1; padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
+.runtitle span { font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.runmeta { display: grid; justify-items: end; font-variant-numeric: tabular-nums; }
+.runmeta b { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; line-height: 1; }
+.runmeta span { font-size: .78rem; color: var(--muted); }
+.runmeta.slow span, .runmeta.long b { color: var(--warn); }
+/* The step and the coach share one grid cell, so a coach message never moves the pad. */
+.stepcard { display: grid; flex: none; min-height: 132px; border-radius: 16px; overflow: hidden; }
+.stepbody, .coach { grid-area: 1 / 1; padding: 4px 2px; display: grid; gap: 6px; align-content: start; }
+.coach { padding: 12px 14px; border-radius: 16px; gap: 10px; background: var(--fg); color: var(--bg); }
+.coach p { font-weight: 700; }
+.coach .btn { border-color: var(--bg); color: var(--bg); }
+.coach .btn.solid { background: var(--bg); color: var(--fg); }
 .stepcard.coaching .stepbody, .stepcard:not(.coaching) .coach { visibility: hidden; }
-.stepcard .steptitle { font-weight: 700; }
-.linkbtn { font: inherit; font-size: .88rem; font-weight: 700; color: var(--catch); background: none; border: 0; padding: 6px 0; cursor: pointer; }
-.markwhen { font-size: 1.12rem; line-height: 1.35; font-weight: 700; }
+.markwhen { font-size: 1.25rem; line-height: 1.3; font-weight: 700; }
 .markwhen::before { content: "YES "; font-family: var(--font-display); font-weight: 800; color: var(--accent); letter-spacing: .03em; }
-details { font-size: .92rem; }
-details summary { cursor: pointer; color: var(--muted); font-weight: 700; padding: 2px 0; }
-details p { margin-top: 6px; }
-details p b { font-weight: 700; }
+.steplinks { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 .holdbtn {
   font: inherit; font-weight: 700; border-radius: 12px; border: 2px solid var(--keep); color: var(--keep); background: transparent;
   min-height: 44px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums;
 }
 .holdbtn.running { background: var(--keep); color: var(--surface); }
-.reprow { display: flex; align-items: center; gap: 10px; }
+.reprow { display: flex; align-items: center; gap: 10px; flex: none; }
 .reps { display: flex; gap: 6px; flex: 1; align-items: center; }
-.reps i { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); }
+.reps i { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); position: relative; }
 .reps i.y { background: var(--keep); border-color: var(--keep); }
-.reps i.n { background: transparent; border-color: var(--miss); position: relative; }
-.reps i.n::after { content: ""; position: absolute; inset: 8px 2px; background: var(--miss); border-radius: 1px; }
-.missbtn {
-  font: inherit; font-weight: 700; border: 2px solid var(--miss); color: var(--miss); background: transparent; border-radius: 12px;
-  min-height: 44px; padding: 8px 16px; cursor: pointer; touch-action: manipulation;
+.reps i.n { border-color: var(--miss); }
+.reps i.n::after { content: ""; position: absolute; inset: 7px 2px; background: var(--miss); border-radius: 1px; }
+.chip {
+  font: inherit; font-size: .85rem; font-weight: 700; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--fg);
+  padding: 6px 12px; min-height: 36px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
 }
-.coach { gap: 10px; background: var(--fg); color: var(--bg); }
-.stat.slow b { color: var(--warn); }
-.coach p { font-weight: 700; }
-.coach .row .btn { border-color: var(--bg); color: var(--bg); }
-.coach .row .btn.solid { background: var(--bg); color: var(--fg); }
-
-/* Marker pad */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.stat { display: flex; flex-direction: column; gap: 2px; }
-.stat b { font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-.stat span { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.stat.low b { color: var(--warn); }
-.timebar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; flex: none; }
-.timebar i { display: block; height: 100%; width: 0; background: var(--keep); transition: width .5s linear; }
-.timebar.over i { background: var(--warn); }
+.chip.rec.on { border-color: var(--miss); color: var(--miss); }
+.chip.rec.on::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--miss); }
+.chip.recall { border-color: var(--catch); color: var(--catch); }
+.padwrap { flex: 1; min-height: 160px; position: relative; display: flex; }
 .pad {
-  flex: 1; min-height: 170px; border: 0; border-radius: 22px; background: var(--accent); color: var(--accent-ink);
+  flex: 1; border: 0; border-radius: 24px; background: var(--accent); color: var(--accent-ink);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   touch-action: none; cursor: pointer; transition: transform .06s ease-out, filter .06s; font: inherit;
 }
-.pad strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(3.6rem, 20vw, 8rem); line-height: .9; letter-spacing: .02em; }
+.pad strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(4rem, 24vw, 8rem); line-height: .9; letter-spacing: .02em; }
 .pad small { font-size: .95rem; opacity: .85; }
 .pad.hit, .mk.hit { transform: scale(.975); filter: brightness(1.15); }
-.markers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.campreview {
+  position: absolute; top: 10px; right: 10px; width: 30%; max-width: 140px; aspect-ratio: 3 / 4; object-fit: cover;
+  border-radius: 12px; border: 2px solid var(--accent-ink); pointer-events: none; background: #000;
+}
+.markers { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; flex: none; }
 .mk {
-  border: 2px solid currentColor; background: var(--surface); border-radius: 16px; min-height: 68px;
+  border: 2px solid currentColor; background: var(--surface); border-radius: 16px; min-height: 64px; padding: 4px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   font: inherit; touch-action: none; cursor: pointer; transition: transform .06s, filter .06s;
 }
-.mk strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.1rem, 5.6vw, 1.5rem); white-space: nowrap; text-transform: uppercase; letter-spacing: .03em; }
-.mk small { font-size: .72rem; color: var(--muted); }
-.mk.catch { color: var(--catch); } .mk.keep { color: var(--keep); } .mk.free { color: var(--free); }
-.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.row.between { justify-content: space-between; }
-.btn {
-  font: inherit; font-weight: 700; border-radius: 12px; border: 2px solid var(--fg); background: transparent; color: var(--fg);
-  padding: 10px 16px; min-height: 44px; cursor: pointer;
-}
-.btn.solid { background: var(--fg); color: var(--bg); }
-.btn:focus-visible, .pad:focus-visible, .mk:focus-visible, .tab:focus-visible, .mod:focus-visible, .tile:focus-visible, .iconbtn:focus-visible, .missbtn:focus-visible, .holdbtn:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
-
-/* Yes guide */
-.guide {
-  position: fixed; inset: 0; z-index: 30; background: var(--bg); overflow-y: auto;
-  padding-top: max(12px, env(safe-area-inset-top, 0px)); padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: flex; flex-direction: column; gap: 14px; -webkit-user-select: text; user-select: text;
-}
-.rules { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
-.rules li { display: grid; grid-template-columns: 1.6rem 1fr; gap: 8px; line-height: 1.45; }
-.rules li > b { font-family: var(--font-display); font-size: 1.25rem; color: var(--accent); }
-.rules li strong { display: block; }
-.soundmap { display: grid; gap: 8px; }
-.soundmap div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 10px; align-items: baseline; }
-.soundmap b { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; text-transform: uppercase; }
-
-/* Recall */
-.recall {
-  flex: 1; min-height: 240px; border: 0; border-radius: 50%; aspect-ratio: 1; max-width: min(100%, 360px); align-self: center; width: 100%;
-  background: var(--catch); color: #fff; font: inherit; touch-action: none; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: transform .06s;
-}
-.recall strong { font-family: var(--font-display); font-weight: 800; font-size: 3.6rem; line-height: 1; text-transform: uppercase; }
-.recall.hit { transform: scale(.97); }
-.recall-rules li > b { color: var(--catch); }
+.mk strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.05rem, 5vw, 1.4rem); line-height: 1; text-transform: uppercase; letter-spacing: .03em; text-align: center; }
+.mk small { font-size: .7rem; color: var(--muted); }
+.mk.miss { color: var(--miss); } .mk.catch { color: var(--catch); } .mk.keep { color: var(--keep); } .mk.free { color: var(--free); }
 
 /* Charge */
 .charge-face {
@@ -192,20 +203,14 @@ details p b { font-weight: 700; }
 .dots i { height: 10px; border-radius: 5px; background: var(--line); }
 .dots i.on { background: var(--accent); }
 
-/* Setup */
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 12px; }
-.field { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
-.field label { font-weight: 700; }
-input[type="range"] { width: 100%; accent-color: var(--accent); }
-input[type="number"] { width: 5.5rem; font: inherit; padding: 8px; border-radius: 10px; border: 2px solid var(--line); background: var(--bg); color: var(--fg); }
-input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--accent); }
+/* Settings */
 .sounds { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
 .history { display: grid; gap: 6px; font-size: .9rem; }
 .history div { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
 
-/* Tabs */
+/* Tabs + floating recall */
 .tabs {
-  display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); background: var(--surface);
+  display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); background: var(--surface);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
 }
@@ -215,6 +220,47 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   border-top: 3px solid transparent;
 }
 .tab[aria-selected="true"] { color: var(--fg); border-top-color: var(--accent); }
+.fab {
+  position: fixed; z-index: 20; right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  font: inherit; border: 0; border-radius: 999px; background: var(--catch); color: #fff; padding: 14px 20px; cursor: pointer; touch-action: none;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; text-transform: uppercase; letter-spacing: .05em;
+  box-shadow: 0 6px 18px rgb(0 0 0 / .25);
+}
+.toast {
+  position: fixed; z-index: 45; left: 50%; transform: translateX(-50%); bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+  background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 700; max-width: min(90vw, 420px); text-align: center;
+}
+
+/* Sheets: Yes guide, step how-to, video review */
+.sheet {
+  position: fixed; inset: 0; z-index: 30; background: var(--bg); overflow-y: auto;
+  padding-top: max(12px, env(safe-area-inset-top, 0px)); padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px; -webkit-user-select: text; user-select: text;
+}
+.rules { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.rules li { display: grid; grid-template-columns: 1.6rem 1fr; gap: 8px; line-height: 1.45; }
+.rules li > b { font-family: var(--font-display); font-size: 1.25rem; color: var(--accent); }
+.rules li strong { display: block; }
+.rules.blue li > b { color: var(--catch); }
+.soundmap { display: grid; gap: 8px; }
+.soundmap div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 10px; align-items: baseline; }
+.soundmap b { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; text-transform: uppercase; }
+.rv-stage { position: relative; background: #000; border-radius: 16px; overflow: hidden; }
+.rv-stage video { display: block; width: 100%; max-height: 52vh; object-fit: contain; }
+.rv-flash {
+  position: absolute; left: 12px; top: 12px; padding: 4px 10px; border-radius: 8px; background: var(--accent); color: var(--accent-ink);
+  font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase;
+}
+.rv-flash.miss { background: var(--miss); }
+.rv-line { position: relative; height: 40px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; touch-action: none; cursor: pointer; }
+.rv-line i { position: absolute; top: 6px; bottom: 6px; width: 3px; margin-left: -1px; border-radius: 2px; background: var(--accent); pointer-events: none; }
+.rv-line i.miss { background: var(--miss); }
+.rv-line i.sel { top: 0; bottom: 0; width: 5px; margin-left: -2px; }
+.rv-line .head { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--fg); pointer-events: none; }
+.rv-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rv-controls .btn { padding-inline: 6px; }
 
 .flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 50; }
 .flash.go { animation: flash .18s ease-out; }
@@ -226,97 +272,112 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 .unlock .btn { font-size: 1.2rem; padding: 14px 28px; }
-@media (prefers-reduced-motion: reduce) { .pad, .mk, .recall, .timebar i { transition: none; } .flash.go { animation-duration: .01s; } }
-@media (max-height: 700px) { .pad strong { font-size: 3.6rem; } .mk { min-height: 58px; } .stat b { font-size: 1.5rem; } }
+button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .pad, .mk { transition: none; } .flash.go { animation-duration: .01s; } }
+@media (max-height: 640px) { .pad strong { font-size: 3.6rem; } .mk { min-height: 56px; } .markwhen { font-size: 1.1rem; } }
 </style>
 
 <div class="app">
-  <!-- TRAIN -->
-  <section class="screen" id="s-train" aria-label="Train">
-    <!-- Module picker -->
-    <div class="view" id="v-list">
-      <h1>What are we training?</h1>
-      <div class="starter">
-        <button class="tile" type="button" id="open-guide"><b>How Yes works</b><span>When to tap it, and what each sound means. Read once.</span></button>
-        <button class="tile" type="button" id="go-charge"><b id="charge-tile-title">Charge Yes</b><span id="charge-tile-sub">Do this first: 2 minutes so your dog learns Yes means food.</span></button>
-      </div>
-      <div class="modules" id="modules"></div>
+  <!-- TODAY -->
+  <section class="screen" id="s-today" aria-label="Today">
+    <div class="todayhead"><h1 id="today-title">Today</h1><span class="muted num" id="today-date"></span></div>
+    <div class="card" id="dog-ask" hidden>
+      <label for="dog-name-ask"><b>What's your dog's name?</b></label>
+      <div class="row"><input type="text" id="dog-name-ask" autocomplete="off" placeholder="Milo" style="flex:1"><button class="btn solid" type="button" id="dog-save">Save</button></div>
     </div>
+    <div class="card summary" id="last" hidden>
+      <div class="row between"><span class="eyebrow" id="last-title">Last session</span><button class="linkbtn" type="button" id="last-close">Dismiss</button></div>
+      <div class="figs">
+        <div class="fig"><b id="last-time">0:00</b><span>Time</span></div>
+        <div class="fig"><b id="last-marks">0</b><span>Marks</span></div>
+        <div class="fig" id="last-rate-wrap"><b id="last-rate">0</b><span>Per minute</span></div>
+      </div>
+      <p class="muted" id="last-note"></p>
+      <button class="btn" type="button" id="last-review" hidden>Review the video</button>
+    </div>
+    <button class="next" type="button" id="next">
+      <span class="eyebrow" id="next-eyebrow">Next up · about 2 minutes</span>
+      <b id="next-name"></b>
+      <span class="sub" id="next-sub"></span>
+      <span class="mk-line" id="next-mark"></span>
+      <span class="go">Start</span>
+    </button>
+    <div class="later" id="later"></div>
+    <button class="linkbtn" type="button" id="pick-other">Train something else</button>
+  </section>
 
-    <!-- Guided session -->
-    <div class="view" id="v-run" hidden>
-      <div class="runhead">
-        <button class="iconbtn" type="button" id="run-back" aria-label="Back to all modules">‹</button>
-        <div class="runtitle"><b id="run-name"></b><span class="num" id="run-step-n"></span></div>
-        <div class="stepnav">
-          <button class="iconbtn" type="button" id="step-prev" aria-label="Easier step">−</button>
-          <button class="iconbtn" type="button" id="step-next" aria-label="Harder step">+</button>
+  <!-- SKILLS -->
+  <section class="screen" id="s-skills" aria-label="Skills" hidden>
+    <h1>Skills</h1>
+    <div class="starter">
+      <button class="tile" type="button" id="open-guide"><b>How Yes works</b><span>When to tap it, what each sound means, and the recall whistle.</span></button>
+      <button class="tile" type="button" id="go-charge"><b id="charge-tile-title">Charge Yes</b><span id="charge-tile-sub">Do this first: 2 minutes so your dog learns Yes means food.</span></button>
+    </div>
+    <div class="modules" id="modules"></div>
+  </section>
+
+  <!-- TRAINING -->
+  <section class="screen run" id="s-run" aria-label="Training" hidden>
+    <div class="runhead">
+      <button class="iconbtn" type="button" id="run-back" aria-label="End session">‹</button>
+      <div class="runtitle"><b id="run-name"></b><span class="num" id="run-step-n"></span></div>
+      <div class="runmeta" id="run-meta"><b id="run-clock">0:00</b><span id="run-rate">tap to start</span></div>
+    </div>
+    <div class="stepcard" id="stepcard">
+      <div class="stepbody">
+        <p class="markwhen" id="run-mark"></p>
+        <div class="steplinks">
+          <button class="linkbtn" type="button" id="step-prev">‹ Easier</button>
+          <button class="linkbtn" type="button" id="open-howto">How to set up</button>
+          <button class="linkbtn" type="button" id="step-next">Harder ›</button>
         </div>
+        <button class="holdbtn" type="button" id="hold" hidden></button>
       </div>
-      <!-- The step and the coach share one grid cell, so a coach message never moves the pad. -->
-      <div class="stepcard" id="stepcard">
-        <div class="stepbody" id="stepbody">
-          <div class="row between"><span class="steptitle" id="run-title"></span><button class="linkbtn" type="button" id="open-howto">How to set up</button></div>
-          <p class="markwhen" id="run-mark"></p>
-          <button class="holdbtn" type="button" id="hold" hidden></button>
-        </div>
-        <div class="coach" id="coach">
-          <p id="coach-text"></p>
-          <div class="row" id="coach-actions"></div>
-        </div>
+      <div class="coach">
+        <p id="coach-text"></p>
+        <div class="row" id="coach-actions"></div>
       </div>
-      <div class="reprow" id="reprow">
-        <span class="eyebrow">Last 5</span>
-        <div class="reps" id="reps"></div>
-        <button class="missbtn" type="button" id="miss">Miss</button>
-      </div>
-      <div class="stats">
-        <div class="stat"><b id="st-marks">0</b><span>Marks</span></div>
-        <div class="stat"><b id="st-rate">–</b><span>Per min</span></div>
-        <div class="stat"><b id="st-time">0:00</b><span>Session</span></div>
-        <div class="stat" id="st-treats-wrap"><b id="st-treats">60</b><span>Treats left</span></div>
-      </div>
-      <div class="timebar" id="timebar" title="Aim for sessions of 1 to 5 minutes"><i></i></div>
+    </div>
+    <div class="reprow">
+      <div class="reps" id="reps" aria-label="Last 5 tries"></div>
+      <button class="chip rec" type="button" id="rec" hidden>Record</button>
+      <button class="chip recall" type="button" id="run-recall">Recall</button>
+    </div>
+    <div class="padwrap">
       <button class="pad" id="pad" type="button" aria-label="Mark: Yes">
         <strong>YES</strong>
         <small id="pad-sub">Tap the moment it happens. Then treat.</small>
       </button>
-      <div class="markers">
-        <button class="mk catch" type="button" data-sound="catch"><strong>Catch</strong><small>treat is thrown</small></button>
-        <button class="mk keep" type="button" data-sound="keep"><strong>Keep going</strong><small>no treat yet</small></button>
-        <button class="mk free" type="button" data-sound="free"><strong>Free</strong><small>release / break</small></button>
-      </div>
-      <div class="row between">
-        <span class="muted num" id="latency">Tap-to-sound: measuring after first mark</span>
-        <button class="btn" type="button" id="end">End session</button>
-      </div>
+      <video class="campreview" id="cam" playsinline muted autoplay hidden></video>
+    </div>
+    <div class="markers" id="markers">
+      <button class="mk miss" type="button" data-sound="miss" id="miss"><strong>Miss</strong><small>no sound</small></button>
+      <button class="mk catch" type="button" data-sound="catch"><strong>Catch</strong><small>treat thrown</small></button>
+      <button class="mk keep" type="button" data-sound="keep" id="mk-keep"><strong>Keep going</strong><small>no treat</small></button>
+      <button class="mk free" type="button" data-sound="free"><strong>Free</strong><small>release</small></button>
     </div>
   </section>
 
-  <!-- RECALL -->
-  <section class="screen" id="s-recall" aria-label="Recall" hidden>
-    <h1>Emergency recall</h1>
-    <button class="recall" type="button" id="recall-btn"><strong>Come</strong><span>Plays the recall whistle</span></button>
-    <p class="muted num" id="recall-count">Used 0 times today</p>
-    <ul class="rules recall-rules">
-      <li><b>1</b><span>Use this sound only to call your dog. Never to scold or interrupt.</span></li>
-      <li><b>2</b><span>Every time it plays, pay a jackpot: 5 or more treats in a row, or the best toy.</span></li>
-      <li><b>3</b><span>Charge it at home first: play it, then jackpot, ten times over a few days, before you ever need it outside.</span></li>
-    </ul>
-  </section>
-
   <!-- CHARGE -->
-  <section class="screen" id="s-charge" aria-label="Charge the marker" hidden>
-    <h1>Charge the marker</h1>
-    <p class="muted">Teaches your dog that the Yes sound means food. The app plays Yes at random moments; you hand over one treat each time. 20 reps, about 2 minutes. Your dog does not need to do anything.</p>
+  <section class="screen run" id="s-charge" aria-label="Charge the marker" hidden>
+    <div class="runhead">
+      <button class="iconbtn" type="button" id="charge-back" aria-label="Back">‹</button>
+      <div class="runtitle"><b>Charge Yes</b><span>20 treats, about 2 minutes</span></div>
+      <span></span>
+    </div>
+    <p class="muted">Teaches your dog that the Yes sound means food. The app plays Yes at random moments; you hand over one treat each time. Your dog does not need to do anything.</p>
     <div class="charge-face" id="charge-face"><strong id="charge-big">Ready</strong><span id="charge-sub">Have 20 small treats in hand.</span></div>
     <div class="dots" id="dots"></div>
     <div class="row"><button class="btn solid" type="button" id="charge-go">Start</button><button class="btn" type="button" id="charge-reset">Reset</button></div>
   </section>
 
-  <!-- SETUP -->
-  <section class="screen" id="s-setup" aria-label="Setup" hidden>
-    <h1>Setup</h1>
+  <!-- SETTINGS -->
+  <section class="screen" id="s-setup" aria-label="Settings" hidden>
+    <h1>Settings</h1>
+    <div class="card">
+      <h2>Your dog</h2>
+      <div class="field"><label for="dog-name">Name</label><input type="text" id="dog-name" autocomplete="off" placeholder="Milo" style="width:10rem"></div>
+    </div>
     <div class="card">
       <h2>Sounds</h2>
       <div class="sounds">
@@ -347,32 +408,34 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
       <div class="field"><label for="opt-budget">Daily treat budget</label><input type="number" id="opt-budget" min="0" max="999" inputmode="numeric"></div>
     </div>
     <div class="card">
-      <h2>Recent sessions</h2>
+      <h2>Practice log</h2>
       <div class="history num" id="history"></div>
     </div>
     <div class="card">
       <h2>Tips</h2>
       <p class="muted">Keep marks on the phone speaker. Bluetooth speakers and AirPods add a delay of up to 200 ms, which can mark the wrong moment.</p>
-      <p class="muted">Add this page to your Home Screen. For one-press recall, make a Shortcut that opens this page and put it on the Action Button or Lock Screen.</p>
-      <p class="muted">With a keyboard or a Bluetooth remote that sends Space or Enter: Space/Enter = Yes, C = Catch, K = Keep going, F = Free, M = Miss, R = Recall.</p>
+      <p class="muted">Install it: in Safari tap Share, then Add to Home Screen. It then works offline, anywhere.</p>
+      <p class="muted">Keyboard or Bluetooth remote: Space/Enter = Yes, C = Catch, K = Keep going, F = Free, M = Miss, R = Recall.</p>
     </div>
   </section>
 
-  <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" aria-selected="true" data-tab="train" type="button">Train</button>
-    <button class="tab" role="tab" aria-selected="false" data-tab="recall" type="button">Recall</button>
-    <button class="tab" role="tab" aria-selected="false" data-tab="charge" type="button">Charge</button>
-    <button class="tab" role="tab" aria-selected="false" data-tab="setup" type="button">Setup</button>
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" aria-selected="true" data-tab="today" type="button">Today</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="skills" type="button">Skills</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="setup" type="button">Settings</button>
   </nav>
 </div>
 
+<button class="fab" type="button" id="fab" aria-label="Play the recall whistle">Recall</button>
+<div class="toast" id="toast" hidden role="status"></div>
+
 <!-- How Yes works -->
-<div class="guide" id="guide" hidden role="dialog" aria-label="How Yes works">
+<div class="sheet" id="guide" hidden role="dialog" aria-label="How Yes works">
   <div class="row between"><h1>How Yes works</h1><button class="btn" type="button" id="close-guide">Done</button></div>
   <p>Yes is a camera shutter. It tells your dog the exact moment they earned the treat, so they can repeat that moment. The treat comes a second later; the sound is the part they learn from.</p>
   <h2>The rules</h2>
   <ol class="rules">
-    <li><b>1</b><span><strong>Charge it first.</strong>Before Yes means anything, it has to mean food. Do the 2-minute Charge routine once or twice, then start a module.</span></li>
+    <li><b>1</b><span><strong>Charge it first.</strong>Before Yes means anything, it has to mean food. Do the 2-minute Charge routine once or twice, then start training.</span></li>
     <li><b>2</b><span><strong>Tap the instant it happens.</strong>Mark when the rear touches the floor, not when the dog is already getting up again. Every step tells you exactly what to mark.</span></li>
     <li><b>3</b><span><strong>Every Yes gets a treat.</strong>Even an accidental one. A Yes without food teaches your dog to ignore it.</span></li>
     <li><b>4</b><span><strong>Hands still, then treat.</strong>Tap first, then reach for the treat. If your hand moves first, your dog watches your hand instead of listening.</span></li>
@@ -386,14 +449,22 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   <div class="soundmap">
     <div><b style="color:var(--accent)">Yes</b><span>That was it. Come get your treat from my hand.</span></div>
     <div><b style="color:var(--catch)">Catch</b><span>That was it, and the treat is flying. Toss it so your dog moves away and resets for the next rep.</span></div>
-    <div><b style="color:var(--keep)">Keep going</b><span>You're on the right track, keep doing it. No treat. Use it during long holds and walks, sparingly.</span></div>
-    <div><b>Free</b><span>You're released. The stay or session is over, go sniff.</span></div>
+    <div><b style="color:var(--keep)">Keep going</b><span>You're on the right track, keep doing it. No treat. It only shows on holds and walking steps.</span></div>
+    <div><b>Free</b><span>You're released. The session is over, go sniff.</span></div>
   </div>
+  <h2>The recall whistle</h2>
+  <ol class="rules blue">
+    <li><b>1</b><span>The blue Recall button plays it from any screen. Use it only to call your dog, never to scold or interrupt.</span></li>
+    <li><b>2</b><span>Every time it plays, pay a jackpot: 5 or more treats in a row, or the best toy.</span></li>
+    <li><b>3</b><span>Charge it at home first: play it, then jackpot, ten times over a few days, before you ever need it outside.</span></li>
+  </ol>
+  <h2>Filming a session</h2>
+  <p>In the installed app, tap Record on the training screen. Hold the phone at your chest with the screen facing you; the back camera sees your dog. Afterwards, Review shows every tap on the video so you can see whether you marked the right moment.</p>
   <button class="btn solid" type="button" id="close-guide-2">Got it</button>
 </div>
 
 <!-- How to set up the current step -->
-<div class="guide" id="howto" hidden role="dialog" aria-label="How to set up this step">
+<div class="sheet" id="howto" hidden role="dialog" aria-label="How to set up this step">
   <div class="row between"><h1 id="howto-title"></h1><button class="btn" type="button" id="close-howto">Done</button></div>
   <p class="markwhen" id="howto-mark"></p>
   <ol class="rules">
@@ -403,6 +474,27 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   </ol>
   <p class="muted">Short rounds of 5 tries. Tap Miss when it doesn't happen; the app tells you when to move on or make it easier.</p>
   <button class="btn solid" type="button" id="close-howto-2">Start</button>
+</div>
+
+<!-- Video review -->
+<div class="sheet" id="review" hidden role="dialog" aria-label="Review the session video">
+  <div class="row between"><h1>Review</h1><button class="btn" type="button" id="rv-close">Done</button></div>
+  <div class="rv-stage">
+    <video id="rv-video" playsinline muted preload="auto"></video>
+    <span class="rv-flash" id="rv-flash" hidden>Yes</span>
+  </div>
+  <div class="rv-line" id="rv-line" aria-label="Timeline with your marks"><span class="head" id="rv-head"></span></div>
+  <div class="rv-controls">
+    <button class="btn" type="button" id="rv-prev">‹ Mark</button>
+    <button class="btn solid" type="button" id="rv-play">Play slow</button>
+    <button class="btn" type="button" id="rv-next">Mark ›</button>
+    <button class="btn" type="button" id="rv-back1">− Frame</button>
+    <button class="btn" type="button" id="rv-moment">Here</button>
+    <button class="btn" type="button" id="rv-fwd1">+ Frame</button>
+  </div>
+  <p id="rv-info">Jump to a mark, step frame by frame to the moment it really happened (rump on the floor, nose on the palm), then tap Here.</p>
+  <p class="muted num" id="rv-summary"></p>
+  <button class="btn" type="button" id="rv-save" hidden>Save video</button>
 </div>
 
 <div class="unlock" id="unlock">
@@ -421,12 +513,20 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
     set(k, v) { try { localStorage.setItem("pt." + k, JSON.stringify(v)); } catch {} },
   };
   const today = () => new Date().toISOString().slice(0, 10);
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
-  const settings = Object.assign({ volume: 0.8, haptic: true, flash: false, budget: 60, custom: null }, store.get("settings", {}));
+  const settings = Object.assign({ volume: 0.8, haptic: true, flash: false, budget: 60, custom: null, dog: "" }, store.get("settings", {}));
   const saveSettings = () => store.set("settings", settings);
+
+  let toastTimer = 0;
+  function toast(text, ms = 2600) {
+    const t = $("toast"); t.textContent = text; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), ms);
+  }
 
   // ---------- Training modules: each step says exactly what earns a Yes ----------
   // hold: [min, max] seconds -> the step gets a hold timer that marks Yes automatically at a random target.
+  // keep: true -> the Keep going marker shows on this step (holds always get it).
   const MODULES = [
     { id: "name", name: "Name", goal: "Eyes on you when you say their name.", cue: "Their name, said once in a happy voice.", steps: [
       { t: "Free eye contact", mark: "your dog looks at your face on their own.", setup: "Quiet room, treats ready, say nothing. Just wait.", reward: "Hand the treat at your chest so their eyes come back up to you." },
@@ -459,15 +559,15 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
       { t: "Word only", mark: "they lie down after \"Down\" with your hands still.", setup: "If nothing in 3 seconds, go back a step.", reward: "Treat between the paws." },
       { t: "New places", mark: "they go down on one cue somewhere new.", setup: "Soft ground first (grass, a mat). Hard floors are harder.", reward: "Treat between the paws." },
     ]},
-    { id: "stay", name: "Stay", goal: "Hold a sit or down until you say Free.", cue: "\"Stay\". Yes is the release (or Free, to end without a treat).", steps: [
+    { id: "stay", name: "Stay", goal: "Hold a sit or down until you release them.", cue: "\"Stay\". Yes is the release (or Free, to end without a treat).", steps: [
       { t: "Tiny hold", mark: "they're still sitting when the timer marks it.", setup: "Ask for Sit, say \"Stay\", start the hold. Stand right in front of them.", reward: "Yes ends the stay. Treat right away; getting up after Yes is fine.", hold: [1, 3] },
       { t: "Longer hold", mark: "they're still sitting when the timer marks it.", setup: "Same, but the time varies so they can't guess the end. Tap Miss if they get up.", reward: "Yes ends the stay. Treat right away.", hold: [3, 10] },
-      { t: "One step away", mark: "you've stepped back, returned, and they're still sitting.", setup: "Say \"Stay\", one step back, step back in. Mark when you're back beside them.", reward: "Yes ends the stay. Treat right away." },
-      { t: "Distance", mark: "you've walked 3 to 5 steps away and back and they're still sitting.", setup: "Going farther? Keep the time short.", reward: "Treat as soon as you're back beside them. Never call them out of a stay." },
+      { t: "One step away", mark: "you've stepped back, returned, and they're still sitting.", setup: "Say \"Stay\", one step back, step back in. Mark when you're back beside them.", reward: "Yes ends the stay. Treat right away.", keep: true },
+      { t: "Distance", mark: "you've walked 3 to 5 steps away and back and they're still sitting.", setup: "Going farther? Keep the time short.", reward: "Treat as soon as you're back beside them. Never call them out of a stay.", keep: true },
       { t: "Distraction", mark: "they hold the stay while you drop a toy, clap, or knock.", setup: "Stand close again. Distraction up = distance and time down.", reward: "Yes ends the stay. Treat right away.", hold: [3, 8] },
       { t: "New places", mark: "they hold a short stay somewhere new.", setup: "Start at the Tiny hold level in each new place.", reward: "Yes ends the stay. Treat right away.", hold: [2, 6] },
     ]},
-    { id: "come", name: "Come", goal: "Run to you every time you call.", cue: "Name + \"Come\", once. The Recall tab is for emergencies.", steps: [
+    { id: "come", name: "Come", goal: "Run to you every time you call.", cue: "Name + \"Come\", once. The Recall whistle is for emergencies.", steps: [
       { t: "Ping-pong indoors", mark: "their front feet reach you.", setup: "2 to 3 m away. Say name + \"Come\" once, take a step backward, clap if needed.", reward: "Treat at your knees, then touch their collar." },
       { t: "Collar touch", mark: "you hold their collar and they stay with you.", setup: "Call, then gently take the collar. This keeps recall from meaning \"fun is over\".", reward: "Treat while you hold the collar, then let go." },
       { t: "Other room", mark: "they arrive from another room.", setup: "Call once from out of sight.", reward: "Two or three treats in a row. Arriving should feel great." },
@@ -492,10 +592,10 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
     { id: "leash", name: "Loose leash", goal: "Walk with a slack leash.", cue: "None needed; a slack leash is the cue.", steps: [
       { t: "Standing still", mark: "the leash hangs slack, or they glance at you.", setup: "Leash on, stand in a hallway or yard. Don't move.", reward: "Treat at your pant seam on the side they walk." },
       { t: "One step", mark: "they're beside you with a slack leash after you take a step.", setup: "One step, stop. Repeat.", reward: "Treat at your seam." },
-      { t: "A few steps", mark: "the leash is still slack after 2 or 3 steps.", setup: "High rate: mark often. Keep going between marks is fine.", reward: "Treat at your seam, without stopping." },
+      { t: "A few steps", mark: "the leash is still slack after 2 or 3 steps.", setup: "High rate: mark often. Keep going between marks is fine.", reward: "Treat at your seam, without stopping.", keep: true },
       { t: "Tight = stop", mark: "the leash goes slack again after you stopped.", setup: "When the leash gets tight, freeze. Wait for slack, mark, then walk on.", reward: "Treat at your seam, then walk." },
       { t: "Turns", mark: "they catch up to your side after you turn around.", setup: "Turn and walk the other way, cheerfully.", reward: "Treat at your seam." },
-      { t: "Sidewalk", mark: "the leash stays slack for a few steps outside.", setup: "Short walks, many marks. A sniff break (Free) is a reward too.", reward: "Treat at your seam, or Free to sniff." },
+      { t: "Sidewalk", mark: "the leash stays slack for a few steps outside.", setup: "Short walks, many marks. A sniff break (Free) is a reward too.", reward: "Treat at your seam, or Free to sniff.", keep: true },
     ]},
     { id: "mat", name: "Mat and settle", goal: "Go to a mat and relax there.", cue: "\"Mat\"", steps: [
       { t: "Notice the mat", mark: "they look at or sniff the mat.", setup: "Put a towel or mat down. Wait.", reward: "Tap Catch and toss the treat onto the mat." },
@@ -504,16 +604,18 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
       { t: "Down on the mat", mark: "they lie down on the mat.", setup: "Cue Down if they know it, otherwise wait.", reward: "Treat between the paws on the mat." },
       { t: "Stay a while", mark: "they're still lying on the mat when the timer marks it.", setup: "Sit nearby. Tap Miss if they leave.", reward: "Yes ends it. Treat between the paws.", hold: [5, 30] },
       { t: "Send to mat", mark: "they go to the mat when you say \"Mat\" from a meter away.", setup: "Say \"Mat\", point. Increase the distance slowly.", reward: "Treat on the mat." },
-      { t: "Settle", mark: "they're relaxed on the mat: head down, hips rolled to one side.", setup: "Sit on the couch with a book or TV. Calm, slow pace.", reward: "Mark softly or just place a treat between the paws every 30 to 60 s. Calm is the goal." },
+      { t: "Settle", mark: "they're relaxed on the mat: head down, hips rolled to one side.", setup: "Sit on the couch with a book or TV. Calm, slow pace.", reward: "Mark softly or just place a treat between the paws every 30 to 60 s. Calm is the goal.", keep: true },
     ]},
   ];
   const FREE = { id: "free", name: "Free clicker", goal: "Just the marker pad, no plan." };
   const modById = (id) => MODULES.find((m) => m.id === id) || FREE;
+  const CHARGE = { id: "charge", name: "Charge Yes" };
 
-  // progress[id] = { step, reps: [true/false...] for the current step, done }
+  // progress[id] = { step, reps: [true/false...] for the current step, done, passDays, last }
   const progress = store.get("progress", {});
   const prog = (id) => (progress[id] ||= { step: 0, reps: [], done: false });
   const saveProgress = () => store.set("progress", progress);
+  const started = (id) => { const p = progress[id]; return !!p && (p.step > 0 || p.reps.length > 0 || !!p.last); };
 
   // ---------- Audio: every sound is rendered once into a buffer, so a mark is one buffer start ----------
   let ctx = null, gain = null;
@@ -579,25 +681,100 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   const hapticEl = $("haptic");
   function feedback(el) {
     if (settings.haptic) {
-      if (navigator.vibrate) navigator.vibrate(12);
-      else hapticEl.click(); // iOS 18 Safari ticks the Taptic Engine when a switch toggles
+      if (navigator.vibrate && navigator.userActivation?.hasBeenActive) navigator.vibrate(12);
+      else if (!navigator.vibrate) hapticEl.click(); // iOS 18 Safari ticks the Taptic Engine when a switch toggles
     }
     if (settings.flash) { const f = $("flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); }
     if (el) { el.classList.add("hit"); setTimeout(() => el.classList.remove("hit"), 90); }
   }
 
-  // ---------- Latency estimate: input-to-handler delay plus what the browser reports for output ----------
-  const lags = [];
-  function noteLatency(e) {
-    const handler = performance.now() - e.timeStamp;
-    if (!(handler >= 0 && handler < 1000) || !ctx) return;
-    const out = ((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000;
-    lags.push(handler + out); if (lags.length > 20) lags.shift();
-    const med = [...lags].sort((a, b) => a - b)[Math.floor(lags.length / 2)];
-    $("latency").textContent = `Tap-to-sound ≈ ${Math.round(med)} ms` + (ctx.outputLatency ? "" : " + speaker");
+  // ---------- Navigation: three tabs, plus full screens for training and charging ----------
+  const tabs = document.querySelectorAll(".tab");
+  let lastTab = "today";
+  function show(name) {
+    const full = name === "run" || name === "charge";
+    if (!full) { lastTab = name; store.set("tab", name); }
+    tabs.forEach((t) => t.setAttribute("aria-selected", t.dataset.tab === name));
+    document.querySelectorAll(".screen").forEach((s) => (s.hidden = s.id !== "s-" + name));
+    $("tabs").hidden = full;
+    $("fab").hidden = full; // the training screen has its own Recall chip
+    if (name === "today") renderToday();
+    if (name === "skills") renderList();
   }
+  tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.tab)));
 
-  // ---------- Module picker ----------
+  // ---------- Today plan: up to 3 short sessions, picked once per day ----------
+  const ORDER = ["name", "touch", "sit", "down", "come", "leave", "mat", "stay", "drop", "leash"];
+  const READY = { stay: () => prog("sit").step >= 4 || prog("sit").done };
+  function plan() {
+    let p = store.get("plan", null);
+    if (p && p.day === today()) return p;
+    const items = [];
+    if (!store.get("charged", false)) items.push("charge");
+    // Skills in progress first, the ones practiced longest ago at the top.
+    const going = MODULES.filter((m) => started(m.id) && !prog(m.id).done)
+      .sort((a, b) => (prog(a.id).last || "").localeCompare(prog(b.id).last || ""));
+    for (const m of going) if (items.length < 3) items.push(m.id);
+    // Then new skills in a sensible order, at most one new one a day once two are under way.
+    let room = going.length >= 2 ? 1 : 3;
+    for (const id of ORDER) {
+      if (items.length >= 3 || room <= 0) break;
+      if (!items.includes(id) && !started(id) && !prog(id).done && (!READY[id] || READY[id]())) { items.push(id); room--; }
+    }
+    p = { day: today(), items, done: [] };
+    store.set("plan", p);
+    return p;
+  }
+  function markPlanDone(id) {
+    const p = plan();
+    if (p.items.includes(id) && !p.done.includes(id)) { p.done.push(id); store.set("plan", p); }
+  }
+  function describe(id) {
+    if (id === "charge") return { name: "Charge Yes", sub: "20 treats at random moments", mark: "Teaches your dog that Yes means food. Do this before anything else." };
+    const m = modById(id), p = prog(id), s = m.steps[p.step];
+    return { name: m.name, sub: `Step ${p.step + 1} of ${m.steps.length}: ${s.t}`, mark: "Mark when " + s.mark };
+  }
+  function startItem(id) { if (id === "charge") show("charge"); else openModule(id); }
+
+  function renderToday() {
+    const dog = settings.dog.trim();
+    $("today-title").textContent = dog ? `Today with ${dog}` : "Today";
+    $("today-date").textContent = new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+    $("dog-ask").hidden = !!dog || store.get("dogAsked", false);
+    const p = plan(), next = p.items.find((id) => !p.done.includes(id));
+    const nb = $("next");
+    if (next) {
+      const d = describe(next);
+      nb.hidden = false; nb.dataset.id = next;
+      $("next-eyebrow").textContent = `Next up · about 2 minutes · ${p.done.length + 1} of ${p.items.length}`;
+      $("next-name").textContent = d.name; $("next-sub").textContent = d.sub; $("next-mark").textContent = d.mark;
+    } else nb.hidden = true;
+    const later = $("later"); later.replaceChildren();
+    if (!next && p.items.length) {
+      const msg = document.createElement("p");
+      msg.className = "muted"; msg.textContent = "All of today's sessions are done. Extra practice is fine, but stopping while your dog still wants more is better.";
+      later.append(msg);
+    }
+    for (const id of p.items) {
+      if (id === next) continue;
+      const d = describe(id), done = p.done.includes(id), b = document.createElement("button");
+      b.type = "button"; b.className = done ? "done" : "";
+      b.innerHTML = "<b></b><span></span>";
+      b.children[0].textContent = d.name; b.children[1].textContent = done ? "Done today" : d.sub;
+      if (done) { const t = document.createElement("span"); t.className = "tick"; t.textContent = "✓"; b.append(t); }
+      b.addEventListener("click", () => startItem(id));
+      later.append(b);
+    }
+    renderLast();
+  }
+  $("next").addEventListener("click", () => startItem($("next").dataset.id));
+  $("pick-other").addEventListener("click", () => show("skills"));
+  $("dog-save").addEventListener("click", () => {
+    settings.dog = $("dog-name-ask").value.trim(); saveSettings(); store.set("dogAsked", true);
+    $("dog-name").value = settings.dog; renderToday();
+  });
+
+  // ---------- Skills list ----------
   function renderList() {
     const el = $("modules");
     el.replaceChildren();
@@ -625,31 +802,33 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
     $("charge-tile-sub").textContent = charged ? "Done. Repeat a round any time Yes seems to lose its meaning." : "Do this first: 2 minutes so your dog learns Yes means food.";
   }
 
-  // ---------- Guided module ----------
+  // ---------- Training screen ----------
   let current = null; // module object
   let hold = null;    // { timer, end }
 
   function openModule(id) {
     current = modById(id);
-    $("v-list").hidden = true; $("v-run").hidden = false;
     store.set("module", id);
+    show("run");
     renderStep();
+    renderClock();
   }
   function closeModule() {
-    endSession(); cancelHold();
+    cancelHold();
+    const summary = endSession();
     current = null; store.set("module", null);
-    $("v-run").hidden = true; $("v-list").hidden = false;
-    renderList();
+    show(lastTab);
+    if (summary) renderToday();
   }
   function renderStep() {
     const guided = !!current.steps;
     $("run-name").textContent = current.name;
-    for (const id of ["stepcard", "reprow", "step-prev", "step-next"]) $(id).hidden = !guided;
     $("stepcard").classList.remove("coaching");
-    if (!guided) { $("run-step-n").textContent = current.goal; return; }
+    $("stepcard").hidden = !guided;
+    $("reps").style.visibility = guided ? "visible" : "hidden";
+    if (!guided) { $("run-step-n").textContent = current.goal; setMarkers(true); return; }
     const p = prog(current.id), s = current.steps[p.step];
-    $("run-step-n").textContent = `Step ${p.step + 1} of ${current.steps.length}` + (p.done ? " · module done" : "");
-    $("run-title").textContent = s.t;
+    $("run-step-n").textContent = `Step ${p.step + 1} of ${current.steps.length} · ${s.t}` + (p.done ? " · done" : "");
     const markText = s.mark.charAt(0).toUpperCase() + s.mark.slice(1);
     $("run-mark").textContent = markText;
     $("howto-title").textContent = `${current.name}: ${s.t}`;
@@ -657,15 +836,18 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
     $("howto-setup").textContent = s.setup;
     $("howto-reward").textContent = s.reward;
     $("howto-cue").textContent = current.cue;
-    // Show the how-to the first time a step is seen, before any training starts.
-    const seen = store.get("seen", {}), key = current.id + ":" + p.step;
-    if (!seen[key]) { seen[key] = true; store.set("seen", seen); openHowto(); }
     $("step-prev").disabled = p.step === 0;
     $("step-next").disabled = p.step === current.steps.length - 1;
+    setMarkers(!!(s.keep || s.hold));
     cancelHold();
     $("hold").hidden = !s.hold;
     renderReps();
+    // Show the how-to the first time a step is seen, before any training starts.
+    const seen = store.get("seen", {}), key = current.id + ":" + p.step;
+    if (!seen[key]) { seen[key] = true; store.set("seen", seen); openHowto(); }
   }
+  // Keep going only shows where it's useful, so the bottom row stays at three big targets.
+  function setMarkers(withKeep) { $("mk-keep").hidden = !withKeep; }
   function renderReps() {
     const p = prog(current.id), el = $("reps");
     el.replaceChildren();
@@ -709,8 +891,8 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
       p.passDays = [...new Set([...(p.passDays || []), today()])];
       p.done = p.passDays.length >= 2; saveProgress();
       const again = () => { p.reps = []; saveProgress(); renderReps(); };
-      if (p.done) coach(`${hits} of 5 on the final step, on ${p.passDays.length} different days. Module done. Use praise or life rewards some of the time now.`, [["Back to modules", closeModule, true], ["Keep practicing", again]]);
-      else coach(`${hits} of 5 on the final step. Pass it again on another day, ideally somewhere new, to finish the module.`, [["OK", again, true]]);
+      if (p.done) coach(`${hits} of 5 on the final step, on ${p.passDays.length} different days. Skill done. Use praise or life rewards some of the time now.`, [["Finish", closeModule, true], ["Keep practicing", again]]);
+      else coach(`${hits} of 5 on the final step. Pass it again on another day, ideally somewhere new, to finish the skill.`, [["OK", again, true]]);
     } else if (hits >= 4) {
       coach(`${hits} of 5. Your dog has this step. Ready for the next one?`, [["Next step", () => setStep(p.step + 1), true], ["Stay here", () => {}]]);
     } else if (hits === 3) {
@@ -750,64 +932,88 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   // ---------- Session ----------
   let session = null, ticker = null;
   const treats = store.get("treats", { day: today(), used: 0 });
-  if (treats.day !== today()) { treats.day = today(); treats.used = 0; }
+  const treatsToday = () => { if (treats.day !== today()) { treats.day = today(); treats.used = 0; } return treats; };
 
   function startSession() {
-    session = { start: Date.now(), marks: 0, module: current ? current.id : "free", counts: { yes: 0, catch: 0, keep: 0, free: 0 } };
-    $("pad-sub").textContent = "Session running. Tap, then treat.";
-    ticker = setInterval(renderStats, 500);
+    session = { start: Date.now(), marks: 0, module: current ? current.id : "free", step: current?.steps ? prog(current.id).step : null, counts: { yes: 0, catch: 0, keep: 0, free: 0, miss: 0 } };
+    $("pad-sub").textContent = "Tap, then treat.";
+    ticker = setInterval(renderClock, 500);
     try { navigator.wakeLock && navigator.wakeLock.request("screen").then((l) => (session.lock = l)).catch(() => {}); } catch {}
   }
   function endSession() {
-    if (!session) return;
+    const recorded = !!rec.recorder;
+    if (recorded) stopRecording();
+    if (!session) return null;
     clearInterval(ticker);
     const secs = Math.round((Date.now() - session.start) / 1000);
+    let summary = null;
     if (session.marks > 0) {
       const h = store.get("history", []);
       h.unshift({ at: new Date().toISOString(), secs, marks: session.marks, module: session.module, counts: session.counts });
-      store.set("history", h.slice(0, 30));
+      store.set("history", h.slice(0, 50));
+      if (session.module !== "free") { prog(session.module).last = today(); saveProgress(); }
+      if (session.marks >= 5) markPlanDone(session.module);
+      const p = session.module !== "free" ? prog(session.module) : null;
+      const lastRound = p && p.reps.length ? p.reps.slice(-5) : [];
+      summary = {
+        title: modById(session.module).name, secs, marks: session.marks, rate: secs >= 20 ? Math.round(session.marks / (secs / 60)) : null,
+        round: lastRound.length ? `${lastRound.filter(Boolean).length} of ${lastRound.length} right in the last round` : "",
+        treats: `${treatsToday().used} of ${settings.budget} treats used today`, video: recorded,
+      };
+      store.set("last", summary);
     }
     try { session.lock && session.lock.release(); } catch {}
     session = null;
     $("pad-sub").textContent = "Tap the moment it happens. Then treat.";
-    renderStats(); renderHistory();
+    renderClock(); renderHistory();
+    return summary;
   }
+  function renderLast() {
+    const s = store.get("last", null);
+    $("last").hidden = !s;
+    if (!s) return;
+    $("last-title").textContent = `Last session · ${s.title}`;
+    $("last-time").textContent = fmt(s.secs);
+    $("last-marks").textContent = s.marks;
+    $("last-rate").textContent = s.rate ?? "–";
+    $("last-rate-wrap").classList.toggle("slow", s.rate !== null && s.rate < 8);
+    const notes = [s.round, s.treats];
+    if (s.rate !== null && s.rate < 8) notes.push("Under 8 rewards a minute: make the next session easier so your dog wins more often");
+    $("last-note").textContent = notes.filter(Boolean).join(". ") + ".";
+    $("last-review").hidden = !(s.video && rec.has);
+  }
+  $("last-close").addEventListener("click", () => { store.set("last", null); renderLast(); });
+  $("last-review").addEventListener("click", () => openReview());
+
   function mark(name, e, el) {
-    play(name);
+    if (name !== "miss") play(name);
     feedback(el);
-    if (e) noteLatency(e);
+    if (rec.recorder && rec.recorder.state === "recording") rec.marks.push({ t: ((e && e.timeStamp > 0 ? e.timeStamp : performance.now()) - rec.startAt) / 1000, kind: name });
+    if (name === "miss") { cancelHold(); logRep(false); if (session) session.counts.miss++; return; }
     if (name === "free") { cancelHold(); if (!session) return; }
     if (!session) startSession();
     session.counts[name]++;
     if (name === "yes" || name === "catch") {
       if (hold) cancelHold();
-      session.marks++; treats.used++; store.set("treats", treats);
+      session.marks++; treatsToday().used++; store.set("treats", treats);
       logRep(true);
     }
-    renderStats();
+    renderClock();
   }
-  const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-  function renderStats() {
+  function renderClock() {
     const secs = session ? Math.floor((Date.now() - session.start) / 1000) : 0;
-    $("st-marks").textContent = session ? session.marks : 0;
+    $("run-clock").textContent = fmt(secs);
     const rate = session && secs >= 10 ? Math.round(session.marks / (secs / 60)) : null;
-    $("st-rate").textContent = rate ?? "–";
-    // Under ~8 rewards a minute, beginners lose interest: flag it so the handler makes it easier.
-    $("st-rate").parentElement.classList.toggle("slow", rate !== null && secs >= 30 && rate < 8);
-    $("st-time").textContent = fmt(secs);
-    const left = settings.budget - treats.used;
-    $("st-treats").textContent = Math.max(0, left);
-    $("st-treats-wrap").classList.toggle("low", left <= 10);
-    const bar = $("timebar");
-    bar.firstElementChild.style.width = Math.min(100, (secs / 180) * 100) + "%";
-    bar.classList.toggle("over", secs > 300);
-    if (session && secs === 180) $("pad-sub").textContent = "3 minutes. End while your dog still wants more.";
+    $("run-rate").textContent = !session ? "tap to start" : rate === null ? `${session.marks} marks` : `${rate} a minute`;
+    // Under ~8 rewards a minute, beginners lose interest; past 3 minutes, end while the dog still wants more.
+    $("run-meta").classList.toggle("slow", rate !== null && secs >= 30 && rate < 8);
+    $("run-meta").classList.toggle("long", secs >= 180);
   }
   function renderHistory() {
     const h = store.get("history", []), el = $("history");
     el.replaceChildren();
     if (!h.length) { el.innerHTML = '<p class="muted">Finished sessions show up here.</p>'; return; }
-    for (const s of h.slice(0, 10)) {
+    for (const s of h.slice(0, 12)) {
       const d = new Date(s.at), row = document.createElement("div");
       const when = d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " · " + modById(s.module).name;
       row.innerHTML = `<span></span><span></span><span></span>`;
@@ -822,34 +1028,146 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   const onDown = (el, fn) => el.addEventListener("pointerdown", (e) => { if (e.button > 0) return; e.preventDefault(); fn(e); });
   onDown($("pad"), (e) => mark("yes", e, $("pad")));
   document.querySelectorAll(".mk").forEach((b) => onDown(b, (e) => mark(b.dataset.sound, e, b)));
-  const miss = () => { cancelHold(); feedback($("miss")); logRep(false); };
-  $("miss").addEventListener("click", miss);
-  $("end").addEventListener("click", () => { if (session) { play("free"); endSession(); } });
   $("run-back").addEventListener("click", closeModule);
   $("step-prev").addEventListener("click", () => setStep(prog(current.id).step - 1));
   $("step-next").addEventListener("click", () => setStep(prog(current.id).step + 1));
 
-  // ---------- Yes guide ----------
-  const guide = $("guide");
-  const openGuide = () => { guide.hidden = false; guide.scrollTop = 0; store.set("guideSeen", true); };
-  const closeGuide = () => { guide.hidden = true; };
-  $("open-guide").addEventListener("click", openGuide);
-  $("close-guide").addEventListener("click", closeGuide);
-  $("close-guide-2").addEventListener("click", closeGuide);
-  $("go-charge").addEventListener("click", () => show("charge"));
-  const howto = $("howto");
-  function openHowto() { howto.hidden = false; howto.scrollTop = 0; }
-  const closeHowto = () => { howto.hidden = true; };
-  $("open-howto").addEventListener("click", openHowto);
-  $("close-howto").addEventListener("click", closeHowto);
-  $("close-howto-2").addEventListener("click", closeHowto);
-
-  // ---------- Recall ----------
+  // ---------- Recall: one press from anywhere ----------
   const recallLog = store.get("recall", { day: today(), n: 0 });
-  if (recallLog.day !== today()) { recallLog.day = today(); recallLog.n = 0; }
-  const renderRecall = () => ($("recall-count").textContent = `Used ${recallLog.n} time${recallLog.n === 1 ? "" : "s"} today. Jackpot every one.`);
-  function recall(el) { play("recall"); feedback(el); recallLog.n++; store.set("recall", recallLog); renderRecall(); }
-  onDown($("recall-btn"), () => recall($("recall-btn")));
+  function recall(el) {
+    play("recall"); feedback(el);
+    if (recallLog.day !== today()) { recallLog.day = today(); recallLog.n = 0; }
+    recallLog.n++; store.set("recall", recallLog);
+    toast("Recall played. Jackpot when they arrive!");
+  }
+  onDown($("fab"), () => recall($("fab")));
+  onDown($("run-recall"), () => recall(null));
+
+  // ---------- Sheets ----------
+  const guide = $("guide"), howto = $("howto");
+  const openGuide = () => { guide.hidden = false; guide.scrollTop = 0; store.set("guideSeen", true); };
+  $("open-guide").addEventListener("click", openGuide);
+  for (const id of ["close-guide", "close-guide-2"]) $(id).addEventListener("click", () => (guide.hidden = true));
+  $("go-charge").addEventListener("click", () => show("charge"));
+  function openHowto() { howto.hidden = false; howto.scrollTop = 0; }
+  $("open-howto").addEventListener("click", openHowto);
+  for (const id of ["close-howto", "close-howto-2"]) $(id).addEventListener("click", () => (howto.hidden = true));
+
+  // ---------- Recording and review ----------
+  // Hold the phone at your chest: the screen faces you, the back camera faces the dog.
+  const rec = { stream: null, recorder: null, chunks: [], marks: [], startAt: 0, duration: 0, blob: null, url: "", has: false };
+  const canRecord = !!(window.isSecureContext && navigator.mediaDevices?.getUserMedia && window.MediaRecorder);
+  $("rec").hidden = !canRecord;
+
+  async function startRecording() {
+    try {
+      rec.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 60 } }, audio: false });
+    } catch {
+      toast("Camera not available. Allow camera access for this app in your phone's settings.", 4000);
+      return;
+    }
+    const cam = $("cam"); cam.srcObject = rec.stream; cam.hidden = false; cam.play().catch(() => {});
+    const types = ["video/mp4;codecs=avc1", "video/mp4", "video/webm;codecs=vp9", "video/webm"];
+    const mime = types.find((t) => MediaRecorder.isTypeSupported?.(t)) || "";
+    rec.recorder = new MediaRecorder(rec.stream, mime ? { mimeType: mime } : undefined);
+    rec.chunks = []; rec.marks = [];
+    rec.recorder.ondataavailable = (e) => { if (e.data.size) rec.chunks.push(e.data); };
+    rec.recorder.onstart = () => { rec.startAt = performance.now(); }; // closest available clock to the first frame
+    rec.recorder.onstop = () => {
+      rec.blob = new Blob(rec.chunks, { type: rec.recorder?.mimeType || mime || "video/mp4" });
+      if (rec.url) URL.revokeObjectURL(rec.url);
+      rec.url = URL.createObjectURL(rec.blob); rec.has = true; rec.recorder = null;
+      renderLast();
+    };
+    rec.startAt = performance.now();
+    rec.recorder.start(1000);
+    $("rec").classList.add("on"); $("rec").textContent = "Recording";
+  }
+  function stopRecording() {
+    if (!rec.recorder) return;
+    rec.duration = (performance.now() - rec.startAt) / 1000;
+    try { rec.recorder.stop(); } catch {}
+    rec.stream?.getTracks().forEach((t) => t.stop());
+    rec.stream = null;
+    $("cam").hidden = true; $("cam").srcObject = null;
+    $("rec").classList.remove("on"); $("rec").textContent = "Record";
+    toast("Video saved. Review it from Today.");
+  }
+  $("rec").addEventListener("click", () => (rec.recorder ? stopRecording() : startRecording()));
+
+  const rv = { i: -1, lags: {} };
+  const video = $("rv-video");
+  const rvDur = () => (Number.isFinite(video.duration) && video.duration > 0 ? video.duration : rec.duration || 1);
+  function openReview() {
+    if (!rec.has) return;
+    $("review").hidden = false;
+    video.src = rec.url; video.playbackRate = 1; rv.i = -1; rv.lags = {};
+    $("rv-save").hidden = !(navigator.canShare && navigator.canShare({ files: [new File([rec.blob], "session.mp4", { type: rec.blob.type })] }));
+    drawLine(); rvSummary();
+    $("rv-info").textContent = rec.marks.length
+      ? `${rec.marks.length} marks. Jump to one, step frame by frame to the moment it really happened (rump on the floor, nose on the palm), then tap Here.`
+      : "No marks in this video. Tap Yes while recording to see your timing here.";
+  }
+  function drawLine() {
+    const line = $("rv-line");
+    line.querySelectorAll("i").forEach((n) => n.remove());
+    rec.marks.forEach((m, i) => {
+      const n = document.createElement("i");
+      n.className = (m.kind === "miss" ? "miss" : "") + (i === rv.i ? " sel" : "");
+      n.style.left = Math.min(100, (m.t / rvDur()) * 100) + "%";
+      line.append(n);
+    });
+  }
+  function goMark(i) {
+    if (!rec.marks.length) return;
+    rv.i = Math.max(0, Math.min(rec.marks.length - 1, i));
+    video.pause();
+    video.currentTime = Math.max(0, rec.marks[rv.i].t);
+    drawLine();
+    const m = rec.marks[rv.i];
+    $("rv-info").textContent = `Mark ${rv.i + 1} of ${rec.marks.length} (${m.kind === "miss" ? "Miss" : m.kind === "yes" ? "Yes" : m.kind}). This frame is when you tapped. Step back to find the real moment, then tap Here.`;
+  }
+  video.addEventListener("timeupdate", () => {
+    $("rv-head").style.left = Math.min(100, (video.currentTime / rvDur()) * 100) + "%";
+    const near = rec.marks.find((m) => Math.abs(m.t - video.currentTime) < 0.07);
+    $("rv-flash").hidden = !near;
+    if (near) { $("rv-flash").textContent = near.kind === "miss" ? "Miss" : "Yes"; $("rv-flash").classList.toggle("miss", near.kind === "miss"); }
+  });
+  $("rv-prev").addEventListener("click", () => goMark(rv.i < 0 ? 0 : rv.i - 1));
+  $("rv-next").addEventListener("click", () => goMark(rv.i + 1));
+  $("rv-play").addEventListener("click", () => {
+    if (!video.paused) { video.pause(); $("rv-play").textContent = "Play slow"; return; }
+    // Slow motion from a second before the current point shows what led up to the mark.
+    if (rv.i >= 0) video.currentTime = Math.max(0, rec.marks[rv.i].t - 1);
+    video.playbackRate = 0.25; video.play().catch(() => {});
+    $("rv-play").textContent = "Pause";
+  });
+  video.addEventListener("pause", () => ($("rv-play").textContent = "Play slow"));
+  const step = (d) => { video.pause(); video.currentTime = Math.max(0, Math.min(rvDur(), video.currentTime + d)); };
+  $("rv-back1").addEventListener("click", () => step(-1 / 30));
+  $("rv-fwd1").addEventListener("click", () => step(1 / 30));
+  $("rv-moment").addEventListener("click", () => {
+    if (rv.i < 0) { $("rv-info").textContent = "Jump to a mark first, then find the real moment."; return; }
+    const lag = Math.round((rec.marks[rv.i].t - video.currentTime) * 1000);
+    rv.lags[rv.i] = lag;
+    $("rv-info").textContent = lag >= 0
+      ? `You tapped ${lag} ms after the real moment. ${lag <= 200 ? "Sharp." : lag <= 350 ? "Good." : "Late: watch for the start of the movement you want and tap as it completes."}`
+      : `You tapped ${-lag} ms before it happened: that marks the movement on its way, not the result. Wait for the finish.`;
+    rvSummary();
+  });
+  function rvSummary() {
+    const v = Object.values(rv.lags).sort((a, b) => a - b);
+    $("rv-summary").textContent = v.length ? `Checked ${v.length} mark${v.length > 1 ? "s" : ""}: typical ${v[Math.floor(v.length / 2)] >= 0 ? "+" : ""}${v[Math.floor(v.length / 2)]} ms. Within ±50 ms is camera timing noise.` : "";
+  }
+  $("rv-line").addEventListener("pointerdown", (e) => {
+    const r = $("rv-line").getBoundingClientRect();
+    video.pause(); video.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * rvDur();
+  });
+  $("rv-close").addEventListener("click", () => { video.pause(); $("review").hidden = true; });
+  $("rv-save").addEventListener("click", () => {
+    const ext = rec.blob.type.includes("webm") ? "webm" : "mp4";
+    navigator.share({ files: [new File([rec.blob], `training-${today()}.${ext}`, { type: rec.blob.type })] }).catch(() => {});
+  });
 
   // ---------- Charge the marker ----------
   const REPS = 20;
@@ -865,8 +1183,8 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   function chargeStep() {
     if (!charge.running) return;
     if (charge.done >= REPS) {
-      charge.running = false; store.set("charged", true); renderList();
-      renderCharge("Charged", "Do one more round tomorrow, then pick a module on the Train tab.", false);
+      charge.running = false; store.set("charged", true); markPlanDone("charge");
+      renderCharge("Charged", "Do one more round tomorrow. Next: your first skill on Today.", false);
       return;
     }
     const wait = 2000 + Math.random() * 3500;
@@ -883,22 +1201,26 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
     if (charge.running) { charge.running = false; clearTimeout(charge.timer); renderCharge("Paused", `${charge.done} of ${REPS} done.`, false); return; }
     if (charge.done >= REPS) charge.done = 0;
     charge.running = true; chargeStep();
+    try { navigator.wakeLock && navigator.wakeLock.request("screen").catch(() => {}); } catch {}
   });
   $("charge-reset").addEventListener("click", () => { charge.running = false; clearTimeout(charge.timer); charge.done = 0; renderCharge("Ready", "Have 20 small treats in hand.", false); });
+  $("charge-back").addEventListener("click", () => { charge.running = false; clearTimeout(charge.timer); show(lastTab); });
 
-  // ---------- Setup ----------
+  // ---------- Settings ----------
   document.querySelectorAll("[data-try]").forEach((b) => b.addEventListener("click", () => play(b.dataset.try)));
   const vol = $("vol");
   vol.value = settings.volume;
   const renderVol = () => { $("vol-out").textContent = Math.round(settings.volume * 100) + "%"; $("vol-warn").hidden = settings.volume <= 0.85; };
   vol.addEventListener("input", () => { settings.volume = +vol.value; if (gain) gain.gain.value = settings.volume; renderVol(); saveSettings(); });
   vol.addEventListener("change", () => play("yes"));
+  $("dog-name").value = settings.dog;
+  $("dog-name").addEventListener("change", (e) => { settings.dog = e.target.value.trim(); saveSettings(); });
   $("opt-haptic").checked = settings.haptic;
   $("opt-flash").checked = settings.flash;
   $("opt-budget").value = settings.budget;
   $("opt-haptic").addEventListener("change", (e) => { settings.haptic = e.target.checked; saveSettings(); });
   $("opt-flash").addEventListener("change", (e) => { settings.flash = e.target.checked; saveSettings(); });
-  $("opt-budget").addEventListener("change", (e) => { settings.budget = Math.max(0, parseInt(e.target.value, 10) || 0); saveSettings(); renderStats(); });
+  $("opt-budget").addEventListener("change", (e) => { settings.budget = Math.max(0, parseInt(e.target.value, 10) || 0); saveSettings(); });
 
   // Decode a recording, cut the silence before the first sound, cap at 1.2 s, fade the tail.
   async function loadCustom(dataUrl) {
@@ -934,27 +1256,15 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
     $("custom-status").textContent = "Using the built-in click for Yes."; $("custom-clear").hidden = true;
   });
 
-  // ---------- Tabs ----------
-  const tabs = document.querySelectorAll(".tab");
-  function show(name) {
-    tabs.forEach((t) => t.setAttribute("aria-selected", t.dataset.tab === name));
-    document.querySelectorAll(".screen").forEach((s) => (s.hidden = s.id !== "s-" + name));
-    store.set("tab", name);
-  }
-  tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.tab)));
-  show(store.get("tab", "train"));
-
   // ---------- Keys (keyboards and Bluetooth remotes) ----------
   document.addEventListener("keydown", (e) => {
+    if (e.target.matches("input")) return;
     // A focused button would also "click" on Space/Enter; drop focus so one key press is one mark.
     if (e.target.matches("button")) e.target.blur();
-    if (e.repeat || e.target.matches("input") || !guide.hidden || !howto.hidden || $("v-run").hidden || $("s-train").hidden) {
-      if (e.key === "r" && !e.target.matches("input")) recall(null);
-      return;
-    }
-    const map = { " ": "yes", Enter: "yes", c: "catch", k: "keep", f: "free" };
+    if (e.repeat) return;
     if (e.key === "r") { e.preventDefault(); recall(null); return; }
-    if (e.key === "m") { e.preventDefault(); miss(); return; }
+    if ($("s-run").hidden || !guide.hidden || !howto.hidden || !$("review").hidden) return;
+    const map = { " ": "yes", Enter: "yes", c: "catch", k: "keep", f: "free", m: "miss" };
     const s = map[e.key]; if (!s) return;
     e.preventDefault();
     mark(s, e, s === "yes" ? $("pad") : document.querySelector(`.mk[data-sound="${s}"]`));
@@ -966,9 +1276,8 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
   });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && ctx.state !== "running") ctx.resume(); });
 
-  renderList();
+  renderVol(); renderHistory(); renderCharge("Ready", "Have 20 small treats in hand.", false);
   const resume = store.get("module", null);
-  if (resume) openModule(resume);
-  renderVol(); renderStats(); renderHistory(); renderRecall(); renderCharge("Ready", "Have 20 small treats in hand.", false);
+  if (resume) openModule(resume); else show(["today", "skills", "setup"].includes(store.get("tab", "today")) ? store.get("tab", "today") : "today");
 })();
 </script>
