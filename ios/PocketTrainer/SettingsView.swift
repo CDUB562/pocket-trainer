@@ -29,9 +29,12 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 8) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                         ForEach(soundButtons, id: \.0) { item in
-                            Button(item.0) { model.audio.play(item.1) }.buttonStyle(OutlineButtonStyle())
+                            Button { model.audio.play(item.1) } label: {
+                                Text(item.0).lineLimit(1).minimumScaleFactor(0.7).frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(OutlineButtonStyle())
                         }
                     }
                     .padding(.vertical, 4)
@@ -115,6 +118,8 @@ struct SettingsView: View {
                 }
             }
             .scrollContentBackground(.hidden)
+            // Room at the end so the floating Recall button never covers the last rows.
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 72) }
             .background(Theme.bg)
             .navigationTitle("Settings")
             .onChange(of: model.state.settings.volume) { _, v in model.audio.volume = Float(v) }

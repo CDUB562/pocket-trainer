@@ -8,7 +8,8 @@ struct RecMark: Codable, Equatable {
 
 /// Films a session with the back camera. Hold the phone at your chest: the screen faces you, the camera faces the dog.
 /// Each video is saved with its tap times next to it, so it can be reviewed after the app is closed.
-final class Recorder: NSObject, ObservableObject, AVCaptureFileOutputRecordingDelegate {
+// Recorder state is touched only on the main thread or its own queue.
+final class Recorder: NSObject, ObservableObject, AVCaptureFileOutputRecordingDelegate, @unchecked Sendable {
     @Published private(set) var isRecording = false
     @Published private(set) var savedCount = 0
 
