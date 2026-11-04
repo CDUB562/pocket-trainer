@@ -60,7 +60,7 @@ p { margin: 0; line-height: 1.45; max-width: 60ch; }
 .row.between { justify-content: space-between; }
 .btn {
   font: inherit; font-weight: 700; border-radius: 12px; border: 2px solid var(--fg); background: transparent; color: var(--fg);
-  padding: 10px 16px; min-height: 44px; cursor: pointer;
+  padding: 10px 16px; min-height: 44px; cursor: pointer; box-sizing: border-box;
 }
 .btn.solid { background: var(--fg); color: var(--bg); }
 .linkbtn { font: inherit; font-size: .88rem; font-weight: 700; color: var(--catch); background: none; border: 0; padding: 6px 0; cursor: pointer; }
@@ -207,6 +207,18 @@ input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--acce
 .sounds { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
 .history { display: grid; gap: 6px; font-size: .9rem; }
 .history div { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.faq { border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.faq summary { font-weight: 700; cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+.faq p { margin-top: 4px; }
+button, label.btn, summary { touch-action: manipulation; }
+/* Landscape on a phone leaves no room for the pad. */
+.turn { display: none; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .turn {
+    display: flex; position: fixed; inset: 0; z-index: 60; background: var(--bg); color: var(--fg);
+    align-items: center; justify-content: center; text-align: center; padding: 24px; font-weight: 700; font-size: 1.2rem;
+  }
+}
 
 /* Tabs + floating recall */
 .tabs {
@@ -281,6 +293,10 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
   <!-- TODAY -->
   <section class="screen" id="s-today" aria-label="Today">
     <div class="todayhead"><h1 id="today-title">Today</h1><span class="muted num" id="today-date"></span></div>
+    <div class="card" id="install" hidden>
+      <div class="row between"><b>Install it for the park</b><button class="linkbtn" type="button" id="install-close">Later</button></div>
+      <p class="muted">In Safari tap Share, then Add to Home Screen. The installed app opens full screen and works with no signal. Progress made here in the browser does not carry over, so install it before you start (or use Save a backup in Settings).</p>
+    </div>
     <div class="card" id="dog-ask" hidden>
       <label for="dog-name-ask"><b>What's your dog's name?</b></label>
       <div class="row"><input type="text" id="dog-name-ask" autocomplete="off" placeholder="Milo" style="flex:1"><button class="btn solid" type="button" id="dog-save">Save</button></div>
@@ -412,10 +428,26 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
       <div class="history num" id="history"></div>
     </div>
     <div class="card">
-      <h2>Tips</h2>
-      <p class="muted">Keep marks on the phone speaker. Bluetooth speakers and AirPods add a delay of up to 200 ms, which can mark the wrong moment.</p>
-      <p class="muted">Install it: in Safari tap Share, then Add to Home Screen. It then works offline, anywhere.</p>
-      <p class="muted">Keyboard or Bluetooth remote: Space/Enter = Yes, C = Catch, K = Keep going, F = Free, M = Miss, R = Recall.</p>
+      <h2>Help</h2>
+      <details class="faq"><summary>No sound</summary><p class="muted">Turn the volume up with the side buttons (sound plays even with the silent switch on, on iOS 17 and later). If it's still quiet, close the app fully and open it again. Using your own recording? Tap "Use built-in click" to rule it out.</p></details>
+      <details class="faq"><summary>The sound comes late</summary><p class="muted">Use the phone speaker. Bluetooth speakers and AirPods add up to 200 ms, enough to mark the wrong moment. Low Power Mode can also slow it a little.</p></details>
+      <details class="faq"><summary>No vibration</summary><p class="muted">iPhone vibration on taps needs iOS 18 and System Haptics on (Settings, Sounds &amp; Haptics). It's a bonus; the sound is what your dog learns from.</p></details>
+      <details class="faq"><summary>Record does nothing or the camera is blocked</summary><p class="muted">Allow the camera: Settings, Apps, Safari, Camera, Ask or Allow. Then close the app and open it again. Filming stops if you leave the app or lock the phone.</p></details>
+      <details class="faq"><summary>My dog isn't getting it</summary><p class="muted">Go back a step (‹ Easier), train in a quieter room, use better treats and keep sessions to 2 or 3 minutes. Aim for 8 or more rewards a minute. If Yes doesn't make your dog look up, do another round of Charge Yes.</p></details>
+      <details class="faq"><summary>My progress is gone</summary><p class="muted">Progress lives on this phone only, separately in Safari and in the installed app. Clearing Safari's website data or deleting the app erases it. Save a backup now and then, below.</p></details>
+      <details class="faq"><summary>Keyboard or Bluetooth remote</summary><p class="muted">Space or Enter = Yes, C = Catch, K = Keep going, F = Free, M = Miss, R = Recall.</p></details>
+      <details class="faq"><summary>Getting updates</summary><p class="muted">The app updates itself when it has signal. A new version takes effect the next time you open it.</p></details>
+    </div>
+    <div class="card">
+      <h2>Your data</h2>
+      <p class="muted">Everything stays on this phone. Nothing is sent anywhere.</p>
+      <div class="row">
+        <button class="btn" type="button" id="backup-save">Save a backup</button>
+        <label class="btn" for="backup-file" style="display:inline-flex;align-items:center">Restore a backup</label>
+        <input type="file" id="backup-file" accept="application/json,.json" hidden>
+      </div>
+      <button class="linkbtn" type="button" id="erase-all" style="color:var(--miss);justify-self:start">Erase everything and start over</button>
+      <p class="muted num" id="version"></p>
     </div>
   </section>
 
@@ -474,6 +506,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
   </ol>
   <p class="muted">Short rounds of 5 tries. Tap Miss when it doesn't happen; the app tells you when to move on or make it easier.</p>
   <button class="btn solid" type="button" id="close-howto-2">Start</button>
+  <button class="linkbtn" type="button" id="skill-reset" style="color:var(--miss);justify-self:start;align-self:flex-start">Start this skill over from step 1</button>
 </div>
 
 <!-- Video review -->
@@ -502,6 +535,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
   <p class="muted">Phones need one tap before they can play sound. Turn your volume up.</p>
   <button class="btn solid" type="button" id="unlock-btn">Start training</button>
 </div>
+<div class="turn" aria-hidden="true">Turn your phone upright to train.</div>
 <div class="flash" id="flash"></div>
 <label class="haptic" id="haptic" aria-hidden="true"><input type="checkbox" switch tabindex="-1"></label>
 
@@ -510,9 +544,11 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
   const $ = (id) => document.getElementById(id);
   const store = {
     get(k, d) { try { const v = localStorage.getItem("pt." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
-    set(k, v) { try { localStorage.setItem("pt." + k, JSON.stringify(v)); } catch {} },
+    set(k, v) { try { localStorage.setItem("pt." + k, JSON.stringify(v)); return true; } catch { return false; } },
+    keys() { const out = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("pt.")) out.push(k); } } catch {} return out; },
   };
-  const today = () => new Date().toISOString().slice(0, 10);
+  // The local calendar day: an evening session must count for today, not tomorrow's UTC date.
+  const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
   const settings = Object.assign({ volume: 0.8, haptic: true, flash: false, budget: 60, custom: null, dog: "" }, store.get("settings", {}));
@@ -613,6 +649,14 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
 
   // progress[id] = { step, reps: [true/false...] for the current step, done, passDays, last }
   const progress = store.get("progress", {});
+  // Saved data may come from an older version or a restored backup: clamp it to the current step lists.
+  for (const [id, p] of Object.entries(progress)) {
+    const m = MODULES.find((x) => x.id === id);
+    if (!m || !p || typeof p !== "object") { delete progress[id]; continue; }
+    p.step = Math.max(0, Math.min(m.steps.length - 1, parseInt(p.step, 10) || 0));
+    if (!Array.isArray(p.reps)) p.reps = [];
+    p.done = !!p.done;
+  }
   const prog = (id) => (progress[id] ||= { step: 0, reps: [], done: false });
   const saveProgress = () => store.set("progress", progress);
   const started = (id) => { const p = progress[id]; return !!p && (p.step > 0 || p.reps.length > 0 || !!p.last); };
@@ -660,7 +704,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     // iOS 17+: play through the ringer switch like a media app.
     try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {}
     const AC = window.AudioContext || window.webkitAudioContext;
-    ctx = new AC({ latencyHint: "interactive" });
+    try { ctx = new AC({ latencyHint: "interactive" }); } catch { ctx = new AC(); }
     gain = ctx.createGain();
     gain.gain.value = settings.volume;
     gain.connect(ctx.destination);
@@ -670,7 +714,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
 
   function play(name) {
     if (!ctx) initAudio();
-    if (ctx.state !== "running") ctx.resume();
+    if (ctx.state !== "running") ctx.resume().catch(() => {});
     const src = ctx.createBufferSource();
     src.buffer = (name === "yes" && customBuf) || bufs[name];
     src.connect(gain);
@@ -741,6 +785,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     $("today-title").textContent = dog ? `Today with ${dog}` : "Today";
     $("today-date").textContent = new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
     $("dog-ask").hidden = !!dog || store.get("dogAsked", false);
+    $("install").hidden = !(canInstall && !installed && !store.get("installLater", false));
     const p = plan(), next = p.items.find((id) => !p.done.includes(id));
     const nb = $("next");
     if (next) {
@@ -750,9 +795,12 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
       $("next-name").textContent = d.name; $("next-sub").textContent = d.sub; $("next-mark").textContent = d.mark;
     } else nb.hidden = true;
     const later = $("later"); later.replaceChildren();
-    if (!next && p.items.length) {
+    if (!next) {
       const msg = document.createElement("p");
-      msg.className = "muted"; msg.textContent = "All of today's sessions are done. Extra practice is fine, but stopping while your dog still wants more is better.";
+      msg.className = "muted";
+      msg.textContent = p.items.length
+        ? "All of today's sessions are done. Extra practice is fine, but stopping while your dog still wants more is better."
+        : "Every skill is done. Keep them sharp: pick one under Train something else and practice it somewhere new.";
       later.append(msg);
     }
     for (const id of p.items) {
@@ -767,6 +815,11 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     }
     renderLast();
   }
+  // The install hint only makes sense on the hosted site, opened directly in a browser tab.
+  const installed = !!(navigator.standalone || window.matchMedia?.("(display-mode: standalone)").matches);
+  let canInstall = false;
+  try { canInstall = window.top === window && location.protocol === "https:" && !location.hostname.endsWith("claude.ai") && !location.hostname.endsWith("claudeusercontent.com"); } catch {}
+  $("install-close").addEventListener("click", () => { store.set("installLater", true); $("install").hidden = true; });
   $("next").addEventListener("click", () => startItem($("next").dataset.id));
   $("pick-other").addEventListener("click", () => show("skills"));
   $("dog-save").addEventListener("click", () => {
@@ -938,30 +991,49 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     session = { start: Date.now(), marks: 0, module: current ? current.id : "free", step: current?.steps ? prog(current.id).step : null, counts: { yes: 0, catch: 0, keep: 0, free: 0, miss: 0 } };
     $("pad-sub").textContent = "Tap, then treat.";
     ticker = setInterval(renderClock, 500);
-    try { navigator.wakeLock && navigator.wakeLock.request("screen").then((l) => (session.lock = l)).catch(() => {}); } catch {}
+    lockScreen();
+    saveLive();
+  }
+  // Keep the screen on during a session. iOS drops the lock whenever the app is hidden, so it is re-taken on return.
+  function lockScreen() {
+    if (!session || session.lock) return;
+    try { navigator.wakeLock?.request("screen").then((l) => { if (session) { session.lock = l; l.addEventListener?.("release", () => { if (session) session.lock = null; }); } else l.release(); }).catch(() => {}); } catch {}
+  }
+  // The live session is saved on every mark: iOS can close a backgrounded app without warning,
+  // and the next launch still files the session in the log.
+  const saveLive = () => { if (session) store.set("live", { start: session.start, at: Date.now(), marks: session.marks, module: session.module, counts: session.counts }); };
+  function fileSession(s, secs, recorded) {
+    const h = store.get("history", []);
+    h.unshift({ at: new Date(s.start + secs * 1000).toISOString(), secs, marks: s.marks, module: s.module, counts: s.counts });
+    store.set("history", h.slice(0, 50));
+    if (s.module !== "free" && MODULES.some((m) => m.id === s.module)) { prog(s.module).last = today(); saveProgress(); }
+    if (s.marks >= 5) markPlanDone(s.module);
+    const p = MODULES.some((m) => m.id === s.module) ? prog(s.module) : null;
+    const lastRound = p && p.reps.length ? p.reps.slice(-5) : [];
+    const summary = {
+      title: modById(s.module).name, secs, marks: s.marks, rate: secs >= 20 ? Math.round(s.marks / (secs / 60)) : null,
+      round: lastRound.length ? `${lastRound.filter(Boolean).length} of ${lastRound.length} right in the last round` : "",
+      treats: `${treatsToday().used} of ${settings.budget} treats used today`, video: recorded,
+    };
+    store.set("last", summary);
+    return summary;
+  }
+  function recoverLive() {
+    const s = store.get("live", null);
+    store.set("live", null);
+    if (!s || !(s.marks > 0) || !s.counts) return;
+    fileSession(s, Math.max(1, Math.round(((s.at || s.start) - s.start) / 1000)), false);
   }
   function endSession() {
-    const recorded = !!rec.recorder;
-    if (recorded) stopRecording();
+    // A video made during this session, whether still running or stopped with the Record chip.
+    const recorded = !!rec.recorder || rec.fresh;
+    if (rec.recorder) stopRecording(true);
+    rec.fresh = false;
     if (!session) return null;
     clearInterval(ticker);
     const secs = Math.round((Date.now() - session.start) / 1000);
-    let summary = null;
-    if (session.marks > 0) {
-      const h = store.get("history", []);
-      h.unshift({ at: new Date().toISOString(), secs, marks: session.marks, module: session.module, counts: session.counts });
-      store.set("history", h.slice(0, 50));
-      if (session.module !== "free") { prog(session.module).last = today(); saveProgress(); }
-      if (session.marks >= 5) markPlanDone(session.module);
-      const p = session.module !== "free" ? prog(session.module) : null;
-      const lastRound = p && p.reps.length ? p.reps.slice(-5) : [];
-      summary = {
-        title: modById(session.module).name, secs, marks: session.marks, rate: secs >= 20 ? Math.round(session.marks / (secs / 60)) : null,
-        round: lastRound.length ? `${lastRound.filter(Boolean).length} of ${lastRound.length} right in the last round` : "",
-        treats: `${treatsToday().used} of ${settings.budget} treats used today`, video: recorded,
-      };
-      store.set("last", summary);
-    }
+    const summary = session.marks > 0 ? fileSession(session, secs, recorded) : null;
+    store.set("live", null);
     try { session.lock && session.lock.release(); } catch {}
     session = null;
     $("pad-sub").textContent = "Tap the moment it happens. Then treat.";
@@ -989,7 +1061,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     if (name !== "miss") play(name);
     feedback(el);
     if (rec.recorder && rec.recorder.state === "recording") rec.marks.push({ t: ((e && e.timeStamp > 0 ? e.timeStamp : performance.now()) - rec.startAt) / 1000, kind: name });
-    if (name === "miss") { cancelHold(); logRep(false); if (session) session.counts.miss++; return; }
+    if (name === "miss") { cancelHold(); logRep(false); if (session) { session.counts.miss++; saveLive(); } return; }
     if (name === "free") { cancelHold(); if (!session) return; }
     if (!session) startSession();
     session.counts[name]++;
@@ -998,6 +1070,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
       session.marks++; treatsToday().used++; store.set("treats", treats);
       logRep(true);
     }
+    saveLive();
     renderClock();
   }
   function renderClock() {
@@ -1055,7 +1128,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
 
   // ---------- Recording and review ----------
   // Hold the phone at your chest: the screen faces you, the back camera faces the dog.
-  const rec = { stream: null, recorder: null, chunks: [], marks: [], startAt: 0, duration: 0, blob: null, url: "", has: false };
+  const rec = { stream: null, recorder: null, chunks: [], marks: [], startAt: 0, duration: 0, blob: null, url: "", has: false, fresh: false, cap: 0 };
   const canRecord = !!(window.isSecureContext && navigator.mediaDevices?.getUserMedia && window.MediaRecorder);
   $("rec").hidden = !canRecord;
 
@@ -1081,19 +1154,25 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     };
     rec.startAt = performance.now();
     rec.recorder.start(1000);
+    rec.fresh = true;
+    // A long video fills the phone's memory; 10 minutes is far longer than a good session.
+    rec.cap = setTimeout(() => { stopRecording(); toast("Recording stopped at 10 minutes. Sessions work best short.", 4000); }, 10 * 60 * 1000);
+    rec.stream.getVideoTracks()[0]?.addEventListener("ended", () => stopRecording());
     $("rec").classList.add("on"); $("rec").textContent = "Recording";
   }
-  function stopRecording() {
+  function stopRecording(quiet) {
     if (!rec.recorder) return;
+    clearTimeout(rec.cap);
     rec.duration = (performance.now() - rec.startAt) / 1000;
     try { rec.recorder.stop(); } catch {}
     rec.stream?.getTracks().forEach((t) => t.stop());
     rec.stream = null;
     $("cam").hidden = true; $("cam").srcObject = null;
     $("rec").classList.remove("on"); $("rec").textContent = "Record";
-    toast("Video saved. Review it from Today.");
+    if (!quiet) toast(session ? "Recording stopped. Review it from Today when the session ends." : "Recording stopped.");
   }
   $("rec").addEventListener("click", () => (rec.recorder ? stopRecording() : startRecording()));
+
 
   const rv = { i: -1, lags: {} };
   const video = $("rv-video");
@@ -1241,11 +1320,17 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
   $("custom-file").addEventListener("change", async (e) => {
     const file = e.target.files[0]; if (!file) return;
     initAudio();
-    if (file.size > 1_500_000) { $("custom-status").textContent = "That file is too long. Keep the recording to a second or two."; return; }
-    const dataUrl = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
+    if (file.size > 600_000) { $("custom-status").textContent = "That file is too long. Keep the recording to a second or two."; e.target.value = ""; return; }
+    const dataUrl = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(""); r.readAsDataURL(file); });
     try {
       await loadCustom(dataUrl);
-      settings.custom = dataUrl; saveSettings(); play("yes");
+      settings.custom = dataUrl;
+      if (!store.set("settings", settings)) {
+        // Too big for the phone's app storage: use it now, but don't keep it.
+        settings.custom = null; saveSettings();
+        $("custom-status").textContent = "Using your recording for now, but it's too large to keep after the app closes. Try a shorter clip.";
+      }
+      play("yes");
     } catch {
       $("custom-status").textContent = "Couldn't read that recording. Try an .m4a from Voice Memos or a .wav.";
     }
@@ -1256,9 +1341,55 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     $("custom-status").textContent = "Using the built-in click for Yes."; $("custom-clear").hidden = true;
   });
 
+  // ---------- Your data: backup, restore, erase ----------
+  $("backup-save").addEventListener("click", async () => {
+    const data = { app: "pocket-trainer", saved: new Date().toISOString(), keys: {} };
+    for (const k of store.keys()) data.keys[k] = localStorage.getItem(k);
+    const file = new File([JSON.stringify(data)], `pocket-trainer-backup-${today()}.json`, { type: "application/json" });
+    // iPhone: the share sheet offers Save to Files. Elsewhere: a normal download.
+    if (navigator.canShare?.({ files: [file] })) {
+      try { await navigator.share({ files: [file] }); } catch {}
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(file); a.download = file.name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  });
+  $("backup-file").addEventListener("change", async (e) => {
+    const file = e.target.files[0]; e.target.value = "";
+    if (!file) return;
+    let data = null;
+    try { data = JSON.parse(await file.text()); } catch {}
+    if (!data || data.app !== "pocket-trainer" || typeof data.keys !== "object") { toast("That file isn't a Pocket Trainer backup.", 4000); return; }
+    if (!confirm(`Replace everything on this phone with the backup from ${new Date(data.saved).toLocaleDateString()}?`)) return;
+    try {
+      for (const k of store.keys()) localStorage.removeItem(k);
+      for (const [k, v] of Object.entries(data.keys)) if (k.startsWith("pt.") && typeof v === "string") localStorage.setItem(k, v);
+    } catch { toast("Couldn't restore: the phone's storage is full.", 4000); return; }
+    location.reload();
+  });
+  $("erase-all").addEventListener("click", () => {
+    if (!confirm("Erase all progress, settings and your dog's name? This can't be undone.")) return;
+    try { for (const k of store.keys()) localStorage.removeItem(k); } catch {}
+    location.reload();
+  });
+  $("skill-reset").addEventListener("click", () => {
+    if (!current?.steps || !confirm(`Start ${current.name} over from step 1?`)) return;
+    progress[current.id] = { step: 0, reps: [], done: false };
+    saveProgress(); howto.hidden = true; renderStep();
+  });
+  // Ask the browser not to clear this app's data when the phone runs low on space.
+  const persist = () => { try { navigator.storage?.persist?.().catch(() => {}); } catch {} };
+  // The offline cache's name carries the build version: handy to tell which version is running.
+  (async () => {
+    let v = "";
+    try { v = ((await caches.keys()).find((k) => k.startsWith("pocket-trainer-")) || "").replace("pocket-trainer-", ""); } catch {}
+    $("version").textContent = v ? `Version ${v}${installed ? " · installed" : ""}` : "";
+  })();
+
   // ---------- Keys (keyboards and Bluetooth remotes) ----------
   document.addEventListener("keydown", (e) => {
-    if (e.target.matches("input")) return;
+    if (e.target.matches("input") || e.metaKey || e.ctrlKey || e.altKey) return;
     // A focused button would also "click" on Space/Enter; drop focus so one key press is one mark.
     if (e.target.matches("button")) e.target.blur();
     if (e.repeat) return;
@@ -1271,11 +1402,22 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
   });
 
   $("unlock-btn").addEventListener("click", () => {
-    initAudio(); ctx.resume(); $("unlock").hidden = true;
+    initAudio(); ctx.resume().catch(() => {}); $("unlock").hidden = true; persist();
     if (!store.get("guideSeen", false)) openGuide();
   });
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && ctx.state !== "running") ctx.resume(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      // iOS cuts the camera when the app leaves the screen; close the file cleanly so the video is still reviewable.
+      if (rec.recorder) stopRecording(true);
+      return;
+    }
+    if (ctx && ctx.state !== "running") ctx.resume().catch(() => {});
+    lockScreen();
+  });
+  // A bug should never leave the app silently stuck: say how to recover.
+  window.addEventListener("error", () => toast("Something went wrong. If a button stops working, close the app and open it again.", 5000));
 
+  recoverLive();
   renderVol(); renderHistory(); renderCharge("Ready", "Have 20 small treats in hand.", false);
   const resume = store.get("module", null);
   if (resume) openModule(resume); else show(["today", "skills", "setup"].includes(store.get("tab", "today")) ? store.get("tab", "today") : "today");
