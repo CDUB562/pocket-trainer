@@ -1,0 +1,6 @@
+build/
+build-release/
+shots/
+*.log
+xcuserdata/
+DerivedData/

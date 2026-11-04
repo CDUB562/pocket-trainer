@@ -1,0 +1,68 @@
+# Builds the iPhone app on a cloud Mac, then runs it in the simulator and takes screenshots.
+name: iOS build
+on:
+  push:
+    paths: ["ios/**", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick the newest Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)"
+          xcodebuild -version
+
+      - name: Build for the simulator (Debug)
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -project PocketTrainer.xcodeproj -target PocketTrainer -configuration Debug \
+            -sdk iphonesimulator -arch arm64 CODE_SIGNING_ALLOWED=NO SYMROOT="$PWD/build" build 2>&1 | tee build.log | grep -E "error:|warning: .*\.swift|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: Build for a device (Release, unsigned)
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -project PocketTrainer.xcodeproj -target PocketTrainer -configuration Release \
+            -sdk iphoneos CODE_SIGNING_ALLOWED=NO SYMROOT="$PWD/build-release" build 2>&1 | tee release.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" release.log
+
+      - name: Run in the simulator and take screenshots
+        working-directory: ios
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)['devices']
+          print(next(x['udid'] for k, v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if x['name'].startswith('iPhone 16')))")
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl ui "$UDID" appearance light
+          APP=build/Debug-iphonesimulator/PocketTrainer.app
+          ID=com.pockettrainer.app
+          mkdir -p shots
+          xcrun simctl install "$UDID" "$APP"
+          shot() { out=$1; shift; xcrun simctl terminate "$UDID" $ID 2>/dev/null || true; xcrun simctl launch "$UDID" $ID "$@"; sleep 7; xcrun simctl io "$UDID" screenshot "shots/$out.png"; }
+          shot 0-first-launch
+          shot 1-today -demo
+          shot 2-skills -demo -tab skills
+          shot 3-training -demo -openTraining
+          shot 4-settings -demo -tab setup
+          xcrun simctl ui "$UDID" appearance dark
+          shot 5-training-dark -demo -openTraining
+          # The app must still be running (no crash) after all of that.
+          xcrun simctl spawn "$UDID" launchctl list | grep -q "$ID" && echo "app alive"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-results
+          path: |
+            ios/shots
+            ios/build.log
+            ios/release.log
