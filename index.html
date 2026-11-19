@@ -358,6 +358,32 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
 .sumblocks .ring { grid-row: 1 / span 2; }
 .sumblocks span { font-size: .88rem; color: var(--muted); }
 .sumblocks b.up { color: var(--keep); }
+
+/* v2 phase 2: field panels, whistle bar, conditions, seasons */
+.panel { flex: 1; min-height: 160px; display: flex; flex-direction: column; gap: 8px; }
+.markwhen.oc::before { content: "GOAL "; color: var(--keep); }
+.mk:disabled { opacity: .35; cursor: default; }
+.markwhen.snd::before { content: "HOW "; color: var(--catch); }
+.obtn {
+  flex: 1; font: inherit; border-radius: 20px; border: 3px solid currentColor; background: var(--surface); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; touch-action: none; min-height: 64px;
+}
+.obtn strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.6rem, 9vw, 2.4rem); text-transform: uppercase; letter-spacing: .03em; }
+.obtn small { font-size: .85rem; color: var(--muted); }
+.obtn.o0 { color: var(--keep); flex: 1.5; } .obtn.o1 { color: var(--warn); } .obtn.o2 { color: var(--miss); }
+.obtn.hit { transform: scale(.98); filter: brightness(1.15); }
+.whistlebar { display: flex; gap: 8px; align-items: center; flex: none; }
+.whistlebar .chip { flex: 1; justify-content: center; }
+.whistlebar .chip i { font-style: normal; color: var(--muted); }
+.brk { align-items: center; justify-content: center; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 16px; }
+.brk strong { font-family: var(--font-display); font-weight: 800; font-size: 5rem; line-height: 1; }
+.warnline { font-weight: 700; color: var(--warn); font-size: .92rem; }
+.seasons { display: grid; gap: 8px; }
+.season { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 8px; }
+.season .bar { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.season .bar::after { content: ""; display: block; height: 100%; width: var(--p, 0%); background: var(--keep); }
+.season .behind { color: var(--warn); font-weight: 700; }
+.trackadd { justify-self: start; }
 </style>
 
 <div class="app">
@@ -377,7 +403,10 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <p class="muted" id="hardweek" hidden></p>
     <span class="eyebrow" id="places-label">Where are you training?</span>
     <div class="places" id="places" role="radiogroup" aria-labelledby="places-label"></div>
+    <div class="places" id="conds"></div>
+    <p class="warnline" id="heatwarn" hidden></p>
     <div class="plan" id="plan"></div>
+    <div class="seasons" id="seasons"></div>
     <div class="card" id="pup-passport" hidden>
       <div class="row between"><b>Socialization passport</b><span class="muted num" id="pup-passport-n"></span></div>
       <p class="muted" id="pup-passport-sub"></p>
@@ -439,8 +468,34 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <div class="reprow">
       <div class="reps" id="reps" aria-label="Last 5 tries"></div>
       <button class="chip" type="button" id="undo" hidden>Undo</button>
+      <button class="chip" type="button" id="gps" hidden>Distance</button>
       <button class="chip rec" type="button" id="rec" hidden>Record</button>
       <button class="chip recall" type="button" id="run-recall">Recall</button>
+    </div>
+    <div class="whistlebar" id="whistlebar" hidden>
+      <span class="eyebrow">Whistle</span>
+      <button class="chip" type="button" data-w="wsit">Sit <i aria-hidden="true">—</i></button>
+      <button class="chip" type="button" data-w="wcome">Come <i aria-hidden="true">~~~</i></button>
+      <button class="chip" type="button" data-w="wturn">Turn <i aria-hidden="true">· ·</i></button>
+    </div>
+    <div class="panel" id="p-outcome" hidden>
+      <button class="obtn o0" type="button" data-o="0"><strong></strong><small>a clean rep</small></button>
+      <button class="obtn o1" type="button" data-o="1"><strong></strong><small>you had to help</small></button>
+      <button class="obtn o2" type="button" data-o="2"><strong></strong><small>didn't happen</small></button>
+    </div>
+    <div class="panel" id="p-sound" hidden>
+      <button class="pad" type="button" id="snd-play"><strong>PLAY</strong><small id="snd-sub"></small></button>
+      <div class="markers">
+        <button class="mk keep" type="button" data-r="relaxed"><strong>Relaxed</strong><small>kept eating</small></button>
+        <button class="mk catch" type="button" data-r="noticed"><strong>Noticed</strong><small>looked, recovered</small></button>
+        <button class="mk miss" type="button" data-r="startled"><strong>Startled</strong><small>stop now</small></button>
+      </div>
+    </div>
+    <div class="panel brk" id="p-break" hidden>
+      <span class="eyebrow">Break</span>
+      <strong class="num" id="brk-clock">2:00</strong>
+      <p id="brk-text">Water and shade. Let your dog lie down and cool off. Quick paw check.</p>
+      <button class="btn solid" type="button" id="brk-skip">Skip break</button>
     </div>
     <div class="padwrap">
       <button class="pad" id="pad" type="button" aria-label="Mark: Yes">
@@ -486,6 +541,9 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
         <button class="btn" type="button" data-try="keep">Keep going</button>
         <button class="btn" type="button" data-try="free">Free</button>
         <button class="btn" type="button" data-try="recall">Recall</button>
+        <button class="btn" type="button" data-try="wsit">Sit whistle</button>
+        <button class="btn" type="button" data-try="wcome">Come whistle</button>
+        <button class="btn" type="button" data-try="wturn">Turn whistle</button>
       </div>
       <div class="field"><label for="vol">Volume <span class="muted num" id="vol-out"></span></label><span></span></div>
       <input type="range" id="vol" min="0.1" max="1" step="0.05">
@@ -578,6 +636,11 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <h1>What do you want to work on?</h1>
     <p class="muted">Pick any. The plan leans toward these.</p>
     <div class="choices multi" id="onb-goals"></div>
+    <div id="onb-seasons" hidden>
+      <p class="muted">Opening day (optional). The plan counts down to it and tells you if you're behind.</p>
+      <div class="field" id="onb-season-waterfowl-row"><label for="onb-season-waterfowl">Waterfowl opener</label><input type="date" id="onb-season-waterfowl"></div>
+      <div class="field" id="onb-season-upland-row"><label for="onb-season-upland">Upland opener</label><input type="date" id="onb-season-upland"></div>
+    </div>
   </div>
   <div class="onbstep" data-q="reward">
     <h1>What does your dog love most?</h1>
@@ -587,6 +650,11 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <h1>Which days can you train?</h1>
     <p class="muted">A few minutes is enough. Rest days are part of the plan.</p>
     <div class="choices multi days" id="onb-days"></div>
+    <div id="onb-field" hidden>
+      <h2>Field or water day</h2>
+      <p class="muted">One longer session a week where you can throw marks or swim. Optional.</p>
+      <div class="choices days" id="onb-fieldday"></div>
+    </div>
   </div>
   <div class="row onbnav"><button class="btn" type="button" id="onb-back">Back</button><button class="btn solid" type="button" id="onb-next">Next</button></div>
   <button class="linkbtn" type="button" id="onb-delete" hidden style="color:var(--miss);align-self:flex-start">Remove this dog</button>
@@ -627,6 +695,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <button class="choice" type="button" data-r="ok">OK</button>
     <button class="choice" type="button" data-r="tired">Tired</button>
   </div>
+  <p class="muted" id="sum-field" hidden>After the field: water and rest, then check paws, eyes and ears, and for ticks and burrs.</p>
   <p class="muted">A nap or quiet time now helps the session stick.</p>
   <button class="btn solid" type="button" id="sum-done">Done</button>
 </div>
@@ -720,6 +789,12 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
 //   proof   the proofing grid after Fluent: dur [[value, label]...], dist [labels], dis [labels].
 //           Index 0 is the Fluent baseline. Labels finish the sentence "...with/at <label>".
 //   places  where it can be practiced (default: everywhere)
+//   needs also takes "a|b" (either one) and "sound:gun:7" (that sound ladder at step 7, no startle in the last 3 sessions)
+//   rep     "outcome" for field reps judged after the fact (you can't tap Yes from 80 yards): rounds of 3, pass at 2.
+//           outcomes: the three button labels, best first. startle: the third outcome means fear, so drop 2 steps and stop.
+//   youngCap  the last step allowed until growth plates close (long retrieves on hard ground)
+//   gear    what to bring, listed on the plan card
+//   whistle shows the whistle bar on the training screen
 //   proofMark  what earns a Yes once the skill is past its ladder (proofing, reviews)
 //   steps   the ladder; hold: [min, max] seconds adds the hold timer; keep: true shows Keep going
 
@@ -727,7 +802,23 @@ const TRACKS = [
   { id: "foundations", name: "Foundations", blurb: "The core every dog needs." },
   { id: "puppy", name: "Puppy", blurb: "First weeks home: confidence, crate, gentle mouth." },
   { id: "life", name: "Life skills", blurb: "Vet, grooming, car, guests and going out." },
+  { id: "field", name: "Field basics", blurb: "Whistles, the retrieve, birds and gunfire. Shared by every bird track.", goals: ["waterfowl", "upland"] },
+  { id: "waterfowl", name: "Waterfowl", blurb: "Ducks and geese: steadiness, marks, water, blinds.", goals: ["waterfowl"] },
+  { id: "upland", name: "Upland pointing", blurb: "Quail, pheasant, chukar: point, whoa, steady to wing and shot.", goals: ["upland"] },
 ];
+
+// The sound ladder: each sound at 10 volume steps, always paired with food.
+// Up a step after 2 relaxed sessions (steps 1-4) or 3 (steps 5-10); down 2 on any startle. Puppies under 16 weeks stop at step 5.
+const SOUNDS = [
+  { id: "doorbell", name: "Doorbell" }, { id: "traffic", name: "Traffic" }, { id: "thunder", name: "Thunder" },
+  { id: "fireworks", name: "Fireworks" }, { id: "duck", name: "Duck call" }, { id: "gun", name: "Gunshot" },
+];
+
+// Season readiness: the milestone skills each opening day needs, at Fluent or better.
+const SEASONS = {
+  waterfowl: { name: "Waterfowl opener", milestones: ["retrieve", "gun", "steady", "marks", "waterentry", "waterdelivery", "doubles", "blindmanners"] },
+  upland: { name: "Upland opener", milestones: ["birdintro", "whoa", "pointdur", "steadywing", "steadyshot", "range"] },
+};
 
 const PLACES = [
   { id: "home", name: "Home" }, { id: "yard", name: "Yard" }, { id: "street", name: "Street" },
@@ -991,6 +1082,191 @@ const SKILLS = [
       { t: "5 m", mark: "they walk calmly at 5 m.", setup: "Keep leashes loose.", reward: "Treat at your seam." },
       { t: "Brief sniff", mark: "they sniff for 3 seconds and come away on \"Let's go\".", setup: "Count three, cue, walk off.", reward: "Treat as they follow you." },
     ]},
+
+  // ---------- Field basics: shared by Waterfowl and Upland ----------
+  { id: "whistle", track: "field", name: "Whistle signals", goal: "Sit, come and turn on the whistle, so you can steer a dog 100 yards out.", cue: "One blast = sit · a trill = come · two pips = turn", proofMark: "they answer the whistle the moment it sounds.", needs: ["sit", "come@1"], whistle: true, gear: ["a whistle (or the app's)"],
+    proof: {"dist":["5 m","20 m","40 m","75 m","100 m"],"dis":["no distraction","a thrown bumper","another dog","birds around"]},
+    steps: [
+      { t: "Sit blast at your side", mark: "they sit as the single blast ends.", setup: "Dog beside you. One blast (tap Sit on the whistle bar), then your usual sit cue. Soon the blast alone means sit.", reward: "Treat while they sit." },
+      { t: "Sit blast alone", mark: "they sit on the blast with no other cue.", setup: "Blast only. If no sit in 2 seconds, help with your hand signal.", reward: "Treat while they sit." },
+      { t: "Recall trill", mark: "they turn and run in on the trill.", setup: "Start at 5 m in the house or yard. Trill once, back up a step.", reward: "Treat at your knees, then a second one." },
+      { t: "Turn pips", mark: "they turn toward you on two pips while trotting ahead.", setup: "On a walk when they're 5 to 10 m ahead. Change direction as you pip.", reward: "Treat as they reach you, then send them on." },
+      { t: "Sit at 20 m", mark: "they sit on the blast 20 m away.", setup: "Long line on. One blast; never repeat it.", reward: "Walk out and treat while they sit, or toss it to them." },
+    ]},
+  { id: "retrieve", track: "field", name: "Retrieve", goal: "Chase, pick up, carry back and deliver to hand. Taught with rewards; no force fetch.", cue: "Their name sends them; \"Give\" for the delivery", proofMark: "they bring it straight back and deliver to hand.", needs: ["hallret|drop"], gear: ["bumpers"],
+    steps: [
+      { t: "Chase and pick up", mark: "they pick up a bumper tossed 3 m away.", setup: "A soft canvas or plastic bumper. A short, exciting toss down a hallway or narrow yard.", reward: "Cheer. The next steps pay with food." },
+      { t: "Come back", mark: "they turn back toward you carrying it.", setup: "Turn and jog away a few steps to draw them in.", reward: "Praise as they come." },
+      { t: "Hold 2 seconds", mark: "they hold the bumper calmly in front of you until the timer marks it.", setup: "Hand under their chin, no pulling. Start the hold.", reward: "Trade for a treat.", hold: [1, 3] },
+      { t: "Hold while you walk", mark: "they carry it beside you for 10 steps.", setup: "Walk slowly with your hand near the bumper.", reward: "Trade for a treat." },
+      { t: "Deliver to hand", mark: "they put the bumper in your hand.", setup: "Stand still, hand open at chest height. Say \"Give\".", reward: "Trade for a treat, then throw again right away." },
+      { t: "Sent on their name", mark: "they wait for their name, then go.", setup: "Hold the collar lightly, toss, count two, say their name.", reward: "The retrieve is the reward; treat on delivery." },
+    ]},
+  { id: "birds", track: "field", name: "Bumper and bird intro", goal: "Happy to carry bumpers, wings and birds.", cue: "Their name", proofMark: "they carry it back gently and deliver to hand.", needs: ["retrieve@2"], gear: ["bumpers", "a duck or pigeon wing"],
+    steps: [
+      { t: "Soft bumper", mark: "they pick up and carry a soft bumper.", setup: "Short, fun tosses.", reward: "Treat on delivery." },
+      { t: "Hard bumper", mark: "they carry a plastic or canvas bumper back.", setup: "Same short tosses.", reward: "Treat on delivery." },
+      { t: "Wing on a bumper", mark: "they retrieve a bumper with a wing taped on.", setup: "A fresh or frozen wing, taped on with electrical tape.", reward: "Treat on delivery." },
+      { t: "Thawed bird", mark: "they pick up and carry a thawed duck or pigeon.", setup: "Short, easy tosses. A cold bird is less tempting to chew.", reward: "Treat on delivery." },
+      { t: "Fresh bird, with a mentor", mark: "they retrieve a freshly shot bird calmly.", setup: "With an experienced trainer or hunting mentor, following your state's rules on birds.", reward: "Big praise and a treat on delivery." },
+    ]},
+  { id: "gun", track: "field", name: "Gun conditioning", goal: "Gunfire means the fun is happening. Always far away first, and never at a nervous dog.", cue: "None", needs: ["retrieve@4", "sound:gun:7"], rep: "outcome", outcomes: ["Happy", "Noticed it", "Worried"], startle: true, places: ["yard", "park", "field"], gear: ["a helper with a blank pistol"],
+    steps: [
+      { t: "Blank at 100 yd", mark: "they keep chasing the bumper happily as the shot goes off 100 yards away.", setup: "A helper 100 yd off with a blank pistol. They fire the moment your dog is chasing a thrown bumper.", reward: "The retrieve, plus a treat on delivery." },
+      { t: "Blank at 50 yd", mark: "they stay happy with the shot 50 yards away.", setup: "Same setup. Only move closer after happy sessions.", reward: "The retrieve, plus a treat." },
+      { t: "Blank at 30 yd", mark: "they stay happy with the shot 30 yards away.", setup: "Same setup.", reward: "The retrieve, plus a treat." },
+      { t: "Blank at 20 yd", mark: "they stay happy with the shot 20 yards away.", setup: "Same setup.", reward: "The retrieve, plus a treat." },
+      { t: "Shotgun at 75 yd", mark: "they stay happy with a shotgun fired 75 yards away during a retrieve.", setup: "A safe range, ear protection for people, the helper far off.", reward: "The retrieve, plus a treat." },
+      { t: "Your shot", mark: "they stay happy when you fire beside them.", setup: "Only after several happy sessions at every step. Gun pointed well away.", reward: "A bird or bumper to retrieve." },
+    ]},
+
+  // ---------- Waterfowl ----------
+  { id: "steady", track: "waterfowl", name: "Steadiness", goal: "Sit still while things fall and fly, until sent by name.", cue: "Sit, then their name to send", proofMark: "they stay sitting until you say their name.", needs: ["stay:proofed", "retrieve"], gear: ["bumpers"],
+    steps: [
+      { t: "Dropped bumper", mark: "they stay sitting while you drop a bumper at your feet.", setup: "Leash on, your foot on the leash. Drop it, wait 2 seconds, mark.", reward: "Treat to them while they sit. Then pick it up yourself, or send them." },
+      { t: "Tossed bumper", mark: "they stay sitting as you toss a bumper 3 m.", setup: "Send them only every other time; you pick up the rest. Staying has to pay too.", reward: "Treat while they sit." },
+      { t: "Thrown 20 yd", mark: "they stay sitting through a 20-yard throw.", setup: "Same: send only some of the time.", reward: "Treat, or the retrieve." },
+      { t: "Throw and shot", mark: "they stay sitting through a throw with a shot.", setup: "A helper fires a blank as you throw. Only after Gun conditioning step 3.", reward: "The retrieve." },
+      { t: "Two throws", mark: "they stay sitting through two throws.", setup: "Throws wide apart.", reward: "The retrieve." },
+      { t: "Honoring", mark: "they stay sitting while another dog retrieves.", setup: "A calm partner dog 3 m to the side.", reward: "Treat while they sit, then their own turn." },
+    ]},
+  { id: "marks", track: "waterfowl", name: "Single marks", goal: "Watch a bird fall and go straight to it.", cue: "Their name", proofMark: "a clean pickup and straight return.", needs: ["retrieve", "steady@2"], rep: "outcome", youngCap: 2, places: ["yard", "park", "field"], gear: ["bumpers", "a helper to throw"],
+    steps: [
+      { t: "10 yd, short grass", mark: "a clean pickup and return on a 10-yard mark.", setup: "A helper throws with a shout or duck call so the dog looks. Send on their name after it lands.", reward: "Treat on delivery." },
+      { t: "25 yd", mark: "a clean retrieve on a 25-yard mark.", setup: "Short grass, wind at your back.", reward: "Treat on delivery." },
+      { t: "50 yd", mark: "a clean retrieve on a 50-yard mark.", setup: "White bumpers show up best.", reward: "Treat on delivery." },
+      { t: "75 yd", mark: "a clean retrieve on a 75-yard mark.", setup: "Use the distance tracker to check it.", reward: "Treat on delivery." },
+      { t: "100 yd", mark: "a clean retrieve on a 100-yard mark.", setup: "A helper with a duck call or launcher.", reward: "Treat on delivery." },
+      { t: "In cover", mark: "a clean retrieve from tall grass or cattails at 50 yards.", setup: "Shorter again in new cover.", reward: "Treat on delivery." },
+      { t: "Ditch and wind", mark: "a clean retrieve across a ditch or into the wind.", setup: "The dog should cross, not run around.", reward: "Treat on delivery." },
+    ]},
+  { id: "waterentry", track: "waterfowl", name: "Water entry", goal: "Into the water with confidence, straight to the bird.", cue: "Their name", proofMark: "a straight, confident entry and swim to the bumper.", needs: ["retrieve"], rep: "outcome", places: ["water"], gear: ["bumpers", "a dog-safe pond or lake"],
+    steps: [
+      { t: "Wade and play", mark: "they wade in on their own to chest depth.", setup: "Warm water and a gentle bank. Wade in yourself. In cold water keep it short and dry them off after.", reward: "Treats and play in the shallows." },
+      { t: "Swim 2 m", mark: "they swim a few strokes to a bumper.", setup: "Toss it just past their depth.", reward: "Treat on delivery." },
+      { t: "Water mark 10 yd", mark: "a clean 10-yard water retrieve.", setup: "Throw parallel to the shore at first.", reward: "Treat on delivery." },
+      { t: "25 yd", mark: "a clean 25-yard water retrieve.", setup: "Straight out from the shore.", reward: "Treat on delivery." },
+      { t: "50 yd", mark: "a clean 50-yard water retrieve.", setup: "Calm water, no wind.", reward: "Treat on delivery." },
+      { t: "Angled entry", mark: "they go straight in at an angle instead of running the bank.", setup: "Throw at a 45 degree angle to the shore.", reward: "Treat on delivery." },
+      { t: "Among decoys", mark: "they swim past decoys to the bumper and leave the decoys alone.", setup: "Three decoys first, wide apart.", reward: "Treat on delivery." },
+    ]},
+  { id: "waterdelivery", track: "waterfowl", name: "Water delivery", goal: "Out of the water and straight to hand before shaking.", cue: "\"Give\"", proofMark: "they come straight out and deliver before shaking.", needs: ["waterentry@2", "retrieve"], rep: "outcome", places: ["water"], gear: ["bumpers"],
+    steps: [
+      { t: "Out with it", mark: "they carry the bumper out of the water without dropping it.", setup: "Stand at the water's edge.", reward: "Treat on delivery." },
+      { t: "Straight to you", mark: "they come straight to you instead of shaking first.", setup: "Back up 2 m from the edge.", reward: "Treat on delivery." },
+      { t: "Deliver, then shake", mark: "they deliver to hand from 5 m back, then shake.", setup: "Back up 5 m. Take the bumper before the shake.", reward: "Treat, then \"shake\" is allowed." },
+    ]},
+  { id: "doubles", track: "waterfowl", name: "Doubles", goal: "Remember two falls and pick up both.", cue: "Their name, then a hand line to the memory bird", proofMark: "both birds picked up cleanly, last first.", needs: ["marks@2", "steady"], rep: "outcome", youngCap: 2, places: ["yard", "park", "field", "water"], gear: ["bumpers", "a helper"],
+    steps: [
+      { t: "Wide apart", mark: "they pick up the last throw, then go back for the first.", setup: "Two throws 90 degrees apart at 25 yd. After the first delivery, line them up on the memory bird.", reward: "Treat on each delivery." },
+      { t: "Memory bird", mark: "they remember the first bird after delivering the second.", setup: "Same, with a pause before the second send.", reward: "Treat on each delivery." },
+      { t: "Tighter angles", mark: "they pick up both with the throws 45 degrees apart.", setup: "Keep the distance at 25 yd.", reward: "Treat on each delivery." },
+      { t: "Land and water", mark: "they pick up one bird on land and one in water.", setup: "Water bird last thrown.", reward: "Treat on each delivery." },
+      { t: "50 yd", mark: "they pick up both at 50 yards.", setup: "Wide angles again at the new distance.", reward: "Treat on each delivery." },
+    ]},
+  { id: "lining", track: "waterfowl", name: "Lining", goal: "Run straight where you point, toward a bird they didn't see fall.", cue: "\"Back\"", proofMark: "a straight line to the bumper.", needs: ["marks@2"], rep: "outcome", places: ["yard", "park", "field"], gear: ["white bumpers"],
+    steps: [
+      { t: "Pile at 10 yd", mark: "they run straight to a visible pile of bumpers on \"Back\".", setup: "Dog at your left, your hand flat beside their head pointing at the pile.", reward: "Treat on delivery." },
+      { t: "Pile at 25 yd", mark: "they run straight to the pile at 25 yards.", setup: "Same.", reward: "Treat on delivery." },
+      { t: "Pile at 50 yd", mark: "they run straight to the pile at 50 yards.", setup: "Same.", reward: "Treat on delivery." },
+      { t: "Single bumper at 50 yd", mark: "they run straight to a single bumper they watched you place.", setup: "Walk out with them, place it, walk back.", reward: "Treat on delivery." },
+      { t: "Cold blind at 75 yd", mark: "they run straight to a bumper they didn't see placed.", setup: "Plant it before the session.", reward: "Treat on delivery." },
+    ]},
+  { id: "casts", track: "waterfowl", name: "Handling casts", goal: "Stop on the whistle and go where your arm sends them.", cue: "One blast = stop; arm signals \"Over\" and \"Back\"", proofMark: "a stop on the whistle and the right cast.", needs: ["lining", "whistle"], rep: "outcome", whistle: true, places: ["yard", "park", "field"], gear: ["white bumpers", "a whistle"],
+    steps: [
+      { t: "Stop at 10 yd", mark: "they stop and sit facing you on the whistle, 10 yards out.", setup: "Send to a pile; blast halfway.", reward: "Walk out and treat, then send them on." },
+      { t: "Over", mark: "they go left or right to the bumper you point to.", setup: "Dog sitting on a mound, bumpers to each side.", reward: "Treat on delivery." },
+      { t: "Back", mark: "they turn and go straight back on \"Back\".", setup: "Bumpers behind them.", reward: "Treat on delivery." },
+      { t: "Diamond at 30 yd", mark: "they take a correct cast 30 yards out.", setup: "The baseball-diamond drill: piles at first, second and third base.", reward: "Treat on delivery." },
+      { t: "At 50 yd", mark: "they stop and take a correct cast 50 yards out.", setup: "Same drill, bigger diamond.", reward: "Treat on delivery." },
+    ]},
+  { id: "blinds", track: "waterfowl", name: "Blind retrieves", goal: "Find a bird they never saw fall, guided by you.", cue: "\"Back\", the whistle and casts", proofMark: "the bird found with a clean line or a handle or two.", needs: ["lining", "casts"], rep: "outcome", youngCap: 1, places: ["park", "field", "water"], gear: ["bumpers or birds"],
+    steps: [
+      { t: "Cold blind 25 yd", mark: "a clean pickup on a 25-yard blind.", setup: "Plant the bumper before you bring the dog out.", reward: "Treat on delivery." },
+      { t: "50 yd", mark: "a clean 50-yard blind.", setup: "Clear terrain.", reward: "Treat on delivery." },
+      { t: "100 yd", mark: "a 100-yard blind with a straight line or one handle.", setup: "Use the distance tracker.", reward: "Treat on delivery." },
+      { t: "With a handle", mark: "they take one stop and cast and find it.", setup: "Plant it slightly off a natural line.", reward: "Treat on delivery." },
+      { t: "Across water", mark: "a blind across a pond or channel.", setup: "Short water first.", reward: "Treat on delivery." },
+    ]},
+  { id: "huntdead", track: "waterfowl", name: "Hunt dead", goal: "Search an area for a crippled bird and bring it back.", cue: "\"Dead bird\"", proofMark: "they search the area and bring back the hidden bird.", needs: ["retrieve"], rep: "outcome", places: ["yard", "park", "field"], gear: ["bumpers or a bird"],
+    steps: [
+      { t: "Short cover", mark: "they search on \"Dead bird\" and find a hidden bumper in short grass.", setup: "Hide it 5 m away; let them watch you walk out.", reward: "Treat on delivery." },
+      { t: "Tall cover", mark: "they find it in tall grass or brush.", setup: "Hide it before you bring them.", reward: "Treat on delivery." },
+      { t: "After a wait", mark: "they find a hidden duck after a 2-minute wait.", setup: "The scent has time to spread; send them downwind.", reward: "Treat on delivery." },
+    ]},
+  { id: "blindmanners", track: "waterfowl", name: "Blind and boat manners", goal: "Still and quiet in a blind or boat while calls blow and guns move.", cue: "\"Place\"", proofMark: "they stay still and quiet on their spot.", needs: ["place:proofed"], places: ["yard", "field", "water"], gear: ["a dog stand or board", "decoys"],
+    steps: [
+      { t: "Dog stand", mark: "they hold place on a dog stand or in a boat on land until the timer marks it.", setup: "The stand on flat ground first.", reward: "Treat on the stand.", hold: [10, 60] },
+      { t: "Through duck calls", mark: "they stay put while a duck call blows.", setup: "Blow a call, or play the Duck call from the sound ladder.", reward: "Treat on the stand.", keep: true },
+      { t: "Through motion", mark: "they stay put while you stand, sit and shoulder an empty gun.", setup: "Slow movements first.", reward: "Treat on the stand.", keep: true },
+      { t: "In a blind", mark: "they stay quiet and still in a blind for 10 minutes.", setup: "A practice blind or a layout spot.", reward: "Calm treats now and then.", keep: true },
+      { t: "Decoys ignored", mark: "they walk past decoys without picking them up.", setup: "On leash, then off.", reward: "Treat as they pass." },
+    ]},
+
+  // ---------- Upland pointing ----------
+  { id: "birdintro", track: "upland", name: "Bird intro and sight point", goal: "Love birds, and freeze at the sight of one.", cue: "None", proofMark: "they freeze and hold on the bird.", needs: ["charge"], places: ["home", "yard", "park", "field"], gear: ["a flirt pole", "a wing"],
+    steps: [
+      { t: "Chase the wing", mark: "they chase a wing on a flirt pole.", setup: "A wing tied to a flirt pole line. Drag it in circles; let them chase, not catch.", reward: "Let them catch it now and then: the catch is the reward." },
+      { t: "Freeze when it stops", mark: "they freeze, staring, when the wing stops.", setup: "Stop the wing dead in the grass and wait.", reward: "Flick the wing away so they can chase again." },
+      { t: "Hold 3 seconds", mark: "they hold the freeze until the timer marks it.", setup: "Stop the wing, start the hold.", reward: "Release them to chase the wing.", hold: [3, 4] },
+      { t: "Hold 10 seconds", mark: "they hold the freeze until the timer marks it.", setup: "Same.", reward: "Release them to chase the wing.", hold: [8, 12] },
+      { t: "Launcher pigeon, with a mentor", mark: "they point a pigeon in a launcher.", setup: "With an experienced trainer, check cord on. Release the bird only while they hold.", reward: "The flight is the reward." },
+      { t: "Call-back quail", mark: "they point a quail from a call-back pen.", setup: "With a mentor or at a preserve.", reward: "The flight is the reward." },
+    ]},
+  { id: "whoa", track: "upland", name: "Whoa", goal: "Stop and stand still on one word, taught with rewards on a board.", cue: "\"Whoa\" (stand still; not sit)", proofMark: "they stand still on \"Whoa\" until released.", needs: ["stay"], gear: ["a low board or table", "a check cord"],
+    proof: {"dur":[[3,"3 s"],[10,"10 s"],[30,"30 s"]],"dist":["you beside them","10 m","30 m"],"dis":["no distraction","a dropped bumper","a wing on the ground","a bird in a launcher"]},
+    steps: [
+      { t: "Stand on a board", mark: "they stand still on a raised board.", setup: "A low table or board. Lift them on, a hand under the belly at first.", reward: "Treat to the mouth while they stand." },
+      { t: "Whoa on the board", mark: "they stay standing on \"Whoa\" until the timer marks it.", setup: "Say \"Whoa\", start the hold. Tap Miss if they sit or step.", reward: "Treat while they stand, then release.", hold: [2, 5] },
+      { t: "Off the board", mark: "they stand still on \"Whoa\" on the ground.", setup: "Right beside the board at first.", reward: "Treat while they stand." },
+      { t: "While walking", mark: "they stop and stand when you say \"Whoa\" mid-walk.", setup: "Slow walk, leash loose.", reward: "Treat while they stand." },
+      { t: "At 10 m", mark: "they stop and stand on \"Whoa\" 10 m ahead of you.", setup: "Check cord on.", reward: "Walk up and treat while they stand." },
+      { t: "At 30 m", mark: "they stop and stand on \"Whoa\" 30 m ahead.", setup: "Check cord on.", reward: "Walk up and treat while they stand." },
+    ]},
+  { id: "pointdur", track: "upland", name: "Point duration", goal: "Hold point while you walk in to flush.", cue: "None, or \"Whoa\" as a reminder", proofMark: "they hold point until released.", needs: ["birdintro@2", "whoa@2"], places: ["yard", "park", "field"], gear: ["a wing or a bird in a launcher"],
+    steps: [
+      { t: "Hold 3 seconds", mark: "they hold point until the timer marks it.", setup: "Wing on a pole, or a planted bird with a mentor.", reward: "Release to the wing or the flush.", hold: [3, 4] },
+      { t: "Hold 10 seconds", mark: "they hold point until the timer marks it.", setup: "Same.", reward: "Release to the wing or the flush.", hold: [8, 12] },
+      { t: "Hold 30 seconds", mark: "they hold point until the timer marks it.", setup: "Same.", reward: "Release to the wing or the flush.", hold: [25, 35], keep: true },
+      { t: "You walk in front", mark: "they hold point while you walk past their nose.", setup: "Walk a wide arc first, then closer.", reward: "Release to the flush.", keep: true },
+      { t: "You kick the cover", mark: "they hold point while you kick the grass for the bird.", setup: "Kick around the bird for a few seconds.", reward: "Release to the flush.", keep: true },
+    ]},
+  { id: "steadywing", track: "upland", name: "Steady to wing", goal: "Stay on point while the bird flies.", cue: "\"Whoa\" if needed", proofMark: "they stay put as the bird flies.", needs: ["pointdur@2"], rep: "outcome", outcomes: ["Steady", "Crept", "Broke"], places: ["yard", "field"], gear: ["a bird launcher", "a check cord"],
+    steps: [
+      { t: "Launcher at 10 yd", mark: "they hold point while the launcher fires.", setup: "Check cord on. A helper fires the launcher on your nod.", reward: "Release to hunt on or to a retrieve." },
+      { t: "Bird flies off", mark: "they hold as a bird flies away.", setup: "Same, with a live bird and a mentor.", reward: "Release to hunt on." },
+      { t: "Two flushes", mark: "they stay steady through two flushes in a row.", setup: "Two launchers.", reward: "Release to hunt on." },
+    ]},
+  { id: "steadyshot", track: "upland", name: "Steady to shot", goal: "Stay on point through the flush and the shot.", cue: "\"Whoa\" if needed", proofMark: "they stay put through the flush and the shot.", needs: ["steadywing", "gun@2"], rep: "outcome", outcomes: ["Steady", "Crept", "Broke"], places: ["field"], gear: ["a launcher", "a blank pistol", "a helper"],
+    steps: [
+      { t: "Blank at 30 yd", mark: "they stay steady through the flush and a blank 30 yards away.", setup: "A helper fires as the bird lifts.", reward: "Release to hunt on." },
+      { t: "Blank at 10 yd", mark: "they stay steady with the blank 10 yards away.", setup: "Same.", reward: "Release to hunt on." },
+      { t: "Your shot", mark: "they stay steady when you shoot.", setup: "Safe direction, the dog well behind your line of fire.", reward: "Release to the retrieve or to hunt on." },
+    ]},
+  { id: "steadyfall", track: "upland", name: "Steady to fall", goal: "Hold until the bird is down and you send them.", cue: "Their name to send", proofMark: "they hold through the fall and go only on their name.", needs: ["steadyshot"], rep: "outcome", outcomes: ["Steady", "Crept", "Broke"], places: ["field"], gear: ["birds", "a helper"],
+    steps: [
+      { t: "Hold through the fall", mark: "they hold until the bird is down and you send them.", setup: "A helper shoots; you stay near the dog.", reward: "The retrieve." },
+      { t: "Released by name", mark: "they go only on their name, to retrieve or to hunt on.", setup: "Vary it: sometimes send, sometimes pick up the bird yourself.", reward: "The retrieve, or hunting on." },
+    ]},
+  { id: "backing", track: "upland", name: "Backing", goal: "Stop and honor another dog's point.", cue: "\"Whoa\" if needed", proofMark: "they stop on sight of the pointing dog.", needs: ["whoa"], rep: "outcome", outcomes: ["Backed", "Slowed", "Ran past"], places: ["yard", "park", "field"], gear: ["a cardboard pointing-dog cutout"],
+    steps: [
+      { t: "Cardboard dog", mark: "they stop on sight of a cardboard pointing dog 10 m away.", setup: "Stand the cutout in short grass; walk them up to it.", reward: "Treat while they stand." },
+      { t: "Statue in cover", mark: "they stop when they come on a dog decoy in cover.", setup: "Hide it so they find it suddenly.", reward: "Treat while they stand." },
+      { t: "Real dog at 20 m", mark: "they stop on a real pointing dog 20 m away.", setup: "A steady partner dog on a planted bird.", reward: "Treat while they stand." },
+      { t: "Real dog at 50 m", mark: "they stop on a real pointing dog 50 m away.", setup: "Same, bigger field.", reward: "Walk up and treat." },
+    ]},
+  { id: "covey", track: "upland", name: "Covey and singles", goal: "Handle a covey rise and work the scattered singles.", cue: "None", proofMark: "a covey pointed and singles worked slowly.", needs: ["steadywing"], rep: "outcome", outcomes: ["Clean", "Needed help", "Bumped birds"], places: ["field"], gear: ["quail (call-back pen or preserve)"],
+    steps: [
+      { t: "Point the covey", mark: "they point a covey find and hold.", setup: "A preserve or call-back pen, with a mentor.", reward: "Release after the rise." },
+      { t: "Through the covey rise", mark: "they stay steady as the covey flushes.", setup: "Check cord on.", reward: "Release to the singles." },
+      { t: "Hunt the singles", mark: "they work slowly and point scattered singles.", setup: "Head where the birds landed.", reward: "Release after each flush." },
+    ]},
+  { id: "range", track: "upland", name: "Range and handling", goal: "Hunt out front at gun range and turn on the whistle.", cue: "Two pips = turn; trill = come", proofMark: "they hunt in range and answer the whistle.", needs: ["come:reliable", "whistle"], rep: "outcome", whistle: true, places: ["park", "field"], gear: ["a whistle", "a long line or GPS collar"],
+    steps: [
+      { t: "Check in at 50 yd", mark: "they swing back to check in within 50 yards.", setup: "Open field. Walk with the wind in your face.", reward: "Treat when they check in, then send them on." },
+      { t: "Turn on the whistle", mark: "they turn on two pips from 50 yards or more.", setup: "Pip as you change direction.", reward: "Treat when they reach you, sometimes." },
+      { t: "Recall from 100 yd", mark: "they come in on the trill from 100 yards in cover.", setup: "Use the distance tracker to check the range.", reward: "Jackpot." },
+    ]},
 ];
 
 // Socialization passport: 60 good first experiences before 16 weeks, each paired with food.
@@ -1055,6 +1331,8 @@ const BREEDS = [
   const today = () => iso(new Date());
   const addDays = (day, n) => { const d = new Date(day + "T12:00:00"); d.setDate(d.getDate() + n); return iso(d); };
   const daysBetween = (a, b) => Math.round((Date.parse(b + "T12:00:00") - Date.parse(a + "T12:00:00")) / 864e5);
+  // Marks fire on touch-down, not on release: release adds 100+ ms.
+  const onDown = (node, fn) => node.addEventListener("pointerdown", (e) => { if (e.button > 0) return; e.preventDefault(); fn(e); });
   const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
   const settings = Object.assign({ volume: 0.8, haptic: true, flash: false, budget: 60, custom: null }, store.get("settings", {}));
@@ -1070,7 +1348,7 @@ const BREEDS = [
   const freshState = () => ({
     progress: {}, plan: null, history: [], last: null, charged: false, seen: {}, place: "home",
     ratings: [], reviews: [], days: [], passport: {}, potty: { on: null, last: 0, offset: 0, log: [] },
-    treats: { day: "", used: 0 }, live: null,
+    treats: { day: "", used: 0 }, live: null, sound: {}, hot: "",
   });
   const newId = () => "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
@@ -1132,13 +1410,29 @@ const BREEDS = [
     return "adult";
   }
   const dogName = () => (dog && dog.name ? dog.name : "your dog");
+  // Growth plates close later in bigger dogs (general guidance; the vet confirms). Until then: no long hard-ground retrieves.
+  const PLATES = { s: 43, m: 56, l: 70, g: 90 };
+  const platesClosed = () => { const w = ageWeeks(); return w == null || w >= PLATES[dog.size || "l"]; };
+  const platesMonths = () => Math.round(PLATES[dog.size || "l"] / 4.35);
+  const hasGoal = (g) => (dog.goals || []).includes(g);
+  const fieldGoal = () => hasGoal("waterfowl") || hasGoal("upland");
   const breedRow = (name) => BREEDS.find((b) => b[0].toLowerCase() === String(name || "").trim().toLowerCase());
 
   // ---------- Skills, levels and proofing ----------
   const FREE = { id: "free", name: "Free clicker", goal: "Just the marker pad, no plan.", steps: [], needs: [] };
   const CHARGE = { id: "charge", name: "Charge Yes", goal: "Yes means food.", steps: [], needs: [] };
+  const BREAK = { id: "break", name: "Break", goal: "Water and shade.", steps: [], needs: [] };
   const skillById = (id) => SKILLS.find((s) => s.id === id);
-  const getSkill = (id) => skillById(id) || (id === "charge" ? CHARGE : FREE);
+  const soundById = (id) => SOUNDS.find((x) => "snd:" + x.id === id);
+  const getSkill = (id) => skillById(id) || (id === "charge" ? CHARGE : id === "break" ? BREAK
+    : soundById(id) ? { id, name: "Sound ladder: " + soundById(id).name, goal: "Paired with food, step by step.", steps: [], needs: [] } : FREE);
+
+  // ---------- Sound ladder state: st.sound[id] = { level 0-10, calm, log: [{ day, r }] } ----------
+  const sound = (id) => (st.sound[id] ||= { level: 0, calm: 0, log: [] });
+  const recentStartle = (id) => sound(id).log.slice(-3).some((x) => x.r === "startled");
+  const soundCap = () => (stage() === "puppy" ? 5 : 10);
+  const calmNeed = (sd) => (sd.level < 4 ? 2 : 3);
+  const LADDER_VOL = (k) => 0.01 * Math.pow(100, (Math.max(1, k) - 1) / 9); // step 1 = 1%, step 10 = full volume
   const prog = (id) => (st.progress[id] ||= { step: 0, reps: [], done: false });
   const peek = (id) => st.progress[id];
   const started = (id) => { const p = peek(id); return !!p && (p.step > 0 || p.reps.length > 0 || !!p.last); };
@@ -1159,14 +1453,22 @@ const BREEDS = [
     return p.reviews > 0 ? 4 : 3;
   }
   function needMet(n) {
+    if (n.includes("|")) return n.split("|").some(needMet);
+    if (n.startsWith("sound:")) { const [, sid, lv] = n.split(":"); return sound(sid).level >= +lv && !recentStartle(sid); }
     const [id, rest] = n.split(/[@:]/);
     if (id === "charge") return !!st.charged;
     if (n.includes("@")) return started(id) && (prog(id).step >= +rest || level(id) >= 1);
     const want = rest ? LEVELS.findIndex((l) => l.toLowerCase() === rest) : 1;
     return level(id) >= want;
   }
-  const isOpen = (id) => started(id) || (getSkill(id).needs || []).every(needMet);
+  // A startle relocks gun work even after it was started, until the gunshot ladder is calm again.
+  const isOpen = (id) => (started(id) && !(id === "gun" && recentStartle("gun"))) || (getSkill(id).needs || []).every(needMet);
   function needText(n) {
+    if (n.includes("|")) return n.split("|").map(needText).join(" or ");
+    if (n.startsWith("sound:")) {
+      const [, sid, lv] = n.split(":"), name = SOUNDS.find((x) => x.id === sid).name;
+      return sound(sid).level >= +lv ? `3 calm ${name.toLowerCase()} sessions since the last startle` : `the ${name.toLowerCase()} sound ladder to step ${lv}`;
+    }
     const [id, rest] = n.split(/[@:]/);
     if (id === "charge") return "Charge Yes";
     const name = getSkill(id).name;
@@ -1191,6 +1493,11 @@ const BREEDS = [
 
   // One plain sentence on what moves the ring next.
   function nextText(id) {
+    if (soundById(id)) {
+      const sd = sound(id.slice(4));
+      if (sd.level >= soundCap()) return sd.level >= 10 ? "Top of the ladder. A short refresher now and then keeps it there." : `Step ${sd.level} is the puppy limit; the rest waits until 16 weeks.`;
+      return `Step ${sd.level + 1} of 10 next. Up a step after ${calmNeed(sd)} relaxed sessions${sd.calm ? ` (${sd.calm} so far)` : ""}.`;
+    }
     const s = getSkill(id), p = peek(id), lv = level(id);
     if (!isOpen(id)) return lockText(id) + ".";
     if (lv === 0) {
@@ -1214,7 +1521,7 @@ const BREEDS = [
     svg.setAttribute("class", "ring"); svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", s ? `${LEVELS[lv]}${lv === 0 && started(id) ? ", step " + (prog(id).step + 1) : ""}` : "");
     // Five segments, one per level; inside Learning, the current segment fills by step.
-    const fill = lv + (lv === 0 && s && started(id) ? prog(id).step / s.steps.length : 0) + (lv === 4 ? 1 : 0);
+    const fill = soundById(id) ? sound(id.slice(4)).level / 2 : lv + (lv === 0 && s && started(id) ? prog(id).step / s.steps.length : 0) + (lv === 4 ? 1 : 0);
     for (let i = 0; i < 5; i++) {
       const arc = document.createElementNS(svg.namespaceURI, "circle");
       arc.setAttribute("cx", size / 2); arc.setAttribute("cy", size / 2); arc.setAttribute("r", r);
@@ -1275,9 +1582,12 @@ const BREEDS = [
   const trainingDay = () => !dog.days || !dog.days.length || dog.days.includes(new Date().getDay());
 
   // ---------- Planner: one session for today, here ----------
-  const ROLE = { warm: "Warm-up", main: "Main", new: "New", finish: "Finish", review: "Review", only: "Skill" };
+  const ROLE = { warm: "Warm-up", main: "Main", new: "New", finish: "Finish", review: "Review", only: "Skill", sound: "Sounds", break: "Rest" };
   function placeOk(s) { return !s.places || s.places.includes(st.place); }
+  const trackGoals = (t) => (TRACKS.find((x) => x.id === t) || {}).goals;
   function wantsTrack(s) {
+    const g = trackGoals(s.track);
+    if (g) return g.some(hasGoal);
     if (s.track !== "puppy") return true;
     const w = ageWeeks();
     return (w != null && w < 30) || (dog.goals || []).includes("puppy");
@@ -1286,7 +1596,14 @@ const BREEDS = [
     const id = s.id, p = peek(id), lv = level(id);
     const due = p && p.reviewDue && p.reviewDue <= today();
     let v = due ? 100 : lv === 0 ? (started(id) ? 80 : 40) : lv === 1 ? 60 : lv === 2 ? 50 + (p.places && p.places[st.place] ? 0 : 20) : 10;
-    v += 15 * ((dog.goals || ["foundations"]).includes(s.track) ? 1 : 0.3);
+    v += 15 * (trackGoals(s.track) || hasGoal(s.track) ? 1 : 0.3);
+    // Field skills come first when you're out in a field or at the water.
+    if (["field", "water"].includes(st.place) && s.places && !s.places.includes("home")) v += 30;
+    // Milestones for an opening day within 5 months get a push.
+    for (const [g, se] of Object.entries(SEASONS)) {
+      const d = (dog.seasons || {})[g];
+      if (d && hasGoal(g) && se.milestones.includes(id) && daysBetween(today(), d) >= 0 && daysBetween(today(), d) <= 150) v += 25;
+    }
     v += Math.min(25, 5 * SKILLS.filter((o) => (o.needs || []).some((n) => n.split(/[@:]/)[0] === id)).length);
     if (due) v += Math.min(50, 10 * daysBetween(p.reviewDue, today()));
     if (p && p.last === today()) v -= 60;
@@ -1299,11 +1616,43 @@ const BREEDS = [
     if (lv === 1) return "proof";
     return "practice";
   }
+  // The day's sound-ladder block: gunfire for bird-dog goals, household sounds for puppies. Once a day; a day off after a startle.
+  function soundPick() {
+    const done = (id) => sound(id).log.some((x) => x.day === today());
+    const shaken = (id) => { const l = sound(id).log.at(-1); return l && l.r === "startled" && l.day === addDays(today(), -1); };
+    let id = null;
+    if (fieldGoal() && sound("gun").level < soundCap()) id = "gun";
+    else if ((ageWeeks() != null && ageWeeks() < 20) || hasGoal("puppy")) {
+      id = ["doorbell", "traffic", "thunder", "fireworks"].filter((x) => sound(x).level < soundCap()).sort((a, b) => sound(a).level - sound(b).level)[0] || null;
+    }
+    return id && !done(id) && !shaken(id) ? id : null;
+  }
+  const FIELD_TRACKS = ["field", "waterfowl", "upland"];
+  const isFieldDay = () => dog.fieldDay != null && dog.fieldDay === new Date().getDay();
+  // A field day out at the field or water: obedience warm-up, then up to 4 field blocks (2 when hot) with breaks between.
+  function fieldPlan(ranked, hot) {
+    const blocks = [], used = new Set();
+    const brk = () => blocks.push({ id: "break", kind: "break", role: "break", secs: hot ? 180 : 120 });
+    const warm = ranked.find(({ s }) => !FIELD_TRACKS.includes(s.track) && level(s.id) >= 1);
+    if (warm) { used.add(warm.s.id); blocks.push({ id: warm.s.id, kind: "practice", role: "warm" }); }
+    let fresh = 0;
+    for (const { s } of ranked) {
+      if (!FIELD_TRACKS.includes(s.track) || used.has(s.id)) continue;
+      const isNew = !started(s.id) && level(s.id) === 0;
+      if (isNew && fresh >= 1) continue;
+      if (blocks.some((b) => b.role !== "warm" && b.role !== "break")) brk();
+      used.add(s.id); fresh += isNew ? 1 : 0;
+      blocks.push({ id: s.id, kind: isNew ? "learn" : kindFor(s.id), role: isNew ? "new" : "main" });
+      if (blocks.filter((b) => b.role === "main" || b.role === "new").length >= (hot ? 2 : 4)) break;
+    }
+    return blocks;
+  }
   function buildPlan(opts = {}) {
     if (!st.charged) return { day: today(), place: st.place, blocks: [{ id: "charge", kind: "charge", role: "only" }] };
-    const short = opts.short || tired(), hard = hardWeek();
+    const short = opts.short || tired(), hard = hardWeek(), hot = st.hot === today();
     const avoid = new Set(opts.avoid || []);
-    const pool = SKILLS.filter((s) => isOpen(s.id) && placeOk(s) && wantsTrack(s));
+    // Gun work pauses after any startle until the gunshot ladder has 3 calm sessions again.
+    const pool = SKILLS.filter((s) => isOpen(s.id) && placeOk(s) && wantsTrack(s) && !(s.id === "gun" && recentStartle("gun")));
     const ranked = pool.map((s) => ({ s, v: score(s) - (avoid.has(s.id) ? 200 : 0) })).sort((a, b) => b.v - a.v);
     const blocks = [], used = new Set();
     // Warm-ups and finishes run at the dog's best level; only main blocks raise the bar.
@@ -1312,6 +1661,12 @@ const BREEDS = [
     // A rest day keeps one light review; a dog with nothing under way yet just gets an optional normal session.
     const rest = !trainingDay() && working.length > 0, offDay = !trainingDay();
     const learning = working.filter(({ s }) => level(s.id) === 0).length;
+    if (!rest && !short && fieldGoal() && ["field", "water", "park"].includes(st.place) && (isFieldDay() || opts.field)) {
+      const fb = fieldPlan(ranked, hot);
+      if (fb.some((b) => b.role === "main" || b.role === "new")) return { day: today(), place: st.place, field: true, hot, hard, blocks: fb };
+    }
+    const snd = rest || short ? null : soundPick();
+    if (snd) blocks.push({ id: "snd:" + snd, kind: "sound", role: "sound" });
     // Warm-up: an easy skill the dog already knows, so the session opens with wins.
     // A skill due for review is never spent as a warm-up, and a short or rest-day session has none.
     const warm = rest || short ? null : working.filter(({ s }) => level(s.id) >= 1 && s.id !== "mat" && kindFor(s.id) !== "review")
@@ -1331,7 +1686,7 @@ const BREEDS = [
       const any = ranked.find(({ s }) => !used.has(s.id));
       if (any) add(any.s.id, started(any.s.id) ? "main" : "new");
     }
-    return { day: today(), place: st.place, rest, offDay, hard, blocks };
+    return { day: today(), place: st.place, rest, offDay, hard, hot, blocks };
   }
   function plan(force, opts) {
     if (force || !st.plan || st.plan.day !== today() || st.plan.place !== st.place || (st.plan.blocks[0] || {}).id === "charge" && st.charged) {
@@ -1341,6 +1696,8 @@ const BREEDS = [
   }
   function blockLine(b) {
     const s = getSkill(b.id);
+    if (b.kind === "sound") return `Step ${Math.min(10, sound(b.id.slice(4)).level + 1)} of 10 · 5 plays, a treat right after each`;
+    if (b.kind === "break") return `${Math.round(b.secs / 60)} minutes of water and shade`;
     if (b.kind === "charge") return "20 treats at random moments. Teaches that Yes means food.";
     if (b.kind === "learn") { const step = (peek(b.id) || { step: 0 }).step; return `Step ${step + 1} of ${s.steps.length}: ${s.steps[step].t}`; }
     if (b.kind === "proof") { const t = proofTarget(b.id); return t.raise ? describeLv(s, t.lv) : "At their best level"; }
@@ -1384,6 +1741,44 @@ const BREEDS = [
       phase += 2 * Math.PI * f / sr;
       return Math.min(1, u / 0.01) * Math.min(1, (len - u) / 0.02) * Math.sin(phase);
     });
+    buildFieldSounds();
+  }
+
+  // Field whistles and the sound-ladder sounds, all synthesized here so they work offline.
+  function buildFieldSounds() {
+    const noise = () => Math.random() * 2 - 1;
+    // A pea whistle: about 2.9 kHz with the pea's fast warble.
+    const pea = (t, start, len) => {
+      const u = t - start; if (u < 0 || u > len) return 0;
+      return Math.min(1, u / 0.01) * Math.min(1, (len - u) / 0.015) * (0.65 + 0.35 * Math.sin(2 * Math.PI * 34 * u)) * Math.sin(2 * Math.PI * 2900 * u);
+    };
+    bufs.wsit = render(0.6, (t) => pea(t, 0, 0.55));
+    bufs.wcome = render(0.95, (t) => { let v = 0; for (let k = 0; k < 7; k++) v += pea(t, k * 0.13, 0.08); return v; });
+    bufs.wturn = render(0.42, (t) => pea(t, 0, 0.12) + pea(t, 0.24, 0.12));
+    bufs.doorbell = render(1.7, (t) => {
+      const ding = (f, s0) => { const u = t - s0; return u < 0 ? 0 : Math.exp(-u / 0.5) * (Math.sin(2 * Math.PI * f * u) + 0.3 * Math.sin(4 * Math.PI * f * u)); };
+      return ding(659, 0) + ding(523, 0.55);
+    });
+    // Brown noise (a running sum, kept from drifting) for traffic and thunder.
+    let brown = 0;
+    const rumble = () => { brown = (brown + 0.02 * noise()) * 0.997; return brown; };
+    bufs.traffic = render(4, (t) => rumble() * Math.exp(-(((t - 2) / 0.9) ** 2)) * 3);
+    bufs.thunder = render(4, (t) => {
+      const env = Math.min(1, t / 0.25) * Math.exp(-t / 1.3) * (1 + 0.5 * Math.sin(2 * Math.PI * 1.7 * t));
+      return rumble() * env * 4;
+    });
+    // Fireworks: three bangs, each with a crackle tail.
+    const bang = (t, s0) => { const u = t - s0; if (u < 0) return 0; return noise() * Math.exp(-u / 0.07) + 0.6 * Math.sin(2 * Math.PI * 55 * u) * Math.exp(-u / 0.12) + (u > 0.15 && Math.random() < 0.02 ? noise() * Math.exp(-(u - 0.15) / 0.5) : 0); };
+    bufs.fireworks = render(2.6, (t) => bang(t, 0) + 0.8 * bang(t, 0.8) + 0.9 * bang(t, 1.5));
+    // A duck call: three nasal quacks with a falling pitch.
+    const quack = (t, s0) => {
+      const u = t - s0; if (u < 0 || u > 0.2) return 0;
+      const f = 420 - 220 * u, ph = (f * u) % 1;
+      return Math.min(1, u / 0.01) * Math.min(1, (0.2 - u) / 0.04) * ((2 * ph - 1) * 0.7 + 0.3 * Math.sin(2 * Math.PI * 3 * f * u));
+    };
+    bufs.duck = render(1.1, (t) => quack(t, 0) + quack(t, 0.32) + quack(t, 0.62));
+    // A gunshot: a sharp noise crack, a low thump and a short echo.
+    bufs.gun = render(1.4, (t) => noise() * (Math.exp(-t / 0.035) + 0.18 * Math.exp(-t / 0.5)) + 0.9 * Math.sin(2 * Math.PI * 60 * t) * Math.exp(-t / 0.09));
   }
 
   function initAudio() {
@@ -1399,12 +1794,13 @@ const BREEDS = [
     if (settings.custom) loadCustom(settings.custom).catch(() => {});
   }
 
-  function play(name) {
+  // vol: a sound-ladder step plays through its own quieter gain, on top of the master volume.
+  function play(name, vol) {
     if (!ctx) initAudio();
     if (ctx.state !== "running") ctx.resume().catch(() => {});
     const src = ctx.createBufferSource();
     src.buffer = (name === "yes" && customBuf) || bufs[name];
-    src.connect(gain);
+    if (vol != null) { const g = ctx.createGain(); g.gain.value = vol; src.connect(g); g.connect(gain); } else src.connect(gain);
     src.start();
   }
 
@@ -1449,6 +1845,7 @@ const BREEDS = [
       ["dogswitch", "hardweek", "pup-passport", "pup-potty", "last"].forEach((i) => ($(i).hidden = true));
       $("profile-ask").hidden = false; $("profile-ask-title").textContent = "Set up your dog";
       $("places").replaceChildren(); $("plan").replaceChildren(); $("week").replaceChildren(); $("places-label").hidden = true;
+      $("conds").replaceChildren(); $("seasons").replaceChildren(); $("heatwarn").hidden = true;
       return;
     }
     $("today-title").textContent = dog.name ? `Today with ${dog.name}` : "Today";
@@ -1474,7 +1871,9 @@ const BREEDS = [
     const hw = hardWeek();
     $("hardweek").hidden = !hw;
     $("hardweek").textContent = `${dog.name || "Your dog"} is having a hard week, which is normal (especially for teenagers). Easier plan until reviews pass again.`;
+    renderConds();
     renderPlan();
+    renderSeasons();
     renderPuppy();
     renderWeek();
     renderLast();
@@ -1495,8 +1894,8 @@ const BREEDS = [
       d.append(again); box.append(d); return;
     }
     const card = el("div", "plancard");
-    const mins = p.blocks.reduce((a, b) => a + (b.kind === "charge" ? 2 : b.kind === "learn" ? 3 : 2), 0);
-    card.append(el("span", "eyebrow", p.rest ? `Rest day · optional review · about ${mins} min` : p.offDay ? `Not a planned day · optional · about ${mins} min` : `Next session · about ${mins} minutes`));
+    const mins = Math.round(p.blocks.reduce((a, b) => a + (b.kind === "break" ? b.secs / 60 : FIELD_TRACKS.includes(getSkill(b.id).track) ? 5 : b.kind === "learn" ? 3 : 2), 0));
+    card.append(el("span", "eyebrow", p.field ? `Field day · about ${mins} minutes with breaks` : p.rest ? `Rest day · optional review · about ${mins} min` : p.offDay ? `Not a planned day · optional · about ${mins} min` : `Next session · about ${mins} minutes`));
     const ol = el("ol");
     for (const b of p.blocks) {
       const li = el("li");
@@ -1504,6 +1903,9 @@ const BREEDS = [
       ol.append(li);
     }
     card.append(ol);
+    const gear = [...new Set(p.blocks.flatMap((b) => getSkill(b.id).gear || []))];
+    if (p.field) gear.unshift("water and a bowl");
+    if (gear.length) card.append(el("small", "", "Bring: " + gear.join(", ") + "."));
     const go = el("button", "go", "Start"); go.type = "button";
     go.addEventListener("click", () => startPlan());
     card.append(go);
@@ -1513,9 +1915,66 @@ const BREEDS = [
       sh.type = df.type = "button";
       sh.addEventListener("click", () => { plan(true, { short: true }); renderToday(); });
       df.addEventListener("click", () => { plan(true, { avoid: p.blocks.map((b) => b.id) }); renderToday(); });
-      links.append(sh, df); card.append(links);
+      links.append(sh, df);
+      // Out at the field or water on another day: offer the longer field session anyway.
+      if (!p.field && fieldGoal() && ["field", "water", "park"].includes(st.place)) {
+        const fd = el("button", "", "Field session"); fd.type = "button";
+        fd.addEventListener("click", () => { plan(true, { field: true }); renderToday(); });
+        links.append(fd);
+      }
+      card.append(links);
     }
     box.append(card);
+  }
+
+  // Heat: a hot-day switch for outdoor places. Flat-faced breeds get the warning whenever they're outside.
+  function renderConds() {
+    const box = $("conds"); box.replaceChildren();
+    const outdoor = st.place !== "home", hot = st.hot === today();
+    if (outdoor) {
+      const b = el("button", "pchip", "Hot day"); b.type = "button"; b.setAttribute("role", "switch"); b.setAttribute("aria-checked", hot);
+      b.addEventListener("click", () => { st.hot = hot ? "" : today(); st.plan = null; saveSt(); renderToday(); });
+      box.append(b);
+    }
+    const flat = !!dog.flat;
+    $("heatwarn").hidden = !(outdoor && (hot || flat));
+    $("heatwarn").textContent = hot
+      ? "Hot day: shorter field work, longer breaks in shade, water every break. Stop at heavy panting or a wide, flat tongue."
+      : `${dog.breed || "Flat-faced dogs"} overheat fast: keep outdoor blocks to 5 minutes with water and shade between.`;
+  }
+
+  // Season countdown: readiness = milestone skills at Fluent (part credit for steps along the way).
+  function seasonInfo(g) {
+    const se = SEASONS[g], date = (dog.seasons || {})[g];
+    const parts = se.milestones.map((id) => {
+      const s = getSkill(id), lv = level(id);
+      return { id, done: lv >= 1, v: lv >= 1 ? 1 : started(id) ? 0.6 * (prog(id).step / s.steps.length) : 0 };
+    });
+    const pct = Math.round((parts.reduce((a, x) => a + x.v, 0) / parts.length) * 100);
+    const left = parts.filter((x) => !x.done), days = daysBetween(today(), date);
+    // About two weeks of short sessions per milestone is a realistic pace.
+    return { se, date, pct, left, days, behind: left.length * 14 > days };
+  }
+  function renderSeasons() {
+    const box = $("seasons"); box.replaceChildren();
+    for (const g of Object.keys(SEASONS)) {
+      const date = (dog.seasons || {})[g];
+      if (!date || !hasGoal(g)) continue;
+      const i = seasonInfo(g);
+      if (i.days < -60) continue;
+      const card = el("div", "season");
+      const when = i.days > 0 ? `in ${i.days} day${i.days === 1 ? "" : "s"}` : i.days === 0 ? "today" : "under way";
+      const head = el("div", "row between"); head.append(el("b", "", `${i.se.name} ${when}`), el("span", "num muted", `${i.pct}% ready`));
+      const bar = el("i", "bar"); bar.style.setProperty("--p", i.pct + "%");
+      card.append(head, bar);
+      if (!i.left.length) card.append(el("p", "muted", `Every milestone is Fluent. Keep them sharp with short reviews before ${i.days > 0 ? "opening day" : "each hunt"}.`));
+      else {
+        const next = i.left.slice(0, 3).map((x) => getSkill(x.id).name + (isOpen(x.id) ? "" : " (locked)")).join(", ");
+        card.append(el("p", "muted", `Still to go: ${next}${i.left.length > 3 ? ` and ${i.left.length - 3} more` : ""}.`));
+        if (i.behind && i.days > 0) card.append(el("p", "behind", `Behind pace for ${i.left.length} milestones in ${i.days} days. Add a field day, and the plan already puts these first.`));
+      }
+      box.append(card);
+    }
   }
 
   function renderWeek() {
@@ -1623,6 +2082,12 @@ const BREEDS = [
     for (const t of TRACKS) {
       const sec = el("div", "track");
       sec.append(el("h2", "", t.name), el("p", "muted", t.blurb));
+      // Sport tracks not in this dog's goals stay folded, one tap to add.
+      if (t.goals && !t.goals.some(hasGoal)) {
+        const add = el("button", "btn trackadd", `Add to ${dog.name || "your dog"}'s goals`); add.type = "button";
+        add.addEventListener("click", () => { dog.goals = [...new Set([...(dog.goals || []), t.goals[0]])]; saveDogs(); st.plan = null; saveSt(); renderSkills(); });
+        sec.append(add); box.append(sec); continue;
+      }
       for (const s of SKILLS.filter((x) => x.track === t.id)) sec.append(skillRow(s.id));
       box.append(sec);
     }
@@ -1631,7 +2096,15 @@ const BREEDS = [
     fb.append(el("b", "", "Free clicker"), el("span", "", "Just the marker pad, no plan."));
     fb.style.gridTemplateColumns = "1fr";
     fb.addEventListener("click", () => startSingle("free"));
-    free.append(fb); box.append(free);
+    free.append(fb);
+    free.append(el("p", "muted", "Sound ladder: each sound at 10 volume steps, paired with food. Builds calm around noise, and is the way in to gunfire."));
+    for (const x of SOUNDS) {
+      const sd = sound(x.id), r = el("button", "skrow"); r.type = "button";
+      r.append(ring("snd:" + x.id), el("b", "", x.name), el("span", "", sd.level ? `Step ${sd.level} of 10${recentStartle(x.id) ? " · startled recently" : ""}` : "Not started"));
+      r.addEventListener("click", () => startSingle("snd:" + x.id));
+      free.append(r);
+    }
+    box.append(free);
     const charged = st.charged;
     $("go-charge").classList.toggle("todo", !charged);
     $("charge-tile-title").textContent = charged ? "Yes is charged" : "Charge Yes";
@@ -1688,9 +2161,9 @@ const BREEDS = [
   const AGES = [["Under 4 months", 10], ["4 to 6 months", 21], ["6 to 18 months", 52], ["1.5 to 7 years", 200], ["8 years or older", 450]];
   const SIZES = [["s", "Small", "under 10 kg"], ["m", "Medium", "10-25 kg"], ["l", "Large", "25-45 kg"], ["g", "Giant", "over 45 kg"]];
   const GOALS = [["foundations", "Good manners"], ["puppy", "Puppy basics"], ["life", "Vet, grooming, car, guests"],
-    ["waterfowl", "Duck and goose hunting"], ["upland", "Upland birds and quail"], ["hog", "Hog bay dog"], ["tracking", "Blood tracking"],
+    ["waterfowl", "Duck and goose hunting"], ["upland", "Quail and upland birds (pointing dogs)"], ["hog", "Hog bay dog"], ["tracking", "Blood tracking"],
     ["shed", "Shed antlers"], ["nosework", "Nose work"], ["tricks", "Tricks"]];
-  const SOON = new Set(["waterfowl", "upland", "hog", "tracking", "shed", "nosework", "tricks"]);
+  const SOON = new Set(["hog", "tracking", "shed", "nosework", "tricks"]);
   const REWARDS = [["food", "Food"], ["toy", "Toys"], ["tug", "Tug"], ["ball", "Ball"], ["praise", "Praise"]];
   const QUIZ = [["retrieve", "Carries things around"], ["herd", "Chases things that move"], ["scent", "Tracks with the nose down"], ["point", "Freezes and stares at birds"]];
   const DAYS = [[1, "Mon"], [2, "Tue"], [3, "Wed"], [4, "Thu"], [5, "Fri"], [6, "Sat"], [0, "Sun"]];
@@ -1735,13 +2208,22 @@ const BREEDS = [
       (w) => { draft.birth = addDays(today(), -w * 7); $("onb-birth").value = draft.birth; });
     choiceSet("onb-size", SIZES.map(([v, l, s]) => [v, l, s]), false, (v) => draft.size === v, (v) => (draft.size = v));
     choiceSet("onb-goals", GOALS.map(([v, l]) => [v, l + (SOON.has(v) ? " (coming soon)" : "")]), true, (v) => draft.goals.includes(v),
-      (v) => { draft.goals = draft.goals.includes(v) ? draft.goals.filter((g) => g !== v) : [...draft.goals, v]; });
+      (v) => { draft.goals = draft.goals.includes(v) ? draft.goals.filter((g) => g !== v) : [...draft.goals, v]; renderOnb(); });
     choiceSet("onb-reward", REWARDS, false, (v) => draft.reward === v, (v) => (draft.reward = v));
     choiceSet("onb-days", DAYS, true, (v) => draft.days.includes(v), (v) => { draft.days = draft.days.includes(v) ? draft.days.filter((x) => x !== v) : [...draft.days, v]; });
+    // Bird-dog goals add opening days and a weekly field day.
+    const fw = draft.goals.includes("waterfowl"), up = draft.goals.includes("upland");
+    $("onb-seasons").hidden = !(fw || up);
+    $("onb-season-waterfowl-row").hidden = !fw; $("onb-season-upland-row").hidden = !up;
+    $("onb-season-waterfowl").value = (draft.seasons || {}).waterfowl || "";
+    $("onb-season-upland").value = (draft.seasons || {}).upland || "";
+    $("onb-field").hidden = !(fw || up);
+    choiceSet("onb-fieldday", [["none", "None"], ...DAYS], false, (v) => (draft.fieldDay == null ? v === "none" : draft.fieldDay === v), (v) => (draft.fieldDay = v === "none" ? null : v));
     choiceSet("onb-quiz-q", QUIZ, true, (v) => draft.drive === v, (v) => { draft.drive = v; driveNote(); });
     driveNote();
   }
   $("onb-birth").addEventListener("change", (e) => { draft.birth = e.target.value || null; renderOnb(); });
+  for (const g of ["waterfowl", "upland"]) $("onb-season-" + g).addEventListener("change", (e) => { draft.seasons = { ...(draft.seasons || {}), [g]: e.target.value || undefined }; });
   $("onb-breed").addEventListener("change", (e) => {
     draft.breed = e.target.value.trim();
     const row = breedRow(draft.breed);
@@ -1792,7 +2274,9 @@ const BREEDS = [
   // block: { id, kind: learn | proof | review | practice | free | charge, role, reps: [], target, lv, raise, before }
   let run = null, ticker = null, lock = null, hold = null, undoSnap = null;
   const block = () => (run ? run.blocks[run.i] : null);
-  const targetFor = (b) => (b.kind === "free" ? Infinity : b.kind === "learn" ? (stage() === "puppy" ? 5 : 10) : 5);
+  const targetFor = (b) => (b.kind === "free" || b.kind === "sound" ? Infinity
+    : getSkill(b.id).rep === "outcome" ? (b.kind === "learn" ? 6 : 3)
+    : b.kind === "learn" ? (stage() === "puppy" ? 5 : 10) : 5);
 
   function startPlan() {
     const p = plan();
@@ -1801,7 +2285,7 @@ const BREEDS = [
   }
   function startSingle(id) {
     if (!st.charged && id !== "free") { toast("Charge Yes first: 2 minutes so Yes means food."); show("charge"); return; }
-    beginRun([{ id, kind: id === "free" ? "free" : kindFor(id), role: "only" }], false);
+    beginRun([{ id, kind: id === "free" ? "free" : id.startsWith("snd:") ? "sound" : kindFor(id), role: "only" }], false);
   }
   function beginRun(blocks, fromPlan) {
     run = { blocks, i: 0, fromPlan, start: 0, marks: 0, counts: { yes: 0, catch: 0, keep: 0, free: 0, miss: 0 } };
@@ -1827,6 +2311,19 @@ const BREEDS = [
     $("stepcard").hidden = !guided;
     $("reps").style.visibility = guided ? "visible" : "hidden";
     $("block-skip").hidden = !(run.i < n - 1);
+    const mode = b.kind === "sound" ? "sound" : b.kind === "break" ? "break" : s.rep === "outcome" ? "outcome" : "marker";
+    setMode(mode);
+    $("run-mark").classList.toggle("oc", mode === "outcome");
+    $("run-mark").classList.toggle("snd", mode === "sound");
+    $("whistlebar").hidden = !(s.whistle || FIELD_TRACKS.includes(s.track));
+    $("gps").hidden = !(navigator.geolocation && (mode === "outcome" || s.whistle));
+    $("open-howto").hidden = false;
+    if (mode === "sound") { renderSoundBlock(b); return; }
+    if (mode === "break") { startBreak(b); return; }
+    if (mode === "outcome") {
+      const labels = s.outcomes || ["Clean", "Needed help", "No go"];
+      document.querySelectorAll(".obtn strong").forEach((x, i) => (x.textContent = labels[i]));
+    }
     if (!guided) { $("run-step-n").textContent = s.goal; setMarkers(true); $("hold").hidden = true; return; }
     const p = prog(b.id), learn = b.kind === "learn";
     const step = learn ? s.steps[p.step] : s.steps.find((x) => x.hold) || s.steps[s.steps.length - 1];
@@ -1860,10 +2357,18 @@ const BREEDS = [
     return step.hold;
   }
   function setMarkers(withKeep) { $("mk-keep").hidden = !withKeep; }
+  // marker: the YES pad and markers · outcome: Clean / Needed help / No go · sound: the ladder · break: a countdown
+  function setMode(mode) {
+    $("p-outcome").hidden = mode !== "outcome";
+    $("p-sound").hidden = mode !== "sound";
+    $("p-break").hidden = mode !== "break";
+    document.querySelector("#s-run .padwrap").hidden = mode !== "marker";
+    $("markers").hidden = mode !== "marker";
+  }
   function renderReps() {
-    const b = block(), r = (b.kind === "learn" ? prog(b.id).reps : b.reps).slice(-5), box = $("reps");
+    const b = block(), size = roundSize(getSkill(b.id)), r = (b.kind === "learn" ? prog(b.id).reps : b.reps).slice(-size), box = $("reps");
     box.replaceChildren();
-    for (let i = 0; i < 5; i++) { const d = el("i"); if (i < r.length) d.className = r[i] ? "y" : "n"; box.append(d); }
+    for (let i = 0; i < size; i++) { const d = el("i"); if (i < r.length) d.className = r[i] ? "y" : "n"; box.append(d); }
   }
   function setStep(n) {
     const b = block(), s = getSkill(b.id), p = prog(b.id);
@@ -1887,52 +2392,60 @@ const BREEDS = [
   const coachOff = () => $("stepcard").classList.remove("coaching");
 
   // Every 5 tries: 4-5 right = harder, 3 = stay, 0-2 = easier. Applied automatically; Easier/Harder can override.
+  // Rounds: 5 tries for marker skills (4-5 right = harder, 3 = stay, 0-2 = easier);
+  // 3 reps for field outcome skills (2-3 clean = harder, 1 = stay, 0 = easier). Applied automatically; Easier/Harder override.
+  const roundSize = (s) => (s.rep === "outcome" ? 3 : 5);
   function logRep(ok) {
     const b = block(); if (!b || b.kind === "free") return;
-    const s = getSkill(b.id), p = prog(b.id);
+    const s = getSkill(b.id), p = prog(b.id), size = roundSize(s);
     b.reps.push(ok);
     if (b.kind === "learn") p.reps.push(ok);
     saveSt(); renderReps();
     const r = b.reps;
-    if (!ok && r.length >= 2 && !r[r.length - 2] && r.length % 5) {
+    if (size === 5 && !ok && r.length >= 2 && !r[r.length - 2] && r.length % 5) {
       coach("Two misses in a row. Make it easier for a few reps: closer, shorter, quieter.", [["OK", () => {}, true]]);
     }
-    if (r.length % 5) return;
-    const hits = r.slice(-5).filter(Boolean).length;
-    const msg = roundResult(b, s, p, hits);
-    const end = r.length >= b.target;
-    if (!end) { coach(msg, [["OK", () => {}, true]]); return; }
+    if (r.length % size) return;
+    const hits = r.slice(-size).filter(Boolean).length;
+    const msg = roundResult(b, s, p, hits, size);
+    if (r.length < b.target) { coach(msg, [["OK", () => {}, true]]); return; }
+    endBlockCoach(msg, () => { b.target += size; });
+  }
+  function endBlockCoach(msg, more) {
     const nxt = run.blocks[run.i + 1];
-    coach(msg, [
-      [nxt ? `Next: ${getSkill(nxt.id).name}` : "Finish session", () => nextBlock(), true],
-      ["One more round", () => { b.target += 5; }],
-    ]);
+    const acts = [[nxt ? `Next: ${nxt.kind === "break" ? "a break" : getSkill(nxt.id).name}` : "Finish session", () => nextBlock(), true]];
+    if (more) acts.push(["One more round", more]);
+    coach(msg, acts);
   }
   // A new step brings new setup, so its how-to opens the first time it is reached.
   function stepHowto(id) {
     const key = id + ":" + prog(id).step;
     if (!st.seen[key]) { st.seen[key] = true; saveSt(); openHowto(); }
   }
-  function roundResult(b, s, p, hits) {
-    const up = hits >= 4, down = hits <= 2, name = dogName();
+  function roundResult(b, s, p, hits, size) {
+    const up = size === 3 ? hits >= 2 : hits >= 4, down = size === 3 ? hits === 0 : hits <= 2, name = dogName();
+    const score = `${hits} of ${size}`;
     if (b.kind === "learn") {
       const last = p.step === s.steps.length - 1;
+      // Long retrieves on hard ground wait for the growth plates.
+      const capped = s.youngCap != null && !platesClosed() && p.step >= s.youngCap;
+      if (up && capped) return `${score}. Longer ones wait until ${name}'s growth plates close (about ${platesMonths()} months). Keep this distance and vary the place and cover.`;
       if (up && last) {
         if (!p.passDays) p.passDays = [];
         if (!p.passDays.includes(today())) p.passDays.push(today());
         const was = p.done; p.done = p.passDays.length >= 2; p.reps = []; saveSt();
         if (p.done && !was) {
-          b.kind = proofTarget(b.id) && proofTarget(b.id).raise ? "proof" : "practice"; b.reps = []; b.target = 5;
+          b.kind = proofTarget(b.id) && proofTarget(b.id).raise ? "proof" : "practice"; b.reps = []; b.target = targetFor(b);
           if (b.kind === "proof") { const t = proofTarget(b.id); b.lv = t.lv; b.raise = t.raise; } else b.lv = bestLevels(b.id);
           renderBlock();
-          return `${hits} of 5 on the last step, on ${p.passDays.length} different days: ${s.name} is Fluent! Next it gets proofed: ${dims(s).length ? "longer, farther, busier, one at a time." : "practice in new places."}`;
+          return `${score} on the last step, on ${p.passDays.length} different days: ${s.name} is Fluent! Next it gets proofed: ${dims(s).length ? "longer, farther, busier, one at a time." : "practice in new places."}`;
         }
-        return `${hits} of 5 on the last step. Pass it again on another day, ideally somewhere new, to make it Fluent.`;
+        return `${score} on the last step. Pass it again on another day, ideally somewhere new, to make it Fluent.`;
       }
-      if (up) { p.step++; p.reps = []; saveSt(); renderBlock(); stepHowto(b.id); return `${hits} of 5. ${name} has this step. On to step ${p.step + 1}: ${s.steps[p.step].t}.`; }
-      if (hits === 3) return "3 of 5. Same step for another round.";
-      if (p.step > 0) { p.step--; p.reps = []; saveSt(); renderBlock(); stepHowto(b.id); return `${hits} of 5. Too hard right now, so back to step ${p.step + 1} to build it up again.`; }
-      return `${hits} of 5. Make it easier: quieter room, closer, better treats. Is Yes charged?`;
+      if (up) { p.step++; p.reps = []; saveSt(); renderBlock(); stepHowto(b.id); return `${score}. ${name} has this step. On to step ${p.step + 1}: ${s.steps[p.step].t}.`; }
+      if (!down) return `${score}. Same step for another round.`;
+      if (p.step > 0) { p.step--; p.reps = []; saveSt(); renderBlock(); stepHowto(b.id); return `${score}. Too hard right now, so back to step ${p.step + 1} to build it up again.`; }
+      return `${score}. Make it easier: quieter place, closer, better treats. Is Yes charged?`;
     }
     let extra = "";
     if (b.kind === "proof") {
@@ -1952,13 +2465,122 @@ const BREEDS = [
       else extra = level(b.id) === 2 ? nextText(b.id) : "";
     }
     if (!extra && up) extra = b.role === "warm" ? "Good warm-up." : b.role === "finish" ? "Calm finish. Session done." : "Solid.";
-    if (!extra) extra = hits === 3 ? "Close. Keep it easy and go again." : "Make it easier next round: closer, shorter, quieter.";
+    if (!extra) extra = !down ? "Close. Keep it easy and go again." : "Make it easier next round: closer, shorter, quieter.";
     saveSt();
-    return `${hits} of 5. ${extra}`.trim();
+    return `${score}. ${extra}`.trim();
   }
 
+  // ---------- Field reps, the sound ladder and breaks ----------
+  function startClock() {
+    if (run.start) return;
+    run.start = Date.now(); ticker = setInterval(renderClock, 500); lockScreen();
+    $("pad-sub").textContent = "Tap, then treat.";
+  }
+  const snapshot = () => { undoSnap = { st: JSON.stringify(st), run: JSON.stringify({ ...run }), rec: rec.marks.length }; $("undo").hidden = false; };
+  function outcome(i, e, node) {
+    if (!run) return;
+    const b = block(), s = getSkill(b.id);
+    if (b.kind === "sound" || b.kind === "break") return;
+    feedback(node);
+    if (rec.recorder && rec.recorder.state === "recording") rec.marks.push({ t: ((e && e.timeStamp > 0 ? e.timeStamp : performance.now()) - rec.startAt) / 1000, kind: i === 0 ? "yes" : "miss" });
+    snapshot(); startClock();
+    if (i === 0) { run.marks++; treatsToday().used++; }
+    (b.yds ||= []).push(gps.yd);
+    if (s.startle && i === 2) { startleStop(b, s); saveLive(); renderClock(); return; }
+    logRep(i === 0); saveLive(); renderClock();
+  }
+  // Fear is never trained through: back off 2 steps, log it against the gun ladder (which locks this skill), stop for today.
+  function startleStop(b, s) {
+    const p = prog(b.id);
+    b.reps.push(false);
+    p.step = Math.max(0, p.step - 2); p.reps = [];
+    sound("gun").log.push({ day: today(), r: "startled" });
+    sound("gun").level = Math.max(0, sound("gun").level - 2); sound("gun").calm = 0;
+    saveSt(); renderBlock();
+    endBlockCoach(`Worried: stop gun work for today. It restarts at step ${p.step + 1} (${s.steps[p.step].t}) after a few calm days back on the gunshot sound ladder. Never fire closer to a nervous dog.`);
+  }
+  document.querySelectorAll(".obtn").forEach((btn) => onDown(btn, (e) => outcome(+btn.dataset.o, e, btn)));
+
+  function renderSoundBlock(b) {
+    const sid = b.id.slice(4), sd = sound(sid), k = Math.min(soundCap(), sd.level + 1);
+    b.plays ||= 0;
+    $("run-step-n").textContent = (run.blocks.length > 1 ? `${run.i + 1} of ${run.blocks.length} · ` : "") + `Step ${k} of 10`;
+    $("stepcard").hidden = false;
+    $("run-mark").textContent = "Play it, then hand a treat right away. Relaxed means still eating, ears soft.";
+    ["step-prev", "step-next", "open-howto", "hold", "run-proof"].forEach((x) => ($(x).hidden = true));
+    $("reps").style.visibility = "hidden";
+    $("snd-sub").textContent = b.plays < 5 ? `Plays: ${b.plays} of 5. A treat right after each one.` : "Done: how was your dog?";
+    document.querySelectorAll("#p-sound [data-r]").forEach((x) => { x.disabled = x.dataset.r !== "startled" && b.plays < 5; });
+  }
+  onDown($("snd-play"), (e) => {
+    const b = block(); if (!b || b.kind !== "sound") return;
+    const sid = b.id.slice(4), k = Math.min(soundCap(), sound(sid).level + 1);
+    play(sid, LADDER_VOL(k)); feedback($("snd-play"));
+    startClock(); b.plays = (b.plays || 0) + 1; run.marks++; treatsToday().used++;
+    saveLive(); renderClock(); renderSoundBlock(b);
+  });
+  document.querySelectorAll("#p-sound [data-r]").forEach((x) => onDown(x, () => {
+    const b = block(); if (!b || b.kind !== "sound" || x.disabled) return;
+    const sid = b.id.slice(4), sd = sound(sid), r = x.dataset.r, name = SOUNDS.find((q) => q.id === sid).name;
+    if (b.rated) return;
+    b.rated = true; startClock();
+    sd.log.push({ day: today(), r }); sd.log = sd.log.slice(-30);
+    b.reps.push(r === "relaxed");
+    let msg;
+    if (r === "relaxed") {
+      // The four quietest steps move up after 2 relaxed sessions, the louder ones after 3.
+      const need = calmNeed(sd);
+      sd.calm++;
+      if (sd.calm >= need && sd.level < soundCap()) { sd.level++; sd.calm = 0; msg = `Relaxed ${need} sessions running: ${name} moves up to step ${Math.min(10, sd.level + 1)} next time.`; }
+      else msg = sd.level >= soundCap() ? `Relaxed at the top step${sd.level < 10 ? " for a puppy" : ""}.` : `Relaxed. ${need - sd.calm} more relaxed session${need - sd.calm === 1 ? "" : "s"} at this step, then it moves up.`;
+    } else if (r === "noticed") msg = "Noticed but recovered: the same step next time.";
+    else { sd.level = Math.max(0, sd.level - 2); sd.calm = 0; msg = `Startled: stop for today. Next time starts 2 steps quieter (step ${sd.level + 1}), after a day off. Never push a scared dog closer to a sound.`; }
+    saveSt(); saveLive();
+    endBlockCoach(msg);
+  }));
+
+  let brkTimer = 0;
+  function startBreak(b) {
+    $("stepcard").hidden = true; $("reps").style.visibility = "hidden";
+    $("run-step-n").textContent = `${run.i + 1} of ${run.blocks.length} · Break`;
+    $("brk-text").textContent = (st.hot === today() ? "Hot day: shade and water, and let them lie on cool ground. " : "Water and shade. Let your dog lie down and cool off. ") + "Quick paw check.";
+    const end = Date.now() + b.secs * 1000;
+    clearInterval(brkTimer);
+    const tickBrk = () => {
+      const left = Math.max(0, Math.round((end - Date.now()) / 1000));
+      $("brk-clock").textContent = fmt(left);
+      if (!left) { clearInterval(brkTimer); if (block() === b) { play("free"); nextBlock(); } }
+    };
+    tickBrk(); brkTimer = setInterval(tickBrk, 500);
+  }
+  $("brk-skip").addEventListener("click", () => { clearInterval(brkTimer); nextBlock(); });
+
+  // Whistle bar: the three standard field whistles, logged on the video timeline.
+  document.querySelectorAll("#whistlebar [data-w]").forEach((x) => onDown(x, (e) => {
+    play(x.dataset.w); feedback(x);
+    if (rec.recorder && rec.recorder.state === "recording") rec.marks.push({ t: ((e.timeStamp > 0 ? e.timeStamp : performance.now()) - rec.startAt) / 1000, kind: "whistle" });
+  }));
+
+  // Distance: tap to set the start spot; the phone's GPS shows yards from it. Tap again to reset.
+  const gps = { watch: null, origin: null, yd: null };
+  function stopGps() { if (gps.watch != null) navigator.geolocation.clearWatch(gps.watch); gps.watch = null; gps.origin = null; gps.yd = null; $("gps").textContent = "Distance"; }
+  $("gps").addEventListener("click", () => {
+    if (gps.watch != null) { gps.origin = null; gps.yd = null; $("gps").textContent = "Finding you…"; return; }
+    $("gps").textContent = "Finding you…";
+    gps.watch = navigator.geolocation.watchPosition((pos) => {
+      const c = pos.coords;
+      if (!gps.origin) gps.origin = c;
+      const R = 6371000, toR = (d) => (d * Math.PI) / 180;
+      const dLat = toR(c.latitude - gps.origin.latitude), dLon = toR(c.longitude - gps.origin.longitude);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toR(gps.origin.latitude)) * Math.cos(toR(c.latitude)) * Math.sin(dLon / 2) ** 2;
+      gps.yd = Math.round(2 * R * Math.asin(Math.sqrt(a)) * 1.0936);
+      $("gps").textContent = `${gps.yd} yd · ±${Math.round(c.accuracy * 1.0936)}`;
+    }, () => { stopGps(); toast("Location is off. Allow it for this app in your phone's settings to measure distance.", 4000); },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+  });
+
   function nextBlock() {
-    cancelHold();
+    cancelHold(); clearInterval(brkTimer);
     const b = block();
     if (b && b.reps.length) { prog(b.id).last = today(); saveSt(); }
     if (run.i < run.blocks.length - 1) { run.i++; enterBlock(); return; }
@@ -2004,9 +2626,7 @@ const BREEDS = [
     feedback(node);
     if (rec.recorder && rec.recorder.state === "recording") rec.marks.push({ t: ((e && e.timeStamp > 0 ? e.timeStamp : performance.now()) - rec.startAt) / 1000, kind: name });
     // One step of undo: a mis-tap is the most common error outdoors.
-    undoSnap = { st: JSON.stringify(st), run: JSON.stringify({ ...run }), rec: rec.marks.length };
-    $("undo").hidden = false;
-    if (!run.start) { run.start = Date.now(); ticker = setInterval(renderClock, 500); lockScreen(); $("pad-sub").textContent = "Tap, then treat."; }
+    snapshot(); startClock();
     run.counts[name] = (run.counts[name] || 0) + 1;
     if (name === "miss") { cancelHold(); logRep(false); }
     else if (name === "yes" || name === "catch") { cancelHold(); run.marks++; treatsToday().used++; logRep(true); }
@@ -2062,7 +2682,7 @@ const BREEDS = [
   }
   function closeRun() {
     if (!run) return;
-    cancelHold(); coachOff();
+    cancelHold(); coachOff(); clearInterval(brkTimer); stopGps();
     const recorded = !!rec.recorder || rec.fresh;
     if (rec.recorder) stopRecording(true);
     rec.fresh = false;
@@ -2098,6 +2718,7 @@ const BREEDS = [
       row.append(ring(b.id), name, el("span", "", `${hits} of ${b.reps.length} right. ${nextText(b.id)}`));
       box.append(row);
     }
+    $("sum-field").hidden = !worked.some((b) => FIELD_TRACKS.includes(getSkill(b.id).track));
     document.querySelectorAll("#sum-rate-dog .choice").forEach((c) => c.setAttribute("aria-pressed", "false"));
     $("summary").hidden = false; $("summary").scrollTop = 0;
   }
@@ -2122,8 +2743,6 @@ const BREEDS = [
     }
   }
 
-  // Marks fire on touch-down, not on release: release adds 100+ ms.
-  const onDown = (node, fn) => node.addEventListener("pointerdown", (e) => { if (e.button > 0) return; e.preventDefault(); fn(e); });
   onDown($("pad"), (e) => mark("yes", e, $("pad")));
   document.querySelectorAll(".mk").forEach((b) => onDown(b, (e) => mark(b.dataset.sound, e, b)));
 

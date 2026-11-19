@@ -8,6 +8,12 @@
 //   proof   the proofing grid after Fluent: dur [[value, label]...], dist [labels], dis [labels].
 //           Index 0 is the Fluent baseline. Labels finish the sentence "...with/at <label>".
 //   places  where it can be practiced (default: everywhere)
+//   needs also takes "a|b" (either one) and "sound:gun:7" (that sound ladder at step 7, no startle in the last 3 sessions)
+//   rep     "outcome" for field reps judged after the fact (you can't tap Yes from 80 yards): rounds of 3, pass at 2.
+//           outcomes: the three button labels, best first. startle: the third outcome means fear, so drop 2 steps and stop.
+//   youngCap  the last step allowed until growth plates close (long retrieves on hard ground)
+//   gear    what to bring, listed on the plan card
+//   whistle shows the whistle bar on the training screen
 //   proofMark  what earns a Yes once the skill is past its ladder (proofing, reviews)
 //   steps   the ladder; hold: [min, max] seconds adds the hold timer; keep: true shows Keep going
 
@@ -15,7 +21,23 @@ const TRACKS = [
   { id: "foundations", name: "Foundations", blurb: "The core every dog needs." },
   { id: "puppy", name: "Puppy", blurb: "First weeks home: confidence, crate, gentle mouth." },
   { id: "life", name: "Life skills", blurb: "Vet, grooming, car, guests and going out." },
+  { id: "field", name: "Field basics", blurb: "Whistles, the retrieve, birds and gunfire. Shared by every bird track.", goals: ["waterfowl", "upland"] },
+  { id: "waterfowl", name: "Waterfowl", blurb: "Ducks and geese: steadiness, marks, water, blinds.", goals: ["waterfowl"] },
+  { id: "upland", name: "Upland pointing", blurb: "Quail, pheasant, chukar: point, whoa, steady to wing and shot.", goals: ["upland"] },
 ];
+
+// The sound ladder: each sound at 10 volume steps, always paired with food.
+// Up a step after 2 relaxed sessions (steps 1-4) or 3 (steps 5-10); down 2 on any startle. Puppies under 16 weeks stop at step 5.
+const SOUNDS = [
+  { id: "doorbell", name: "Doorbell" }, { id: "traffic", name: "Traffic" }, { id: "thunder", name: "Thunder" },
+  { id: "fireworks", name: "Fireworks" }, { id: "duck", name: "Duck call" }, { id: "gun", name: "Gunshot" },
+];
+
+// Season readiness: the milestone skills each opening day needs, at Fluent or better.
+const SEASONS = {
+  waterfowl: { name: "Waterfowl opener", milestones: ["retrieve", "gun", "steady", "marks", "waterentry", "waterdelivery", "doubles", "blindmanners"] },
+  upland: { name: "Upland opener", milestones: ["birdintro", "whoa", "pointdur", "steadywing", "steadyshot", "range"] },
+};
 
 const PLACES = [
   { id: "home", name: "Home" }, { id: "yard", name: "Yard" }, { id: "street", name: "Street" },
@@ -278,6 +300,191 @@ const SKILLS = [
       { t: "10 m", mark: "they walk calmly at 10 m.", setup: "Close the gap slowly.", reward: "Treat at your seam." },
       { t: "5 m", mark: "they walk calmly at 5 m.", setup: "Keep leashes loose.", reward: "Treat at your seam." },
       { t: "Brief sniff", mark: "they sniff for 3 seconds and come away on \"Let's go\".", setup: "Count three, cue, walk off.", reward: "Treat as they follow you." },
+    ]},
+
+  // ---------- Field basics: shared by Waterfowl and Upland ----------
+  { id: "whistle", track: "field", name: "Whistle signals", goal: "Sit, come and turn on the whistle, so you can steer a dog 100 yards out.", cue: "One blast = sit · a trill = come · two pips = turn", proofMark: "they answer the whistle the moment it sounds.", needs: ["sit", "come@1"], whistle: true, gear: ["a whistle (or the app's)"],
+    proof: {"dist":["5 m","20 m","40 m","75 m","100 m"],"dis":["no distraction","a thrown bumper","another dog","birds around"]},
+    steps: [
+      { t: "Sit blast at your side", mark: "they sit as the single blast ends.", setup: "Dog beside you. One blast (tap Sit on the whistle bar), then your usual sit cue. Soon the blast alone means sit.", reward: "Treat while they sit." },
+      { t: "Sit blast alone", mark: "they sit on the blast with no other cue.", setup: "Blast only. If no sit in 2 seconds, help with your hand signal.", reward: "Treat while they sit." },
+      { t: "Recall trill", mark: "they turn and run in on the trill.", setup: "Start at 5 m in the house or yard. Trill once, back up a step.", reward: "Treat at your knees, then a second one." },
+      { t: "Turn pips", mark: "they turn toward you on two pips while trotting ahead.", setup: "On a walk when they're 5 to 10 m ahead. Change direction as you pip.", reward: "Treat as they reach you, then send them on." },
+      { t: "Sit at 20 m", mark: "they sit on the blast 20 m away.", setup: "Long line on. One blast; never repeat it.", reward: "Walk out and treat while they sit, or toss it to them." },
+    ]},
+  { id: "retrieve", track: "field", name: "Retrieve", goal: "Chase, pick up, carry back and deliver to hand. Taught with rewards; no force fetch.", cue: "Their name sends them; \"Give\" for the delivery", proofMark: "they bring it straight back and deliver to hand.", needs: ["hallret|drop"], gear: ["bumpers"],
+    steps: [
+      { t: "Chase and pick up", mark: "they pick up a bumper tossed 3 m away.", setup: "A soft canvas or plastic bumper. A short, exciting toss down a hallway or narrow yard.", reward: "Cheer. The next steps pay with food." },
+      { t: "Come back", mark: "they turn back toward you carrying it.", setup: "Turn and jog away a few steps to draw them in.", reward: "Praise as they come." },
+      { t: "Hold 2 seconds", mark: "they hold the bumper calmly in front of you until the timer marks it.", setup: "Hand under their chin, no pulling. Start the hold.", reward: "Trade for a treat.", hold: [1, 3] },
+      { t: "Hold while you walk", mark: "they carry it beside you for 10 steps.", setup: "Walk slowly with your hand near the bumper.", reward: "Trade for a treat." },
+      { t: "Deliver to hand", mark: "they put the bumper in your hand.", setup: "Stand still, hand open at chest height. Say \"Give\".", reward: "Trade for a treat, then throw again right away." },
+      { t: "Sent on their name", mark: "they wait for their name, then go.", setup: "Hold the collar lightly, toss, count two, say their name.", reward: "The retrieve is the reward; treat on delivery." },
+    ]},
+  { id: "birds", track: "field", name: "Bumper and bird intro", goal: "Happy to carry bumpers, wings and birds.", cue: "Their name", proofMark: "they carry it back gently and deliver to hand.", needs: ["retrieve@2"], gear: ["bumpers", "a duck or pigeon wing"],
+    steps: [
+      { t: "Soft bumper", mark: "they pick up and carry a soft bumper.", setup: "Short, fun tosses.", reward: "Treat on delivery." },
+      { t: "Hard bumper", mark: "they carry a plastic or canvas bumper back.", setup: "Same short tosses.", reward: "Treat on delivery." },
+      { t: "Wing on a bumper", mark: "they retrieve a bumper with a wing taped on.", setup: "A fresh or frozen wing, taped on with electrical tape.", reward: "Treat on delivery." },
+      { t: "Thawed bird", mark: "they pick up and carry a thawed duck or pigeon.", setup: "Short, easy tosses. A cold bird is less tempting to chew.", reward: "Treat on delivery." },
+      { t: "Fresh bird, with a mentor", mark: "they retrieve a freshly shot bird calmly.", setup: "With an experienced trainer or hunting mentor, following your state's rules on birds.", reward: "Big praise and a treat on delivery." },
+    ]},
+  { id: "gun", track: "field", name: "Gun conditioning", goal: "Gunfire means the fun is happening. Always far away first, and never at a nervous dog.", cue: "None", needs: ["retrieve@4", "sound:gun:7"], rep: "outcome", outcomes: ["Happy", "Noticed it", "Worried"], startle: true, places: ["yard", "park", "field"], gear: ["a helper with a blank pistol"],
+    steps: [
+      { t: "Blank at 100 yd", mark: "they keep chasing the bumper happily as the shot goes off 100 yards away.", setup: "A helper 100 yd off with a blank pistol. They fire the moment your dog is chasing a thrown bumper.", reward: "The retrieve, plus a treat on delivery." },
+      { t: "Blank at 50 yd", mark: "they stay happy with the shot 50 yards away.", setup: "Same setup. Only move closer after happy sessions.", reward: "The retrieve, plus a treat." },
+      { t: "Blank at 30 yd", mark: "they stay happy with the shot 30 yards away.", setup: "Same setup.", reward: "The retrieve, plus a treat." },
+      { t: "Blank at 20 yd", mark: "they stay happy with the shot 20 yards away.", setup: "Same setup.", reward: "The retrieve, plus a treat." },
+      { t: "Shotgun at 75 yd", mark: "they stay happy with a shotgun fired 75 yards away during a retrieve.", setup: "A safe range, ear protection for people, the helper far off.", reward: "The retrieve, plus a treat." },
+      { t: "Your shot", mark: "they stay happy when you fire beside them.", setup: "Only after several happy sessions at every step. Gun pointed well away.", reward: "A bird or bumper to retrieve." },
+    ]},
+
+  // ---------- Waterfowl ----------
+  { id: "steady", track: "waterfowl", name: "Steadiness", goal: "Sit still while things fall and fly, until sent by name.", cue: "Sit, then their name to send", proofMark: "they stay sitting until you say their name.", needs: ["stay:proofed", "retrieve"], gear: ["bumpers"],
+    steps: [
+      { t: "Dropped bumper", mark: "they stay sitting while you drop a bumper at your feet.", setup: "Leash on, your foot on the leash. Drop it, wait 2 seconds, mark.", reward: "Treat to them while they sit. Then pick it up yourself, or send them." },
+      { t: "Tossed bumper", mark: "they stay sitting as you toss a bumper 3 m.", setup: "Send them only every other time; you pick up the rest. Staying has to pay too.", reward: "Treat while they sit." },
+      { t: "Thrown 20 yd", mark: "they stay sitting through a 20-yard throw.", setup: "Same: send only some of the time.", reward: "Treat, or the retrieve." },
+      { t: "Throw and shot", mark: "they stay sitting through a throw with a shot.", setup: "A helper fires a blank as you throw. Only after Gun conditioning step 3.", reward: "The retrieve." },
+      { t: "Two throws", mark: "they stay sitting through two throws.", setup: "Throws wide apart.", reward: "The retrieve." },
+      { t: "Honoring", mark: "they stay sitting while another dog retrieves.", setup: "A calm partner dog 3 m to the side.", reward: "Treat while they sit, then their own turn." },
+    ]},
+  { id: "marks", track: "waterfowl", name: "Single marks", goal: "Watch a bird fall and go straight to it.", cue: "Their name", proofMark: "a clean pickup and straight return.", needs: ["retrieve", "steady@2"], rep: "outcome", youngCap: 2, places: ["yard", "park", "field"], gear: ["bumpers", "a helper to throw"],
+    steps: [
+      { t: "10 yd, short grass", mark: "a clean pickup and return on a 10-yard mark.", setup: "A helper throws with a shout or duck call so the dog looks. Send on their name after it lands.", reward: "Treat on delivery." },
+      { t: "25 yd", mark: "a clean retrieve on a 25-yard mark.", setup: "Short grass, wind at your back.", reward: "Treat on delivery." },
+      { t: "50 yd", mark: "a clean retrieve on a 50-yard mark.", setup: "White bumpers show up best.", reward: "Treat on delivery." },
+      { t: "75 yd", mark: "a clean retrieve on a 75-yard mark.", setup: "Use the distance tracker to check it.", reward: "Treat on delivery." },
+      { t: "100 yd", mark: "a clean retrieve on a 100-yard mark.", setup: "A helper with a duck call or launcher.", reward: "Treat on delivery." },
+      { t: "In cover", mark: "a clean retrieve from tall grass or cattails at 50 yards.", setup: "Shorter again in new cover.", reward: "Treat on delivery." },
+      { t: "Ditch and wind", mark: "a clean retrieve across a ditch or into the wind.", setup: "The dog should cross, not run around.", reward: "Treat on delivery." },
+    ]},
+  { id: "waterentry", track: "waterfowl", name: "Water entry", goal: "Into the water with confidence, straight to the bird.", cue: "Their name", proofMark: "a straight, confident entry and swim to the bumper.", needs: ["retrieve"], rep: "outcome", places: ["water"], gear: ["bumpers", "a dog-safe pond or lake"],
+    steps: [
+      { t: "Wade and play", mark: "they wade in on their own to chest depth.", setup: "Warm water and a gentle bank. Wade in yourself. In cold water keep it short and dry them off after.", reward: "Treats and play in the shallows." },
+      { t: "Swim 2 m", mark: "they swim a few strokes to a bumper.", setup: "Toss it just past their depth.", reward: "Treat on delivery." },
+      { t: "Water mark 10 yd", mark: "a clean 10-yard water retrieve.", setup: "Throw parallel to the shore at first.", reward: "Treat on delivery." },
+      { t: "25 yd", mark: "a clean 25-yard water retrieve.", setup: "Straight out from the shore.", reward: "Treat on delivery." },
+      { t: "50 yd", mark: "a clean 50-yard water retrieve.", setup: "Calm water, no wind.", reward: "Treat on delivery." },
+      { t: "Angled entry", mark: "they go straight in at an angle instead of running the bank.", setup: "Throw at a 45 degree angle to the shore.", reward: "Treat on delivery." },
+      { t: "Among decoys", mark: "they swim past decoys to the bumper and leave the decoys alone.", setup: "Three decoys first, wide apart.", reward: "Treat on delivery." },
+    ]},
+  { id: "waterdelivery", track: "waterfowl", name: "Water delivery", goal: "Out of the water and straight to hand before shaking.", cue: "\"Give\"", proofMark: "they come straight out and deliver before shaking.", needs: ["waterentry@2", "retrieve"], rep: "outcome", places: ["water"], gear: ["bumpers"],
+    steps: [
+      { t: "Out with it", mark: "they carry the bumper out of the water without dropping it.", setup: "Stand at the water's edge.", reward: "Treat on delivery." },
+      { t: "Straight to you", mark: "they come straight to you instead of shaking first.", setup: "Back up 2 m from the edge.", reward: "Treat on delivery." },
+      { t: "Deliver, then shake", mark: "they deliver to hand from 5 m back, then shake.", setup: "Back up 5 m. Take the bumper before the shake.", reward: "Treat, then \"shake\" is allowed." },
+    ]},
+  { id: "doubles", track: "waterfowl", name: "Doubles", goal: "Remember two falls and pick up both.", cue: "Their name, then a hand line to the memory bird", proofMark: "both birds picked up cleanly, last first.", needs: ["marks@2", "steady"], rep: "outcome", youngCap: 2, places: ["yard", "park", "field", "water"], gear: ["bumpers", "a helper"],
+    steps: [
+      { t: "Wide apart", mark: "they pick up the last throw, then go back for the first.", setup: "Two throws 90 degrees apart at 25 yd. After the first delivery, line them up on the memory bird.", reward: "Treat on each delivery." },
+      { t: "Memory bird", mark: "they remember the first bird after delivering the second.", setup: "Same, with a pause before the second send.", reward: "Treat on each delivery." },
+      { t: "Tighter angles", mark: "they pick up both with the throws 45 degrees apart.", setup: "Keep the distance at 25 yd.", reward: "Treat on each delivery." },
+      { t: "Land and water", mark: "they pick up one bird on land and one in water.", setup: "Water bird last thrown.", reward: "Treat on each delivery." },
+      { t: "50 yd", mark: "they pick up both at 50 yards.", setup: "Wide angles again at the new distance.", reward: "Treat on each delivery." },
+    ]},
+  { id: "lining", track: "waterfowl", name: "Lining", goal: "Run straight where you point, toward a bird they didn't see fall.", cue: "\"Back\"", proofMark: "a straight line to the bumper.", needs: ["marks@2"], rep: "outcome", places: ["yard", "park", "field"], gear: ["white bumpers"],
+    steps: [
+      { t: "Pile at 10 yd", mark: "they run straight to a visible pile of bumpers on \"Back\".", setup: "Dog at your left, your hand flat beside their head pointing at the pile.", reward: "Treat on delivery." },
+      { t: "Pile at 25 yd", mark: "they run straight to the pile at 25 yards.", setup: "Same.", reward: "Treat on delivery." },
+      { t: "Pile at 50 yd", mark: "they run straight to the pile at 50 yards.", setup: "Same.", reward: "Treat on delivery." },
+      { t: "Single bumper at 50 yd", mark: "they run straight to a single bumper they watched you place.", setup: "Walk out with them, place it, walk back.", reward: "Treat on delivery." },
+      { t: "Cold blind at 75 yd", mark: "they run straight to a bumper they didn't see placed.", setup: "Plant it before the session.", reward: "Treat on delivery." },
+    ]},
+  { id: "casts", track: "waterfowl", name: "Handling casts", goal: "Stop on the whistle and go where your arm sends them.", cue: "One blast = stop; arm signals \"Over\" and \"Back\"", proofMark: "a stop on the whistle and the right cast.", needs: ["lining", "whistle"], rep: "outcome", whistle: true, places: ["yard", "park", "field"], gear: ["white bumpers", "a whistle"],
+    steps: [
+      { t: "Stop at 10 yd", mark: "they stop and sit facing you on the whistle, 10 yards out.", setup: "Send to a pile; blast halfway.", reward: "Walk out and treat, then send them on." },
+      { t: "Over", mark: "they go left or right to the bumper you point to.", setup: "Dog sitting on a mound, bumpers to each side.", reward: "Treat on delivery." },
+      { t: "Back", mark: "they turn and go straight back on \"Back\".", setup: "Bumpers behind them.", reward: "Treat on delivery." },
+      { t: "Diamond at 30 yd", mark: "they take a correct cast 30 yards out.", setup: "The baseball-diamond drill: piles at first, second and third base.", reward: "Treat on delivery." },
+      { t: "At 50 yd", mark: "they stop and take a correct cast 50 yards out.", setup: "Same drill, bigger diamond.", reward: "Treat on delivery." },
+    ]},
+  { id: "blinds", track: "waterfowl", name: "Blind retrieves", goal: "Find a bird they never saw fall, guided by you.", cue: "\"Back\", the whistle and casts", proofMark: "the bird found with a clean line or a handle or two.", needs: ["lining", "casts"], rep: "outcome", youngCap: 1, places: ["park", "field", "water"], gear: ["bumpers or birds"],
+    steps: [
+      { t: "Cold blind 25 yd", mark: "a clean pickup on a 25-yard blind.", setup: "Plant the bumper before you bring the dog out.", reward: "Treat on delivery." },
+      { t: "50 yd", mark: "a clean 50-yard blind.", setup: "Clear terrain.", reward: "Treat on delivery." },
+      { t: "100 yd", mark: "a 100-yard blind with a straight line or one handle.", setup: "Use the distance tracker.", reward: "Treat on delivery." },
+      { t: "With a handle", mark: "they take one stop and cast and find it.", setup: "Plant it slightly off a natural line.", reward: "Treat on delivery." },
+      { t: "Across water", mark: "a blind across a pond or channel.", setup: "Short water first.", reward: "Treat on delivery." },
+    ]},
+  { id: "huntdead", track: "waterfowl", name: "Hunt dead", goal: "Search an area for a crippled bird and bring it back.", cue: "\"Dead bird\"", proofMark: "they search the area and bring back the hidden bird.", needs: ["retrieve"], rep: "outcome", places: ["yard", "park", "field"], gear: ["bumpers or a bird"],
+    steps: [
+      { t: "Short cover", mark: "they search on \"Dead bird\" and find a hidden bumper in short grass.", setup: "Hide it 5 m away; let them watch you walk out.", reward: "Treat on delivery." },
+      { t: "Tall cover", mark: "they find it in tall grass or brush.", setup: "Hide it before you bring them.", reward: "Treat on delivery." },
+      { t: "After a wait", mark: "they find a hidden duck after a 2-minute wait.", setup: "The scent has time to spread; send them downwind.", reward: "Treat on delivery." },
+    ]},
+  { id: "blindmanners", track: "waterfowl", name: "Blind and boat manners", goal: "Still and quiet in a blind or boat while calls blow and guns move.", cue: "\"Place\"", proofMark: "they stay still and quiet on their spot.", needs: ["place:proofed"], places: ["yard", "field", "water"], gear: ["a dog stand or board", "decoys"],
+    steps: [
+      { t: "Dog stand", mark: "they hold place on a dog stand or in a boat on land until the timer marks it.", setup: "The stand on flat ground first.", reward: "Treat on the stand.", hold: [10, 60] },
+      { t: "Through duck calls", mark: "they stay put while a duck call blows.", setup: "Blow a call, or play the Duck call from the sound ladder.", reward: "Treat on the stand.", keep: true },
+      { t: "Through motion", mark: "they stay put while you stand, sit and shoulder an empty gun.", setup: "Slow movements first.", reward: "Treat on the stand.", keep: true },
+      { t: "In a blind", mark: "they stay quiet and still in a blind for 10 minutes.", setup: "A practice blind or a layout spot.", reward: "Calm treats now and then.", keep: true },
+      { t: "Decoys ignored", mark: "they walk past decoys without picking them up.", setup: "On leash, then off.", reward: "Treat as they pass." },
+    ]},
+
+  // ---------- Upland pointing ----------
+  { id: "birdintro", track: "upland", name: "Bird intro and sight point", goal: "Love birds, and freeze at the sight of one.", cue: "None", proofMark: "they freeze and hold on the bird.", needs: ["charge"], places: ["home", "yard", "park", "field"], gear: ["a flirt pole", "a wing"],
+    steps: [
+      { t: "Chase the wing", mark: "they chase a wing on a flirt pole.", setup: "A wing tied to a flirt pole line. Drag it in circles; let them chase, not catch.", reward: "Let them catch it now and then: the catch is the reward." },
+      { t: "Freeze when it stops", mark: "they freeze, staring, when the wing stops.", setup: "Stop the wing dead in the grass and wait.", reward: "Flick the wing away so they can chase again." },
+      { t: "Hold 3 seconds", mark: "they hold the freeze until the timer marks it.", setup: "Stop the wing, start the hold.", reward: "Release them to chase the wing.", hold: [3, 4] },
+      { t: "Hold 10 seconds", mark: "they hold the freeze until the timer marks it.", setup: "Same.", reward: "Release them to chase the wing.", hold: [8, 12] },
+      { t: "Launcher pigeon, with a mentor", mark: "they point a pigeon in a launcher.", setup: "With an experienced trainer, check cord on. Release the bird only while they hold.", reward: "The flight is the reward." },
+      { t: "Call-back quail", mark: "they point a quail from a call-back pen.", setup: "With a mentor or at a preserve.", reward: "The flight is the reward." },
+    ]},
+  { id: "whoa", track: "upland", name: "Whoa", goal: "Stop and stand still on one word, taught with rewards on a board.", cue: "\"Whoa\" (stand still; not sit)", proofMark: "they stand still on \"Whoa\" until released.", needs: ["stay"], gear: ["a low board or table", "a check cord"],
+    proof: {"dur":[[3,"3 s"],[10,"10 s"],[30,"30 s"]],"dist":["you beside them","10 m","30 m"],"dis":["no distraction","a dropped bumper","a wing on the ground","a bird in a launcher"]},
+    steps: [
+      { t: "Stand on a board", mark: "they stand still on a raised board.", setup: "A low table or board. Lift them on, a hand under the belly at first.", reward: "Treat to the mouth while they stand." },
+      { t: "Whoa on the board", mark: "they stay standing on \"Whoa\" until the timer marks it.", setup: "Say \"Whoa\", start the hold. Tap Miss if they sit or step.", reward: "Treat while they stand, then release.", hold: [2, 5] },
+      { t: "Off the board", mark: "they stand still on \"Whoa\" on the ground.", setup: "Right beside the board at first.", reward: "Treat while they stand." },
+      { t: "While walking", mark: "they stop and stand when you say \"Whoa\" mid-walk.", setup: "Slow walk, leash loose.", reward: "Treat while they stand." },
+      { t: "At 10 m", mark: "they stop and stand on \"Whoa\" 10 m ahead of you.", setup: "Check cord on.", reward: "Walk up and treat while they stand." },
+      { t: "At 30 m", mark: "they stop and stand on \"Whoa\" 30 m ahead.", setup: "Check cord on.", reward: "Walk up and treat while they stand." },
+    ]},
+  { id: "pointdur", track: "upland", name: "Point duration", goal: "Hold point while you walk in to flush.", cue: "None, or \"Whoa\" as a reminder", proofMark: "they hold point until released.", needs: ["birdintro@2", "whoa@2"], places: ["yard", "park", "field"], gear: ["a wing or a bird in a launcher"],
+    steps: [
+      { t: "Hold 3 seconds", mark: "they hold point until the timer marks it.", setup: "Wing on a pole, or a planted bird with a mentor.", reward: "Release to the wing or the flush.", hold: [3, 4] },
+      { t: "Hold 10 seconds", mark: "they hold point until the timer marks it.", setup: "Same.", reward: "Release to the wing or the flush.", hold: [8, 12] },
+      { t: "Hold 30 seconds", mark: "they hold point until the timer marks it.", setup: "Same.", reward: "Release to the wing or the flush.", hold: [25, 35], keep: true },
+      { t: "You walk in front", mark: "they hold point while you walk past their nose.", setup: "Walk a wide arc first, then closer.", reward: "Release to the flush.", keep: true },
+      { t: "You kick the cover", mark: "they hold point while you kick the grass for the bird.", setup: "Kick around the bird for a few seconds.", reward: "Release to the flush.", keep: true },
+    ]},
+  { id: "steadywing", track: "upland", name: "Steady to wing", goal: "Stay on point while the bird flies.", cue: "\"Whoa\" if needed", proofMark: "they stay put as the bird flies.", needs: ["pointdur@2"], rep: "outcome", outcomes: ["Steady", "Crept", "Broke"], places: ["yard", "field"], gear: ["a bird launcher", "a check cord"],
+    steps: [
+      { t: "Launcher at 10 yd", mark: "they hold point while the launcher fires.", setup: "Check cord on. A helper fires the launcher on your nod.", reward: "Release to hunt on or to a retrieve." },
+      { t: "Bird flies off", mark: "they hold as a bird flies away.", setup: "Same, with a live bird and a mentor.", reward: "Release to hunt on." },
+      { t: "Two flushes", mark: "they stay steady through two flushes in a row.", setup: "Two launchers.", reward: "Release to hunt on." },
+    ]},
+  { id: "steadyshot", track: "upland", name: "Steady to shot", goal: "Stay on point through the flush and the shot.", cue: "\"Whoa\" if needed", proofMark: "they stay put through the flush and the shot.", needs: ["steadywing", "gun@2"], rep: "outcome", outcomes: ["Steady", "Crept", "Broke"], places: ["field"], gear: ["a launcher", "a blank pistol", "a helper"],
+    steps: [
+      { t: "Blank at 30 yd", mark: "they stay steady through the flush and a blank 30 yards away.", setup: "A helper fires as the bird lifts.", reward: "Release to hunt on." },
+      { t: "Blank at 10 yd", mark: "they stay steady with the blank 10 yards away.", setup: "Same.", reward: "Release to hunt on." },
+      { t: "Your shot", mark: "they stay steady when you shoot.", setup: "Safe direction, the dog well behind your line of fire.", reward: "Release to the retrieve or to hunt on." },
+    ]},
+  { id: "steadyfall", track: "upland", name: "Steady to fall", goal: "Hold until the bird is down and you send them.", cue: "Their name to send", proofMark: "they hold through the fall and go only on their name.", needs: ["steadyshot"], rep: "outcome", outcomes: ["Steady", "Crept", "Broke"], places: ["field"], gear: ["birds", "a helper"],
+    steps: [
+      { t: "Hold through the fall", mark: "they hold until the bird is down and you send them.", setup: "A helper shoots; you stay near the dog.", reward: "The retrieve." },
+      { t: "Released by name", mark: "they go only on their name, to retrieve or to hunt on.", setup: "Vary it: sometimes send, sometimes pick up the bird yourself.", reward: "The retrieve, or hunting on." },
+    ]},
+  { id: "backing", track: "upland", name: "Backing", goal: "Stop and honor another dog's point.", cue: "\"Whoa\" if needed", proofMark: "they stop on sight of the pointing dog.", needs: ["whoa"], rep: "outcome", outcomes: ["Backed", "Slowed", "Ran past"], places: ["yard", "park", "field"], gear: ["a cardboard pointing-dog cutout"],
+    steps: [
+      { t: "Cardboard dog", mark: "they stop on sight of a cardboard pointing dog 10 m away.", setup: "Stand the cutout in short grass; walk them up to it.", reward: "Treat while they stand." },
+      { t: "Statue in cover", mark: "they stop when they come on a dog decoy in cover.", setup: "Hide it so they find it suddenly.", reward: "Treat while they stand." },
+      { t: "Real dog at 20 m", mark: "they stop on a real pointing dog 20 m away.", setup: "A steady partner dog on a planted bird.", reward: "Treat while they stand." },
+      { t: "Real dog at 50 m", mark: "they stop on a real pointing dog 50 m away.", setup: "Same, bigger field.", reward: "Walk up and treat." },
+    ]},
+  { id: "covey", track: "upland", name: "Covey and singles", goal: "Handle a covey rise and work the scattered singles.", cue: "None", proofMark: "a covey pointed and singles worked slowly.", needs: ["steadywing"], rep: "outcome", outcomes: ["Clean", "Needed help", "Bumped birds"], places: ["field"], gear: ["quail (call-back pen or preserve)"],
+    steps: [
+      { t: "Point the covey", mark: "they point a covey find and hold.", setup: "A preserve or call-back pen, with a mentor.", reward: "Release after the rise." },
+      { t: "Through the covey rise", mark: "they stay steady as the covey flushes.", setup: "Check cord on.", reward: "Release to the singles." },
+      { t: "Hunt the singles", mark: "they work slowly and point scattered singles.", setup: "Head where the birds landed.", reward: "Release after each flush." },
+    ]},
+  { id: "range", track: "upland", name: "Range and handling", goal: "Hunt out front at gun range and turn on the whistle.", cue: "Two pips = turn; trill = come", proofMark: "they hunt in range and answer the whistle.", needs: ["come:reliable", "whistle"], rep: "outcome", whistle: true, places: ["park", "field"], gear: ["a whistle", "a long line or GPS collar"],
+    steps: [
+      { t: "Check in at 50 yd", mark: "they swing back to check in within 50 yards.", setup: "Open field. Walk with the wind in your face.", reward: "Treat when they check in, then send them on." },
+      { t: "Turn on the whistle", mark: "they turn on two pips from 50 yards or more.", setup: "Pip as you change direction.", reward: "Treat when they reach you, sometimes." },
+      { t: "Recall from 100 yd", mark: "they come in on the trill from 100 yards in cover.", setup: "Use the distance tracker to check the range.", reward: "Jackpot." },
     ]},
 ];
 

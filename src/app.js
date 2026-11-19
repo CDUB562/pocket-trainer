@@ -12,6 +12,8 @@
   const today = () => iso(new Date());
   const addDays = (day, n) => { const d = new Date(day + "T12:00:00"); d.setDate(d.getDate() + n); return iso(d); };
   const daysBetween = (a, b) => Math.round((Date.parse(b + "T12:00:00") - Date.parse(a + "T12:00:00")) / 864e5);
+  // Marks fire on touch-down, not on release: release adds 100+ ms.
+  const onDown = (node, fn) => node.addEventListener("pointerdown", (e) => { if (e.button > 0) return; e.preventDefault(); fn(e); });
   const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
   const settings = Object.assign({ volume: 0.8, haptic: true, flash: false, budget: 60, custom: null }, store.get("settings", {}));
@@ -27,7 +29,7 @@
   const freshState = () => ({
     progress: {}, plan: null, history: [], last: null, charged: false, seen: {}, place: "home",
     ratings: [], reviews: [], days: [], passport: {}, potty: { on: null, last: 0, offset: 0, log: [] },
-    treats: { day: "", used: 0 }, live: null,
+    treats: { day: "", used: 0 }, live: null, sound: {}, hot: "",
   });
   const newId = () => "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
@@ -89,13 +91,29 @@
     return "adult";
   }
   const dogName = () => (dog && dog.name ? dog.name : "your dog");
+  // Growth plates close later in bigger dogs (general guidance; the vet confirms). Until then: no long hard-ground retrieves.
+  const PLATES = { s: 43, m: 56, l: 70, g: 90 };
+  const platesClosed = () => { const w = ageWeeks(); return w == null || w >= PLATES[dog.size || "l"]; };
+  const platesMonths = () => Math.round(PLATES[dog.size || "l"] / 4.35);
+  const hasGoal = (g) => (dog.goals || []).includes(g);
+  const fieldGoal = () => hasGoal("waterfowl") || hasGoal("upland");
   const breedRow = (name) => BREEDS.find((b) => b[0].toLowerCase() === String(name || "").trim().toLowerCase());
 
   // ---------- Skills, levels and proofing ----------
   const FREE = { id: "free", name: "Free clicker", goal: "Just the marker pad, no plan.", steps: [], needs: [] };
   const CHARGE = { id: "charge", name: "Charge Yes", goal: "Yes means food.", steps: [], needs: [] };
+  const BREAK = { id: "break", name: "Break", goal: "Water and shade.", steps: [], needs: [] };
   const skillById = (id) => SKILLS.find((s) => s.id === id);
-  const getSkill = (id) => skillById(id) || (id === "charge" ? CHARGE : FREE);
+  const soundById = (id) => SOUNDS.find((x) => "snd:" + x.id === id);
+  const getSkill = (id) => skillById(id) || (id === "charge" ? CHARGE : id === "break" ? BREAK
+    : soundById(id) ? { id, name: "Sound ladder: " + soundById(id).name, goal: "Paired with food, step by step.", steps: [], needs: [] } : FREE);
+
+  // ---------- Sound ladder state: st.sound[id] = { level 0-10, calm, log: [{ day, r }] } ----------
+  const sound = (id) => (st.sound[id] ||= { level: 0, calm: 0, log: [] });
+  const recentStartle = (id) => sound(id).log.slice(-3).some((x) => x.r === "startled");
+  const soundCap = () => (stage() === "puppy" ? 5 : 10);
+  const calmNeed = (sd) => (sd.level < 4 ? 2 : 3);
+  const LADDER_VOL = (k) => 0.01 * Math.pow(100, (Math.max(1, k) - 1) / 9); // step 1 = 1%, step 10 = full volume
   const prog = (id) => (st.progress[id] ||= { step: 0, reps: [], done: false });
   const peek = (id) => st.progress[id];
   const started = (id) => { const p = peek(id); return !!p && (p.step > 0 || p.reps.length > 0 || !!p.last); };
@@ -116,14 +134,22 @@
     return p.reviews > 0 ? 4 : 3;
   }
   function needMet(n) {
+    if (n.includes("|")) return n.split("|").some(needMet);
+    if (n.startsWith("sound:")) { const [, sid, lv] = n.split(":"); return sound(sid).level >= +lv && !recentStartle(sid); }
     const [id, rest] = n.split(/[@:]/);
     if (id === "charge") return !!st.charged;
     if (n.includes("@")) return started(id) && (prog(id).step >= +rest || level(id) >= 1);
     const want = rest ? LEVELS.findIndex((l) => l.toLowerCase() === rest) : 1;
     return level(id) >= want;
   }
-  const isOpen = (id) => started(id) || (getSkill(id).needs || []).every(needMet);
+  // A startle relocks gun work even after it was started, until the gunshot ladder is calm again.
+  const isOpen = (id) => (started(id) && !(id === "gun" && recentStartle("gun"))) || (getSkill(id).needs || []).every(needMet);
   function needText(n) {
+    if (n.includes("|")) return n.split("|").map(needText).join(" or ");
+    if (n.startsWith("sound:")) {
+      const [, sid, lv] = n.split(":"), name = SOUNDS.find((x) => x.id === sid).name;
+      return sound(sid).level >= +lv ? `3 calm ${name.toLowerCase()} sessions since the last startle` : `the ${name.toLowerCase()} sound ladder to step ${lv}`;
+    }
     const [id, rest] = n.split(/[@:]/);
     if (id === "charge") return "Charge Yes";
     const name = getSkill(id).name;
@@ -148,6 +174,11 @@
 
   // One plain sentence on what moves the ring next.
   function nextText(id) {
+    if (soundById(id)) {
+      const sd = sound(id.slice(4));
+      if (sd.level >= soundCap()) return sd.level >= 10 ? "Top of the ladder. A short refresher now and then keeps it there." : `Step ${sd.level} is the puppy limit; the rest waits until 16 weeks.`;
+      return `Step ${sd.level + 1} of 10 next. Up a step after ${calmNeed(sd)} relaxed sessions${sd.calm ? ` (${sd.calm} so far)` : ""}.`;
+    }
     const s = getSkill(id), p = peek(id), lv = level(id);
     if (!isOpen(id)) return lockText(id) + ".";
     if (lv === 0) {
@@ -171,7 +202,7 @@
     svg.setAttribute("class", "ring"); svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", s ? `${LEVELS[lv]}${lv === 0 && started(id) ? ", step " + (prog(id).step + 1) : ""}` : "");
     // Five segments, one per level; inside Learning, the current segment fills by step.
-    const fill = lv + (lv === 0 && s && started(id) ? prog(id).step / s.steps.length : 0) + (lv === 4 ? 1 : 0);
+    const fill = soundById(id) ? sound(id.slice(4)).level / 2 : lv + (lv === 0 && s && started(id) ? prog(id).step / s.steps.length : 0) + (lv === 4 ? 1 : 0);
     for (let i = 0; i < 5; i++) {
       const arc = document.createElementNS(svg.namespaceURI, "circle");
       arc.setAttribute("cx", size / 2); arc.setAttribute("cy", size / 2); arc.setAttribute("r", r);
@@ -232,9 +263,12 @@
   const trainingDay = () => !dog.days || !dog.days.length || dog.days.includes(new Date().getDay());
 
   // ---------- Planner: one session for today, here ----------
-  const ROLE = { warm: "Warm-up", main: "Main", new: "New", finish: "Finish", review: "Review", only: "Skill" };
+  const ROLE = { warm: "Warm-up", main: "Main", new: "New", finish: "Finish", review: "Review", only: "Skill", sound: "Sounds", break: "Rest" };
   function placeOk(s) { return !s.places || s.places.includes(st.place); }
+  const trackGoals = (t) => (TRACKS.find((x) => x.id === t) || {}).goals;
   function wantsTrack(s) {
+    const g = trackGoals(s.track);
+    if (g) return g.some(hasGoal);
     if (s.track !== "puppy") return true;
     const w = ageWeeks();
     return (w != null && w < 30) || (dog.goals || []).includes("puppy");
@@ -243,7 +277,14 @@
     const id = s.id, p = peek(id), lv = level(id);
     const due = p && p.reviewDue && p.reviewDue <= today();
     let v = due ? 100 : lv === 0 ? (started(id) ? 80 : 40) : lv === 1 ? 60 : lv === 2 ? 50 + (p.places && p.places[st.place] ? 0 : 20) : 10;
-    v += 15 * ((dog.goals || ["foundations"]).includes(s.track) ? 1 : 0.3);
+    v += 15 * (trackGoals(s.track) || hasGoal(s.track) ? 1 : 0.3);
+    // Field skills come first when you're out in a field or at the water.
+    if (["field", "water"].includes(st.place) && s.places && !s.places.includes("home")) v += 30;
+    // Milestones for an opening day within 5 months get a push.
+    for (const [g, se] of Object.entries(SEASONS)) {
+      const d = (dog.seasons || {})[g];
+      if (d && hasGoal(g) && se.milestones.includes(id) && daysBetween(today(), d) >= 0 && daysBetween(today(), d) <= 150) v += 25;
+    }
     v += Math.min(25, 5 * SKILLS.filter((o) => (o.needs || []).some((n) => n.split(/[@:]/)[0] === id)).length);
     if (due) v += Math.min(50, 10 * daysBetween(p.reviewDue, today()));
     if (p && p.last === today()) v -= 60;
@@ -256,11 +297,43 @@
     if (lv === 1) return "proof";
     return "practice";
   }
+  // The day's sound-ladder block: gunfire for bird-dog goals, household sounds for puppies. Once a day; a day off after a startle.
+  function soundPick() {
+    const done = (id) => sound(id).log.some((x) => x.day === today());
+    const shaken = (id) => { const l = sound(id).log.at(-1); return l && l.r === "startled" && l.day === addDays(today(), -1); };
+    let id = null;
+    if (fieldGoal() && sound("gun").level < soundCap()) id = "gun";
+    else if ((ageWeeks() != null && ageWeeks() < 20) || hasGoal("puppy")) {
+      id = ["doorbell", "traffic", "thunder", "fireworks"].filter((x) => sound(x).level < soundCap()).sort((a, b) => sound(a).level - sound(b).level)[0] || null;
+    }
+    return id && !done(id) && !shaken(id) ? id : null;
+  }
+  const FIELD_TRACKS = ["field", "waterfowl", "upland"];
+  const isFieldDay = () => dog.fieldDay != null && dog.fieldDay === new Date().getDay();
+  // A field day out at the field or water: obedience warm-up, then up to 4 field blocks (2 when hot) with breaks between.
+  function fieldPlan(ranked, hot) {
+    const blocks = [], used = new Set();
+    const brk = () => blocks.push({ id: "break", kind: "break", role: "break", secs: hot ? 180 : 120 });
+    const warm = ranked.find(({ s }) => !FIELD_TRACKS.includes(s.track) && level(s.id) >= 1);
+    if (warm) { used.add(warm.s.id); blocks.push({ id: warm.s.id, kind: "practice", role: "warm" }); }
+    let fresh = 0;
+    for (const { s } of ranked) {
+      if (!FIELD_TRACKS.includes(s.track) || used.has(s.id)) continue;
+      const isNew = !started(s.id) && level(s.id) === 0;
+      if (isNew && fresh >= 1) continue;
+      if (blocks.some((b) => b.role !== "warm" && b.role !== "break")) brk();
+      used.add(s.id); fresh += isNew ? 1 : 0;
+      blocks.push({ id: s.id, kind: isNew ? "learn" : kindFor(s.id), role: isNew ? "new" : "main" });
+      if (blocks.filter((b) => b.role === "main" || b.role === "new").length >= (hot ? 2 : 4)) break;
+    }
+    return blocks;
+  }
   function buildPlan(opts = {}) {
     if (!st.charged) return { day: today(), place: st.place, blocks: [{ id: "charge", kind: "charge", role: "only" }] };
-    const short = opts.short || tired(), hard = hardWeek();
+    const short = opts.short || tired(), hard = hardWeek(), hot = st.hot === today();
     const avoid = new Set(opts.avoid || []);
-    const pool = SKILLS.filter((s) => isOpen(s.id) && placeOk(s) && wantsTrack(s));
+    // Gun work pauses after any startle until the gunshot ladder has 3 calm sessions again.
+    const pool = SKILLS.filter((s) => isOpen(s.id) && placeOk(s) && wantsTrack(s) && !(s.id === "gun" && recentStartle("gun")));
     const ranked = pool.map((s) => ({ s, v: score(s) - (avoid.has(s.id) ? 200 : 0) })).sort((a, b) => b.v - a.v);
     const blocks = [], used = new Set();
     // Warm-ups and finishes run at the dog's best level; only main blocks raise the bar.
@@ -269,6 +342,12 @@
     // A rest day keeps one light review; a dog with nothing under way yet just gets an optional normal session.
     const rest = !trainingDay() && working.length > 0, offDay = !trainingDay();
     const learning = working.filter(({ s }) => level(s.id) === 0).length;
+    if (!rest && !short && fieldGoal() && ["field", "water", "park"].includes(st.place) && (isFieldDay() || opts.field)) {
+      const fb = fieldPlan(ranked, hot);
+      if (fb.some((b) => b.role === "main" || b.role === "new")) return { day: today(), place: st.place, field: true, hot, hard, blocks: fb };
+    }
+    const snd = rest || short ? null : soundPick();
+    if (snd) blocks.push({ id: "snd:" + snd, kind: "sound", role: "sound" });
     // Warm-up: an easy skill the dog already knows, so the session opens with wins.
     // A skill due for review is never spent as a warm-up, and a short or rest-day session has none.
     const warm = rest || short ? null : working.filter(({ s }) => level(s.id) >= 1 && s.id !== "mat" && kindFor(s.id) !== "review")
@@ -288,7 +367,7 @@
       const any = ranked.find(({ s }) => !used.has(s.id));
       if (any) add(any.s.id, started(any.s.id) ? "main" : "new");
     }
-    return { day: today(), place: st.place, rest, offDay, hard, blocks };
+    return { day: today(), place: st.place, rest, offDay, hard, hot, blocks };
   }
   function plan(force, opts) {
     if (force || !st.plan || st.plan.day !== today() || st.plan.place !== st.place || (st.plan.blocks[0] || {}).id === "charge" && st.charged) {
@@ -298,6 +377,8 @@
   }
   function blockLine(b) {
     const s = getSkill(b.id);
+    if (b.kind === "sound") return `Step ${Math.min(10, sound(b.id.slice(4)).level + 1)} of 10 · 5 plays, a treat right after each`;
+    if (b.kind === "break") return `${Math.round(b.secs / 60)} minutes of water and shade`;
     if (b.kind === "charge") return "20 treats at random moments. Teaches that Yes means food.";
     if (b.kind === "learn") { const step = (peek(b.id) || { step: 0 }).step; return `Step ${step + 1} of ${s.steps.length}: ${s.steps[step].t}`; }
     if (b.kind === "proof") { const t = proofTarget(b.id); return t.raise ? describeLv(s, t.lv) : "At their best level"; }
@@ -341,6 +422,44 @@
       phase += 2 * Math.PI * f / sr;
       return Math.min(1, u / 0.01) * Math.min(1, (len - u) / 0.02) * Math.sin(phase);
     });
+    buildFieldSounds();
+  }
+
+  // Field whistles and the sound-ladder sounds, all synthesized here so they work offline.
+  function buildFieldSounds() {
+    const noise = () => Math.random() * 2 - 1;
+    // A pea whistle: about 2.9 kHz with the pea's fast warble.
+    const pea = (t, start, len) => {
+      const u = t - start; if (u < 0 || u > len) return 0;
+      return Math.min(1, u / 0.01) * Math.min(1, (len - u) / 0.015) * (0.65 + 0.35 * Math.sin(2 * Math.PI * 34 * u)) * Math.sin(2 * Math.PI * 2900 * u);
+    };
+    bufs.wsit = render(0.6, (t) => pea(t, 0, 0.55));
+    bufs.wcome = render(0.95, (t) => { let v = 0; for (let k = 0; k < 7; k++) v += pea(t, k * 0.13, 0.08); return v; });
+    bufs.wturn = render(0.42, (t) => pea(t, 0, 0.12) + pea(t, 0.24, 0.12));
+    bufs.doorbell = render(1.7, (t) => {
+      const ding = (f, s0) => { const u = t - s0; return u < 0 ? 0 : Math.exp(-u / 0.5) * (Math.sin(2 * Math.PI * f * u) + 0.3 * Math.sin(4 * Math.PI * f * u)); };
+      return ding(659, 0) + ding(523, 0.55);
+    });
+    // Brown noise (a running sum, kept from drifting) for traffic and thunder.
+    let brown = 0;
+    const rumble = () => { brown = (brown + 0.02 * noise()) * 0.997; return brown; };
+    bufs.traffic = render(4, (t) => rumble() * Math.exp(-(((t - 2) / 0.9) ** 2)) * 3);
+    bufs.thunder = render(4, (t) => {
+      const env = Math.min(1, t / 0.25) * Math.exp(-t / 1.3) * (1 + 0.5 * Math.sin(2 * Math.PI * 1.7 * t));
+      return rumble() * env * 4;
+    });
+    // Fireworks: three bangs, each with a crackle tail.
+    const bang = (t, s0) => { const u = t - s0; if (u < 0) return 0; return noise() * Math.exp(-u / 0.07) + 0.6 * Math.sin(2 * Math.PI * 55 * u) * Math.exp(-u / 0.12) + (u > 0.15 && Math.random() < 0.02 ? noise() * Math.exp(-(u - 0.15) / 0.5) : 0); };
+    bufs.fireworks = render(2.6, (t) => bang(t, 0) + 0.8 * bang(t, 0.8) + 0.9 * bang(t, 1.5));
+    // A duck call: three nasal quacks with a falling pitch.
+    const quack = (t, s0) => {
+      const u = t - s0; if (u < 0 || u > 0.2) return 0;
+      const f = 420 - 220 * u, ph = (f * u) % 1;
+      return Math.min(1, u / 0.01) * Math.min(1, (0.2 - u) / 0.04) * ((2 * ph - 1) * 0.7 + 0.3 * Math.sin(2 * Math.PI * 3 * f * u));
+    };
+    bufs.duck = render(1.1, (t) => quack(t, 0) + quack(t, 0.32) + quack(t, 0.62));
+    // A gunshot: a sharp noise crack, a low thump and a short echo.
+    bufs.gun = render(1.4, (t) => noise() * (Math.exp(-t / 0.035) + 0.18 * Math.exp(-t / 0.5)) + 0.9 * Math.sin(2 * Math.PI * 60 * t) * Math.exp(-t / 0.09));
   }
 
   function initAudio() {
@@ -356,12 +475,13 @@
     if (settings.custom) loadCustom(settings.custom).catch(() => {});
   }
 
-  function play(name) {
+  // vol: a sound-ladder step plays through its own quieter gain, on top of the master volume.
+  function play(name, vol) {
     if (!ctx) initAudio();
     if (ctx.state !== "running") ctx.resume().catch(() => {});
     const src = ctx.createBufferSource();
     src.buffer = (name === "yes" && customBuf) || bufs[name];
-    src.connect(gain);
+    if (vol != null) { const g = ctx.createGain(); g.gain.value = vol; src.connect(g); g.connect(gain); } else src.connect(gain);
     src.start();
   }
 
@@ -406,6 +526,7 @@
       ["dogswitch", "hardweek", "pup-passport", "pup-potty", "last"].forEach((i) => ($(i).hidden = true));
       $("profile-ask").hidden = false; $("profile-ask-title").textContent = "Set up your dog";
       $("places").replaceChildren(); $("plan").replaceChildren(); $("week").replaceChildren(); $("places-label").hidden = true;
+      $("conds").replaceChildren(); $("seasons").replaceChildren(); $("heatwarn").hidden = true;
       return;
     }
     $("today-title").textContent = dog.name ? `Today with ${dog.name}` : "Today";
@@ -431,7 +552,9 @@
     const hw = hardWeek();
     $("hardweek").hidden = !hw;
     $("hardweek").textContent = `${dog.name || "Your dog"} is having a hard week, which is normal (especially for teenagers). Easier plan until reviews pass again.`;
+    renderConds();
     renderPlan();
+    renderSeasons();
     renderPuppy();
     renderWeek();
     renderLast();
@@ -452,8 +575,8 @@
       d.append(again); box.append(d); return;
     }
     const card = el("div", "plancard");
-    const mins = p.blocks.reduce((a, b) => a + (b.kind === "charge" ? 2 : b.kind === "learn" ? 3 : 2), 0);
-    card.append(el("span", "eyebrow", p.rest ? `Rest day · optional review · about ${mins} min` : p.offDay ? `Not a planned day · optional · about ${mins} min` : `Next session · about ${mins} minutes`));
+    const mins = Math.round(p.blocks.reduce((a, b) => a + (b.kind === "break" ? b.secs / 60 : FIELD_TRACKS.includes(getSkill(b.id).track) ? 5 : b.kind === "learn" ? 3 : 2), 0));
+    card.append(el("span", "eyebrow", p.field ? `Field day · about ${mins} minutes with breaks` : p.rest ? `Rest day · optional review · about ${mins} min` : p.offDay ? `Not a planned day · optional · about ${mins} min` : `Next session · about ${mins} minutes`));
     const ol = el("ol");
     for (const b of p.blocks) {
       const li = el("li");
@@ -461,6 +584,9 @@
       ol.append(li);
     }
     card.append(ol);
+    const gear = [...new Set(p.blocks.flatMap((b) => getSkill(b.id).gear || []))];
+    if (p.field) gear.unshift("water and a bowl");
+    if (gear.length) card.append(el("small", "", "Bring: " + gear.join(", ") + "."));
     const go = el("button", "go", "Start"); go.type = "button";
     go.addEventListener("click", () => startPlan());
     card.append(go);
@@ -470,9 +596,66 @@
       sh.type = df.type = "button";
       sh.addEventListener("click", () => { plan(true, { short: true }); renderToday(); });
       df.addEventListener("click", () => { plan(true, { avoid: p.blocks.map((b) => b.id) }); renderToday(); });
-      links.append(sh, df); card.append(links);
+      links.append(sh, df);
+      // Out at the field or water on another day: offer the longer field session anyway.
+      if (!p.field && fieldGoal() && ["field", "water", "park"].includes(st.place)) {
+        const fd = el("button", "", "Field session"); fd.type = "button";
+        fd.addEventListener("click", () => { plan(true, { field: true }); renderToday(); });
+        links.append(fd);
+      }
+      card.append(links);
     }
     box.append(card);
+  }
+
+  // Heat: a hot-day switch for outdoor places. Flat-faced breeds get the warning whenever they're outside.
+  function renderConds() {
+    const box = $("conds"); box.replaceChildren();
+    const outdoor = st.place !== "home", hot = st.hot === today();
+    if (outdoor) {
+      const b = el("button", "pchip", "Hot day"); b.type = "button"; b.setAttribute("role", "switch"); b.setAttribute("aria-checked", hot);
+      b.addEventListener("click", () => { st.hot = hot ? "" : today(); st.plan = null; saveSt(); renderToday(); });
+      box.append(b);
+    }
+    const flat = !!dog.flat;
+    $("heatwarn").hidden = !(outdoor && (hot || flat));
+    $("heatwarn").textContent = hot
+      ? "Hot day: shorter field work, longer breaks in shade, water every break. Stop at heavy panting or a wide, flat tongue."
+      : `${dog.breed || "Flat-faced dogs"} overheat fast: keep outdoor blocks to 5 minutes with water and shade between.`;
+  }
+
+  // Season countdown: readiness = milestone skills at Fluent (part credit for steps along the way).
+  function seasonInfo(g) {
+    const se = SEASONS[g], date = (dog.seasons || {})[g];
+    const parts = se.milestones.map((id) => {
+      const s = getSkill(id), lv = level(id);
+      return { id, done: lv >= 1, v: lv >= 1 ? 1 : started(id) ? 0.6 * (prog(id).step / s.steps.length) : 0 };
+    });
+    const pct = Math.round((parts.reduce((a, x) => a + x.v, 0) / parts.length) * 100);
+    const left = parts.filter((x) => !x.done), days = daysBetween(today(), date);
+    // About two weeks of short sessions per milestone is a realistic pace.
+    return { se, date, pct, left, days, behind: left.length * 14 > days };
+  }
+  function renderSeasons() {
+    const box = $("seasons"); box.replaceChildren();
+    for (const g of Object.keys(SEASONS)) {
+      const date = (dog.seasons || {})[g];
+      if (!date || !hasGoal(g)) continue;
+      const i = seasonInfo(g);
+      if (i.days < -60) continue;
+      const card = el("div", "season");
+      const when = i.days > 0 ? `in ${i.days} day${i.days === 1 ? "" : "s"}` : i.days === 0 ? "today" : "under way";
+      const head = el("div", "row between"); head.append(el("b", "", `${i.se.name} ${when}`), el("span", "num muted", `${i.pct}% ready`));
+      const bar = el("i", "bar"); bar.style.setProperty("--p", i.pct + "%");
+      card.append(head, bar);
+      if (!i.left.length) card.append(el("p", "muted", `Every milestone is Fluent. Keep them sharp with short reviews before ${i.days > 0 ? "opening day" : "each hunt"}.`));
+      else {
+        const next = i.left.slice(0, 3).map((x) => getSkill(x.id).name + (isOpen(x.id) ? "" : " (locked)")).join(", ");
+        card.append(el("p", "muted", `Still to go: ${next}${i.left.length > 3 ? ` and ${i.left.length - 3} more` : ""}.`));
+        if (i.behind && i.days > 0) card.append(el("p", "behind", `Behind pace for ${i.left.length} milestones in ${i.days} days. Add a field day, and the plan already puts these first.`));
+      }
+      box.append(card);
+    }
   }
 
   function renderWeek() {
@@ -580,6 +763,12 @@
     for (const t of TRACKS) {
       const sec = el("div", "track");
       sec.append(el("h2", "", t.name), el("p", "muted", t.blurb));
+      // Sport tracks not in this dog's goals stay folded, one tap to add.
+      if (t.goals && !t.goals.some(hasGoal)) {
+        const add = el("button", "btn trackadd", `Add to ${dog.name || "your dog"}'s goals`); add.type = "button";
+        add.addEventListener("click", () => { dog.goals = [...new Set([...(dog.goals || []), t.goals[0]])]; saveDogs(); st.plan = null; saveSt(); renderSkills(); });
+        sec.append(add); box.append(sec); continue;
+      }
       for (const s of SKILLS.filter((x) => x.track === t.id)) sec.append(skillRow(s.id));
       box.append(sec);
     }
@@ -588,7 +777,15 @@
     fb.append(el("b", "", "Free clicker"), el("span", "", "Just the marker pad, no plan."));
     fb.style.gridTemplateColumns = "1fr";
     fb.addEventListener("click", () => startSingle("free"));
-    free.append(fb); box.append(free);
+    free.append(fb);
+    free.append(el("p", "muted", "Sound ladder: each sound at 10 volume steps, paired with food. Builds calm around noise, and is the way in to gunfire."));
+    for (const x of SOUNDS) {
+      const sd = sound(x.id), r = el("button", "skrow"); r.type = "button";
+      r.append(ring("snd:" + x.id), el("b", "", x.name), el("span", "", sd.level ? `Step ${sd.level} of 10${recentStartle(x.id) ? " · startled recently" : ""}` : "Not started"));
+      r.addEventListener("click", () => startSingle("snd:" + x.id));
+      free.append(r);
+    }
+    box.append(free);
     const charged = st.charged;
     $("go-charge").classList.toggle("todo", !charged);
     $("charge-tile-title").textContent = charged ? "Yes is charged" : "Charge Yes";
@@ -645,9 +842,9 @@
   const AGES = [["Under 4 months", 10], ["4 to 6 months", 21], ["6 to 18 months", 52], ["1.5 to 7 years", 200], ["8 years or older", 450]];
   const SIZES = [["s", "Small", "under 10 kg"], ["m", "Medium", "10-25 kg"], ["l", "Large", "25-45 kg"], ["g", "Giant", "over 45 kg"]];
   const GOALS = [["foundations", "Good manners"], ["puppy", "Puppy basics"], ["life", "Vet, grooming, car, guests"],
-    ["waterfowl", "Duck and goose hunting"], ["upland", "Upland birds and quail"], ["hog", "Hog bay dog"], ["tracking", "Blood tracking"],
+    ["waterfowl", "Duck and goose hunting"], ["upland", "Quail and upland birds (pointing dogs)"], ["hog", "Hog bay dog"], ["tracking", "Blood tracking"],
     ["shed", "Shed antlers"], ["nosework", "Nose work"], ["tricks", "Tricks"]];
-  const SOON = new Set(["waterfowl", "upland", "hog", "tracking", "shed", "nosework", "tricks"]);
+  const SOON = new Set(["hog", "tracking", "shed", "nosework", "tricks"]);
   const REWARDS = [["food", "Food"], ["toy", "Toys"], ["tug", "Tug"], ["ball", "Ball"], ["praise", "Praise"]];
   const QUIZ = [["retrieve", "Carries things around"], ["herd", "Chases things that move"], ["scent", "Tracks with the nose down"], ["point", "Freezes and stares at birds"]];
   const DAYS = [[1, "Mon"], [2, "Tue"], [3, "Wed"], [4, "Thu"], [5, "Fri"], [6, "Sat"], [0, "Sun"]];
@@ -692,13 +889,22 @@
       (w) => { draft.birth = addDays(today(), -w * 7); $("onb-birth").value = draft.birth; });
     choiceSet("onb-size", SIZES.map(([v, l, s]) => [v, l, s]), false, (v) => draft.size === v, (v) => (draft.size = v));
     choiceSet("onb-goals", GOALS.map(([v, l]) => [v, l + (SOON.has(v) ? " (coming soon)" : "")]), true, (v) => draft.goals.includes(v),
-      (v) => { draft.goals = draft.goals.includes(v) ? draft.goals.filter((g) => g !== v) : [...draft.goals, v]; });
+      (v) => { draft.goals = draft.goals.includes(v) ? draft.goals.filter((g) => g !== v) : [...draft.goals, v]; renderOnb(); });
     choiceSet("onb-reward", REWARDS, false, (v) => draft.reward === v, (v) => (draft.reward = v));
     choiceSet("onb-days", DAYS, true, (v) => draft.days.includes(v), (v) => { draft.days = draft.days.includes(v) ? draft.days.filter((x) => x !== v) : [...draft.days, v]; });
+    // Bird-dog goals add opening days and a weekly field day.
+    const fw = draft.goals.includes("waterfowl"), up = draft.goals.includes("upland");
+    $("onb-seasons").hidden = !(fw || up);
+    $("onb-season-waterfowl-row").hidden = !fw; $("onb-season-upland-row").hidden = !up;
+    $("onb-season-waterfowl").value = (draft.seasons || {}).waterfowl || "";
+    $("onb-season-upland").value = (draft.seasons || {}).upland || "";
+    $("onb-field").hidden = !(fw || up);
+    choiceSet("onb-fieldday", [["none", "None"], ...DAYS], false, (v) => (draft.fieldDay == null ? v === "none" : draft.fieldDay === v), (v) => (draft.fieldDay = v === "none" ? null : v));
     choiceSet("onb-quiz-q", QUIZ, true, (v) => draft.drive === v, (v) => { draft.drive = v; driveNote(); });
     driveNote();
   }
   $("onb-birth").addEventListener("change", (e) => { draft.birth = e.target.value || null; renderOnb(); });
+  for (const g of ["waterfowl", "upland"]) $("onb-season-" + g).addEventListener("change", (e) => { draft.seasons = { ...(draft.seasons || {}), [g]: e.target.value || undefined }; });
   $("onb-breed").addEventListener("change", (e) => {
     draft.breed = e.target.value.trim();
     const row = breedRow(draft.breed);
@@ -749,7 +955,9 @@
   // block: { id, kind: learn | proof | review | practice | free | charge, role, reps: [], target, lv, raise, before }
   let run = null, ticker = null, lock = null, hold = null, undoSnap = null;
   const block = () => (run ? run.blocks[run.i] : null);
-  const targetFor = (b) => (b.kind === "free" ? Infinity : b.kind === "learn" ? (stage() === "puppy" ? 5 : 10) : 5);
+  const targetFor = (b) => (b.kind === "free" || b.kind === "sound" ? Infinity
+    : getSkill(b.id).rep === "outcome" ? (b.kind === "learn" ? 6 : 3)
+    : b.kind === "learn" ? (stage() === "puppy" ? 5 : 10) : 5);
 
   function startPlan() {
     const p = plan();
@@ -758,7 +966,7 @@
   }
   function startSingle(id) {
     if (!st.charged && id !== "free") { toast("Charge Yes first: 2 minutes so Yes means food."); show("charge"); return; }
-    beginRun([{ id, kind: id === "free" ? "free" : kindFor(id), role: "only" }], false);
+    beginRun([{ id, kind: id === "free" ? "free" : id.startsWith("snd:") ? "sound" : kindFor(id), role: "only" }], false);
   }
   function beginRun(blocks, fromPlan) {
     run = { blocks, i: 0, fromPlan, start: 0, marks: 0, counts: { yes: 0, catch: 0, keep: 0, free: 0, miss: 0 } };
@@ -784,6 +992,19 @@
     $("stepcard").hidden = !guided;
     $("reps").style.visibility = guided ? "visible" : "hidden";
     $("block-skip").hidden = !(run.i < n - 1);
+    const mode = b.kind === "sound" ? "sound" : b.kind === "break" ? "break" : s.rep === "outcome" ? "outcome" : "marker";
+    setMode(mode);
+    $("run-mark").classList.toggle("oc", mode === "outcome");
+    $("run-mark").classList.toggle("snd", mode === "sound");
+    $("whistlebar").hidden = !(s.whistle || FIELD_TRACKS.includes(s.track));
+    $("gps").hidden = !(navigator.geolocation && (mode === "outcome" || s.whistle));
+    $("open-howto").hidden = false;
+    if (mode === "sound") { renderSoundBlock(b); return; }
+    if (mode === "break") { startBreak(b); return; }
+    if (mode === "outcome") {
+      const labels = s.outcomes || ["Clean", "Needed help", "No go"];
+      document.querySelectorAll(".obtn strong").forEach((x, i) => (x.textContent = labels[i]));
+    }
     if (!guided) { $("run-step-n").textContent = s.goal; setMarkers(true); $("hold").hidden = true; return; }
     const p = prog(b.id), learn = b.kind === "learn";
     const step = learn ? s.steps[p.step] : s.steps.find((x) => x.hold) || s.steps[s.steps.length - 1];
@@ -817,10 +1038,18 @@
     return step.hold;
   }
   function setMarkers(withKeep) { $("mk-keep").hidden = !withKeep; }
+  // marker: the YES pad and markers · outcome: Clean / Needed help / No go · sound: the ladder · break: a countdown
+  function setMode(mode) {
+    $("p-outcome").hidden = mode !== "outcome";
+    $("p-sound").hidden = mode !== "sound";
+    $("p-break").hidden = mode !== "break";
+    document.querySelector("#s-run .padwrap").hidden = mode !== "marker";
+    $("markers").hidden = mode !== "marker";
+  }
   function renderReps() {
-    const b = block(), r = (b.kind === "learn" ? prog(b.id).reps : b.reps).slice(-5), box = $("reps");
+    const b = block(), size = roundSize(getSkill(b.id)), r = (b.kind === "learn" ? prog(b.id).reps : b.reps).slice(-size), box = $("reps");
     box.replaceChildren();
-    for (let i = 0; i < 5; i++) { const d = el("i"); if (i < r.length) d.className = r[i] ? "y" : "n"; box.append(d); }
+    for (let i = 0; i < size; i++) { const d = el("i"); if (i < r.length) d.className = r[i] ? "y" : "n"; box.append(d); }
   }
   function setStep(n) {
     const b = block(), s = getSkill(b.id), p = prog(b.id);
@@ -844,52 +1073,60 @@
   const coachOff = () => $("stepcard").classList.remove("coaching");
 
   // Every 5 tries: 4-5 right = harder, 3 = stay, 0-2 = easier. Applied automatically; Easier/Harder can override.
+  // Rounds: 5 tries for marker skills (4-5 right = harder, 3 = stay, 0-2 = easier);
+  // 3 reps for field outcome skills (2-3 clean = harder, 1 = stay, 0 = easier). Applied automatically; Easier/Harder override.
+  const roundSize = (s) => (s.rep === "outcome" ? 3 : 5);
   function logRep(ok) {
     const b = block(); if (!b || b.kind === "free") return;
-    const s = getSkill(b.id), p = prog(b.id);
+    const s = getSkill(b.id), p = prog(b.id), size = roundSize(s);
     b.reps.push(ok);
     if (b.kind === "learn") p.reps.push(ok);
     saveSt(); renderReps();
     const r = b.reps;
-    if (!ok && r.length >= 2 && !r[r.length - 2] && r.length % 5) {
+    if (size === 5 && !ok && r.length >= 2 && !r[r.length - 2] && r.length % 5) {
       coach("Two misses in a row. Make it easier for a few reps: closer, shorter, quieter.", [["OK", () => {}, true]]);
     }
-    if (r.length % 5) return;
-    const hits = r.slice(-5).filter(Boolean).length;
-    const msg = roundResult(b, s, p, hits);
-    const end = r.length >= b.target;
-    if (!end) { coach(msg, [["OK", () => {}, true]]); return; }
+    if (r.length % size) return;
+    const hits = r.slice(-size).filter(Boolean).length;
+    const msg = roundResult(b, s, p, hits, size);
+    if (r.length < b.target) { coach(msg, [["OK", () => {}, true]]); return; }
+    endBlockCoach(msg, () => { b.target += size; });
+  }
+  function endBlockCoach(msg, more) {
     const nxt = run.blocks[run.i + 1];
-    coach(msg, [
-      [nxt ? `Next: ${getSkill(nxt.id).name}` : "Finish session", () => nextBlock(), true],
-      ["One more round", () => { b.target += 5; }],
-    ]);
+    const acts = [[nxt ? `Next: ${nxt.kind === "break" ? "a break" : getSkill(nxt.id).name}` : "Finish session", () => nextBlock(), true]];
+    if (more) acts.push(["One more round", more]);
+    coach(msg, acts);
   }
   // A new step brings new setup, so its how-to opens the first time it is reached.
   function stepHowto(id) {
     const key = id + ":" + prog(id).step;
     if (!st.seen[key]) { st.seen[key] = true; saveSt(); openHowto(); }
   }
-  function roundResult(b, s, p, hits) {
-    const up = hits >= 4, down = hits <= 2, name = dogName();
+  function roundResult(b, s, p, hits, size) {
+    const up = size === 3 ? hits >= 2 : hits >= 4, down = size === 3 ? hits === 0 : hits <= 2, name = dogName();
+    const score = `${hits} of ${size}`;
     if (b.kind === "learn") {
       const last = p.step === s.steps.length - 1;
+      // Long retrieves on hard ground wait for the growth plates.
+      const capped = s.youngCap != null && !platesClosed() && p.step >= s.youngCap;
+      if (up && capped) return `${score}. Longer ones wait until ${name}'s growth plates close (about ${platesMonths()} months). Keep this distance and vary the place and cover.`;
       if (up && last) {
         if (!p.passDays) p.passDays = [];
         if (!p.passDays.includes(today())) p.passDays.push(today());
         const was = p.done; p.done = p.passDays.length >= 2; p.reps = []; saveSt();
         if (p.done && !was) {
-          b.kind = proofTarget(b.id) && proofTarget(b.id).raise ? "proof" : "practice"; b.reps = []; b.target = 5;
+          b.kind = proofTarget(b.id) && proofTarget(b.id).raise ? "proof" : "practice"; b.reps = []; b.target = targetFor(b);
           if (b.kind === "proof") { const t = proofTarget(b.id); b.lv = t.lv; b.raise = t.raise; } else b.lv = bestLevels(b.id);
           renderBlock();
-          return `${hits} of 5 on the last step, on ${p.passDays.length} different days: ${s.name} is Fluent! Next it gets proofed: ${dims(s).length ? "longer, farther, busier, one at a time." : "practice in new places."}`;
+          return `${score} on the last step, on ${p.passDays.length} different days: ${s.name} is Fluent! Next it gets proofed: ${dims(s).length ? "longer, farther, busier, one at a time." : "practice in new places."}`;
         }
-        return `${hits} of 5 on the last step. Pass it again on another day, ideally somewhere new, to make it Fluent.`;
+        return `${score} on the last step. Pass it again on another day, ideally somewhere new, to make it Fluent.`;
       }
-      if (up) { p.step++; p.reps = []; saveSt(); renderBlock(); stepHowto(b.id); return `${hits} of 5. ${name} has this step. On to step ${p.step + 1}: ${s.steps[p.step].t}.`; }
-      if (hits === 3) return "3 of 5. Same step for another round.";
-      if (p.step > 0) { p.step--; p.reps = []; saveSt(); renderBlock(); stepHowto(b.id); return `${hits} of 5. Too hard right now, so back to step ${p.step + 1} to build it up again.`; }
-      return `${hits} of 5. Make it easier: quieter room, closer, better treats. Is Yes charged?`;
+      if (up) { p.step++; p.reps = []; saveSt(); renderBlock(); stepHowto(b.id); return `${score}. ${name} has this step. On to step ${p.step + 1}: ${s.steps[p.step].t}.`; }
+      if (!down) return `${score}. Same step for another round.`;
+      if (p.step > 0) { p.step--; p.reps = []; saveSt(); renderBlock(); stepHowto(b.id); return `${score}. Too hard right now, so back to step ${p.step + 1} to build it up again.`; }
+      return `${score}. Make it easier: quieter place, closer, better treats. Is Yes charged?`;
     }
     let extra = "";
     if (b.kind === "proof") {
@@ -909,13 +1146,122 @@
       else extra = level(b.id) === 2 ? nextText(b.id) : "";
     }
     if (!extra && up) extra = b.role === "warm" ? "Good warm-up." : b.role === "finish" ? "Calm finish. Session done." : "Solid.";
-    if (!extra) extra = hits === 3 ? "Close. Keep it easy and go again." : "Make it easier next round: closer, shorter, quieter.";
+    if (!extra) extra = !down ? "Close. Keep it easy and go again." : "Make it easier next round: closer, shorter, quieter.";
     saveSt();
-    return `${hits} of 5. ${extra}`.trim();
+    return `${score}. ${extra}`.trim();
   }
 
+  // ---------- Field reps, the sound ladder and breaks ----------
+  function startClock() {
+    if (run.start) return;
+    run.start = Date.now(); ticker = setInterval(renderClock, 500); lockScreen();
+    $("pad-sub").textContent = "Tap, then treat.";
+  }
+  const snapshot = () => { undoSnap = { st: JSON.stringify(st), run: JSON.stringify({ ...run }), rec: rec.marks.length }; $("undo").hidden = false; };
+  function outcome(i, e, node) {
+    if (!run) return;
+    const b = block(), s = getSkill(b.id);
+    if (b.kind === "sound" || b.kind === "break") return;
+    feedback(node);
+    if (rec.recorder && rec.recorder.state === "recording") rec.marks.push({ t: ((e && e.timeStamp > 0 ? e.timeStamp : performance.now()) - rec.startAt) / 1000, kind: i === 0 ? "yes" : "miss" });
+    snapshot(); startClock();
+    if (i === 0) { run.marks++; treatsToday().used++; }
+    (b.yds ||= []).push(gps.yd);
+    if (s.startle && i === 2) { startleStop(b, s); saveLive(); renderClock(); return; }
+    logRep(i === 0); saveLive(); renderClock();
+  }
+  // Fear is never trained through: back off 2 steps, log it against the gun ladder (which locks this skill), stop for today.
+  function startleStop(b, s) {
+    const p = prog(b.id);
+    b.reps.push(false);
+    p.step = Math.max(0, p.step - 2); p.reps = [];
+    sound("gun").log.push({ day: today(), r: "startled" });
+    sound("gun").level = Math.max(0, sound("gun").level - 2); sound("gun").calm = 0;
+    saveSt(); renderBlock();
+    endBlockCoach(`Worried: stop gun work for today. It restarts at step ${p.step + 1} (${s.steps[p.step].t}) after a few calm days back on the gunshot sound ladder. Never fire closer to a nervous dog.`);
+  }
+  document.querySelectorAll(".obtn").forEach((btn) => onDown(btn, (e) => outcome(+btn.dataset.o, e, btn)));
+
+  function renderSoundBlock(b) {
+    const sid = b.id.slice(4), sd = sound(sid), k = Math.min(soundCap(), sd.level + 1);
+    b.plays ||= 0;
+    $("run-step-n").textContent = (run.blocks.length > 1 ? `${run.i + 1} of ${run.blocks.length} · ` : "") + `Step ${k} of 10`;
+    $("stepcard").hidden = false;
+    $("run-mark").textContent = "Play it, then hand a treat right away. Relaxed means still eating, ears soft.";
+    ["step-prev", "step-next", "open-howto", "hold", "run-proof"].forEach((x) => ($(x).hidden = true));
+    $("reps").style.visibility = "hidden";
+    $("snd-sub").textContent = b.plays < 5 ? `Plays: ${b.plays} of 5. A treat right after each one.` : "Done: how was your dog?";
+    document.querySelectorAll("#p-sound [data-r]").forEach((x) => { x.disabled = x.dataset.r !== "startled" && b.plays < 5; });
+  }
+  onDown($("snd-play"), (e) => {
+    const b = block(); if (!b || b.kind !== "sound") return;
+    const sid = b.id.slice(4), k = Math.min(soundCap(), sound(sid).level + 1);
+    play(sid, LADDER_VOL(k)); feedback($("snd-play"));
+    startClock(); b.plays = (b.plays || 0) + 1; run.marks++; treatsToday().used++;
+    saveLive(); renderClock(); renderSoundBlock(b);
+  });
+  document.querySelectorAll("#p-sound [data-r]").forEach((x) => onDown(x, () => {
+    const b = block(); if (!b || b.kind !== "sound" || x.disabled) return;
+    const sid = b.id.slice(4), sd = sound(sid), r = x.dataset.r, name = SOUNDS.find((q) => q.id === sid).name;
+    if (b.rated) return;
+    b.rated = true; startClock();
+    sd.log.push({ day: today(), r }); sd.log = sd.log.slice(-30);
+    b.reps.push(r === "relaxed");
+    let msg;
+    if (r === "relaxed") {
+      // The four quietest steps move up after 2 relaxed sessions, the louder ones after 3.
+      const need = calmNeed(sd);
+      sd.calm++;
+      if (sd.calm >= need && sd.level < soundCap()) { sd.level++; sd.calm = 0; msg = `Relaxed ${need} sessions running: ${name} moves up to step ${Math.min(10, sd.level + 1)} next time.`; }
+      else msg = sd.level >= soundCap() ? `Relaxed at the top step${sd.level < 10 ? " for a puppy" : ""}.` : `Relaxed. ${need - sd.calm} more relaxed session${need - sd.calm === 1 ? "" : "s"} at this step, then it moves up.`;
+    } else if (r === "noticed") msg = "Noticed but recovered: the same step next time.";
+    else { sd.level = Math.max(0, sd.level - 2); sd.calm = 0; msg = `Startled: stop for today. Next time starts 2 steps quieter (step ${sd.level + 1}), after a day off. Never push a scared dog closer to a sound.`; }
+    saveSt(); saveLive();
+    endBlockCoach(msg);
+  }));
+
+  let brkTimer = 0;
+  function startBreak(b) {
+    $("stepcard").hidden = true; $("reps").style.visibility = "hidden";
+    $("run-step-n").textContent = `${run.i + 1} of ${run.blocks.length} · Break`;
+    $("brk-text").textContent = (st.hot === today() ? "Hot day: shade and water, and let them lie on cool ground. " : "Water and shade. Let your dog lie down and cool off. ") + "Quick paw check.";
+    const end = Date.now() + b.secs * 1000;
+    clearInterval(brkTimer);
+    const tickBrk = () => {
+      const left = Math.max(0, Math.round((end - Date.now()) / 1000));
+      $("brk-clock").textContent = fmt(left);
+      if (!left) { clearInterval(brkTimer); if (block() === b) { play("free"); nextBlock(); } }
+    };
+    tickBrk(); brkTimer = setInterval(tickBrk, 500);
+  }
+  $("brk-skip").addEventListener("click", () => { clearInterval(brkTimer); nextBlock(); });
+
+  // Whistle bar: the three standard field whistles, logged on the video timeline.
+  document.querySelectorAll("#whistlebar [data-w]").forEach((x) => onDown(x, (e) => {
+    play(x.dataset.w); feedback(x);
+    if (rec.recorder && rec.recorder.state === "recording") rec.marks.push({ t: ((e.timeStamp > 0 ? e.timeStamp : performance.now()) - rec.startAt) / 1000, kind: "whistle" });
+  }));
+
+  // Distance: tap to set the start spot; the phone's GPS shows yards from it. Tap again to reset.
+  const gps = { watch: null, origin: null, yd: null };
+  function stopGps() { if (gps.watch != null) navigator.geolocation.clearWatch(gps.watch); gps.watch = null; gps.origin = null; gps.yd = null; $("gps").textContent = "Distance"; }
+  $("gps").addEventListener("click", () => {
+    if (gps.watch != null) { gps.origin = null; gps.yd = null; $("gps").textContent = "Finding you…"; return; }
+    $("gps").textContent = "Finding you…";
+    gps.watch = navigator.geolocation.watchPosition((pos) => {
+      const c = pos.coords;
+      if (!gps.origin) gps.origin = c;
+      const R = 6371000, toR = (d) => (d * Math.PI) / 180;
+      const dLat = toR(c.latitude - gps.origin.latitude), dLon = toR(c.longitude - gps.origin.longitude);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toR(gps.origin.latitude)) * Math.cos(toR(c.latitude)) * Math.sin(dLon / 2) ** 2;
+      gps.yd = Math.round(2 * R * Math.asin(Math.sqrt(a)) * 1.0936);
+      $("gps").textContent = `${gps.yd} yd · ±${Math.round(c.accuracy * 1.0936)}`;
+    }, () => { stopGps(); toast("Location is off. Allow it for this app in your phone's settings to measure distance.", 4000); },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+  });
+
   function nextBlock() {
-    cancelHold();
+    cancelHold(); clearInterval(brkTimer);
     const b = block();
     if (b && b.reps.length) { prog(b.id).last = today(); saveSt(); }
     if (run.i < run.blocks.length - 1) { run.i++; enterBlock(); return; }
@@ -961,9 +1307,7 @@
     feedback(node);
     if (rec.recorder && rec.recorder.state === "recording") rec.marks.push({ t: ((e && e.timeStamp > 0 ? e.timeStamp : performance.now()) - rec.startAt) / 1000, kind: name });
     // One step of undo: a mis-tap is the most common error outdoors.
-    undoSnap = { st: JSON.stringify(st), run: JSON.stringify({ ...run }), rec: rec.marks.length };
-    $("undo").hidden = false;
-    if (!run.start) { run.start = Date.now(); ticker = setInterval(renderClock, 500); lockScreen(); $("pad-sub").textContent = "Tap, then treat."; }
+    snapshot(); startClock();
     run.counts[name] = (run.counts[name] || 0) + 1;
     if (name === "miss") { cancelHold(); logRep(false); }
     else if (name === "yes" || name === "catch") { cancelHold(); run.marks++; treatsToday().used++; logRep(true); }
@@ -1019,7 +1363,7 @@
   }
   function closeRun() {
     if (!run) return;
-    cancelHold(); coachOff();
+    cancelHold(); coachOff(); clearInterval(brkTimer); stopGps();
     const recorded = !!rec.recorder || rec.fresh;
     if (rec.recorder) stopRecording(true);
     rec.fresh = false;
@@ -1055,6 +1399,7 @@
       row.append(ring(b.id), name, el("span", "", `${hits} of ${b.reps.length} right. ${nextText(b.id)}`));
       box.append(row);
     }
+    $("sum-field").hidden = !worked.some((b) => FIELD_TRACKS.includes(getSkill(b.id).track));
     document.querySelectorAll("#sum-rate-dog .choice").forEach((c) => c.setAttribute("aria-pressed", "false"));
     $("summary").hidden = false; $("summary").scrollTop = 0;
   }
@@ -1079,8 +1424,6 @@
     }
   }
 
-  // Marks fire on touch-down, not on release: release adds 100+ ms.
-  const onDown = (node, fn) => node.addEventListener("pointerdown", (e) => { if (e.button > 0) return; e.preventDefault(); fn(e); });
   onDown($("pad"), (e) => mark("yes", e, $("pad")));
   document.querySelectorAll(".mk").forEach((b) => onDown(b, (e) => mark(b.dataset.sound, e, b)));
 

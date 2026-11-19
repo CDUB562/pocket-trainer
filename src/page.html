@@ -358,6 +358,32 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
 .sumblocks .ring { grid-row: 1 / span 2; }
 .sumblocks span { font-size: .88rem; color: var(--muted); }
 .sumblocks b.up { color: var(--keep); }
+
+/* v2 phase 2: field panels, whistle bar, conditions, seasons */
+.panel { flex: 1; min-height: 160px; display: flex; flex-direction: column; gap: 8px; }
+.markwhen.oc::before { content: "GOAL "; color: var(--keep); }
+.mk:disabled { opacity: .35; cursor: default; }
+.markwhen.snd::before { content: "HOW "; color: var(--catch); }
+.obtn {
+  flex: 1; font: inherit; border-radius: 20px; border: 3px solid currentColor; background: var(--surface); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; touch-action: none; min-height: 64px;
+}
+.obtn strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.6rem, 9vw, 2.4rem); text-transform: uppercase; letter-spacing: .03em; }
+.obtn small { font-size: .85rem; color: var(--muted); }
+.obtn.o0 { color: var(--keep); flex: 1.5; } .obtn.o1 { color: var(--warn); } .obtn.o2 { color: var(--miss); }
+.obtn.hit { transform: scale(.98); filter: brightness(1.15); }
+.whistlebar { display: flex; gap: 8px; align-items: center; flex: none; }
+.whistlebar .chip { flex: 1; justify-content: center; }
+.whistlebar .chip i { font-style: normal; color: var(--muted); }
+.brk { align-items: center; justify-content: center; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 16px; }
+.brk strong { font-family: var(--font-display); font-weight: 800; font-size: 5rem; line-height: 1; }
+.warnline { font-weight: 700; color: var(--warn); font-size: .92rem; }
+.seasons { display: grid; gap: 8px; }
+.season { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 8px; }
+.season .bar { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.season .bar::after { content: ""; display: block; height: 100%; width: var(--p, 0%); background: var(--keep); }
+.season .behind { color: var(--warn); font-weight: 700; }
+.trackadd { justify-self: start; }
 </style>
 
 <div class="app">
@@ -377,7 +403,10 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <p class="muted" id="hardweek" hidden></p>
     <span class="eyebrow" id="places-label">Where are you training?</span>
     <div class="places" id="places" role="radiogroup" aria-labelledby="places-label"></div>
+    <div class="places" id="conds"></div>
+    <p class="warnline" id="heatwarn" hidden></p>
     <div class="plan" id="plan"></div>
+    <div class="seasons" id="seasons"></div>
     <div class="card" id="pup-passport" hidden>
       <div class="row between"><b>Socialization passport</b><span class="muted num" id="pup-passport-n"></span></div>
       <p class="muted" id="pup-passport-sub"></p>
@@ -439,8 +468,34 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <div class="reprow">
       <div class="reps" id="reps" aria-label="Last 5 tries"></div>
       <button class="chip" type="button" id="undo" hidden>Undo</button>
+      <button class="chip" type="button" id="gps" hidden>Distance</button>
       <button class="chip rec" type="button" id="rec" hidden>Record</button>
       <button class="chip recall" type="button" id="run-recall">Recall</button>
+    </div>
+    <div class="whistlebar" id="whistlebar" hidden>
+      <span class="eyebrow">Whistle</span>
+      <button class="chip" type="button" data-w="wsit">Sit <i aria-hidden="true">—</i></button>
+      <button class="chip" type="button" data-w="wcome">Come <i aria-hidden="true">~~~</i></button>
+      <button class="chip" type="button" data-w="wturn">Turn <i aria-hidden="true">· ·</i></button>
+    </div>
+    <div class="panel" id="p-outcome" hidden>
+      <button class="obtn o0" type="button" data-o="0"><strong></strong><small>a clean rep</small></button>
+      <button class="obtn o1" type="button" data-o="1"><strong></strong><small>you had to help</small></button>
+      <button class="obtn o2" type="button" data-o="2"><strong></strong><small>didn't happen</small></button>
+    </div>
+    <div class="panel" id="p-sound" hidden>
+      <button class="pad" type="button" id="snd-play"><strong>PLAY</strong><small id="snd-sub"></small></button>
+      <div class="markers">
+        <button class="mk keep" type="button" data-r="relaxed"><strong>Relaxed</strong><small>kept eating</small></button>
+        <button class="mk catch" type="button" data-r="noticed"><strong>Noticed</strong><small>looked, recovered</small></button>
+        <button class="mk miss" type="button" data-r="startled"><strong>Startled</strong><small>stop now</small></button>
+      </div>
+    </div>
+    <div class="panel brk" id="p-break" hidden>
+      <span class="eyebrow">Break</span>
+      <strong class="num" id="brk-clock">2:00</strong>
+      <p id="brk-text">Water and shade. Let your dog lie down and cool off. Quick paw check.</p>
+      <button class="btn solid" type="button" id="brk-skip">Skip break</button>
     </div>
     <div class="padwrap">
       <button class="pad" id="pad" type="button" aria-label="Mark: Yes">
@@ -486,6 +541,9 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
         <button class="btn" type="button" data-try="keep">Keep going</button>
         <button class="btn" type="button" data-try="free">Free</button>
         <button class="btn" type="button" data-try="recall">Recall</button>
+        <button class="btn" type="button" data-try="wsit">Sit whistle</button>
+        <button class="btn" type="button" data-try="wcome">Come whistle</button>
+        <button class="btn" type="button" data-try="wturn">Turn whistle</button>
       </div>
       <div class="field"><label for="vol">Volume <span class="muted num" id="vol-out"></span></label><span></span></div>
       <input type="range" id="vol" min="0.1" max="1" step="0.05">
@@ -578,6 +636,11 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <h1>What do you want to work on?</h1>
     <p class="muted">Pick any. The plan leans toward these.</p>
     <div class="choices multi" id="onb-goals"></div>
+    <div id="onb-seasons" hidden>
+      <p class="muted">Opening day (optional). The plan counts down to it and tells you if you're behind.</p>
+      <div class="field" id="onb-season-waterfowl-row"><label for="onb-season-waterfowl">Waterfowl opener</label><input type="date" id="onb-season-waterfowl"></div>
+      <div class="field" id="onb-season-upland-row"><label for="onb-season-upland">Upland opener</label><input type="date" id="onb-season-upland"></div>
+    </div>
   </div>
   <div class="onbstep" data-q="reward">
     <h1>What does your dog love most?</h1>
@@ -587,6 +650,11 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <h1>Which days can you train?</h1>
     <p class="muted">A few minutes is enough. Rest days are part of the plan.</p>
     <div class="choices multi days" id="onb-days"></div>
+    <div id="onb-field" hidden>
+      <h2>Field or water day</h2>
+      <p class="muted">One longer session a week where you can throw marks or swim. Optional.</p>
+      <div class="choices days" id="onb-fieldday"></div>
+    </div>
   </div>
   <div class="row onbnav"><button class="btn" type="button" id="onb-back">Back</button><button class="btn solid" type="button" id="onb-next">Next</button></div>
   <button class="linkbtn" type="button" id="onb-delete" hidden style="color:var(--miss);align-self:flex-start">Remove this dog</button>
@@ -627,6 +695,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <button class="choice" type="button" data-r="ok">OK</button>
     <button class="choice" type="button" data-r="tired">Tired</button>
   </div>
+  <p class="muted" id="sum-field" hidden>After the field: water and rest, then check paws, eyes and ears, and for ticks and burrs.</p>
   <p class="muted">A nap or quiet time now helps the session stick.</p>
   <button class="btn solid" type="button" id="sum-done">Done</button>
 </div>
