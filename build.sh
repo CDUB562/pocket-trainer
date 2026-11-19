@@ -1,8 +1,20 @@
 #!/bin/sh
-# Build the installable offline app into docs/ (served by GitHub Pages).
-# index.html is the page body (also published as a claude.ai artifact, which adds its own skeleton).
+# Build the app from src/ into index.html (the page body, also published as a claude.ai artifact)
+# and into docs/ (the installable offline app served by GitHub Pages).
+#   src/page.html   markup and styles
+#   src/catalog.js  skills, passport, breeds (plain data)
+#   src/app.js      the app
 set -e
 cd "$(dirname "$0")"
+node -e 'new Function(require("fs").readFileSync("src/catalog.js","utf8") + require("fs").readFileSync("src/app.js","utf8"))' # syntax check
+{
+  cat src/page.html
+  printf '<script>\n'
+  cat src/catalog.js
+  printf '\n'
+  cat src/app.js
+  printf '</script>\n'
+} > index.html
 mkdir -p docs
 VERSION=$(cat index.html pwa/sw.js pwa/manifest.webmanifest | sha1sum | cut -c1-10)
 {
@@ -20,4 +32,4 @@ VERSION=$(cat index.html pwa/sw.js pwa/manifest.webmanifest | sha1sum | cut -c1-
 sed "s/__VERSION__/$VERSION/" pwa/sw.js > docs/sw.js
 cp pwa/manifest.webmanifest pwa/icon-*.png docs/
 touch docs/.nojekyll
-echo "built docs/ ($VERSION)"
+echo "built index.html and docs/ ($VERSION)"

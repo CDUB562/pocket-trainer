@@ -1,0 +1,711 @@
+<title>Pocket Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@600;800&display=swap">
+<style>
+/* Layout: Today (one next session) / Skills / Settings tabs. Training is a full screen with no tab bar:
+   one line of what to mark, the try dots, a giant pad in the thumb zone, and the secondary markers under it. */
+:root {
+  --bg: #eef0ea;          /* sun-readable light, faint grass tint */
+  --surface: #ffffff;
+  --fg: #17201b;
+  --muted: #59645d;
+  --line: #d3d8cf;
+  --accent: #e0561a;      /* training-dummy orange: the Yes marker */
+  --accent-ink: #ffffff;
+  --catch: #2463b8;
+  --keep: #3f6b52;
+  --free: #17201b;
+  --warn: #a35a00;
+  --miss: #a3302a;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --font-body: "Atkinson Hyperlegible", -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111613; --surface: #1b221e; --fg: #eef2ec; --muted: #9aa69e; --line: #2c3530;
+    --accent: #f06a2c; --accent-ink: #120a05; --catch: #5b95e6; --keep: #6fa784; --free: #eef2ec; --warn: #e3a147; --miss: #ec7a70;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111613; --surface: #1b221e; --fg: #eef2ec; --muted: #9aa69e; --line: #2c3530;
+  --accent: #f06a2c; --accent-ink: #120a05; --catch: #5b95e6; --keep: #6fa784; --free: #eef2ec; --warn: #e3a147; --miss: #ec7a70;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; overflow: hidden;
+}
+.app { height: 100%; display: flex; flex-direction: column; }
+.screen {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+  padding-block: 12px 88px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.screen.run { padding-bottom: 12px; overflow: hidden; }
+h1, h2 { font-family: var(--font-display); font-weight: 800; letter-spacing: .02em; margin: 0; text-wrap: balance; }
+h1 { font-size: 1.6rem; text-transform: uppercase; }
+h2 { font-size: 1.15rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+p { margin: 0; line-height: 1.45; max-width: 60ch; }
+.muted { color: var(--muted); font-size: .9rem; }
+.num { font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 700; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row.between { justify-content: space-between; }
+.btn {
+  font: inherit; font-weight: 700; border-radius: 12px; border: 2px solid var(--fg); background: transparent; color: var(--fg);
+  padding: 10px 16px; min-height: 44px; cursor: pointer; box-sizing: border-box;
+}
+.btn.solid { background: var(--fg); color: var(--bg); }
+.linkbtn { font: inherit; font-size: .88rem; font-weight: 700; color: var(--catch); background: none; border: 0; padding: 6px 0; cursor: pointer; }
+.linkbtn:disabled { color: var(--muted); opacity: .5; cursor: default; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 12px; }
+
+/* Today */
+.todayhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.next {
+  font: inherit; text-align: left; border: 0; border-radius: 20px; background: var(--accent); color: var(--accent-ink);
+  padding: 16px; display: grid; gap: 4px; cursor: pointer;
+}
+.next .eyebrow { color: inherit; opacity: .85; }
+.next b { font-family: var(--font-display); font-weight: 800; font-size: 2.6rem; line-height: .95; text-transform: uppercase; }
+.next .sub { font-weight: 700; }
+.next .mk-line { opacity: .9; font-size: .95rem; line-height: 1.35; }
+.next .go {
+  margin-top: 10px; background: var(--accent-ink); color: var(--accent); border-radius: 12px; padding: 12px; text-align: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; letter-spacing: .04em;
+}
+.later { display: grid; gap: 8px; }
+.later button {
+  font: inherit; color: var(--fg); text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; cursor: pointer;
+}
+.later b { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; text-transform: uppercase; }
+.later span { font-size: .85rem; color: var(--muted); }
+.later .done b { text-decoration: line-through; color: var(--muted); }
+.later .tick { grid-row: 1 / span 2; grid-column: 2; font-weight: 700; color: var(--keep); }
+.summary { gap: 8px; }
+.summary .figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.fig { display: flex; flex-direction: column; gap: 2px; }
+.fig b { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.fig span { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.fig.slow b { color: var(--warn); }
+.field { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+.field label { font-weight: 700; }
+input[type="text"], input[type="number"] {
+  font: inherit; padding: 10px; border-radius: 10px; border: 2px solid var(--line); background: var(--bg); color: var(--fg); min-width: 0;
+  -webkit-user-select: text; user-select: text;
+}
+input[type="number"] { width: 5.5rem; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="checkbox"].tog { width: 26px; height: 26px; accent-color: var(--accent); }
+
+/* Skills */
+.starter { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile {
+  font: inherit; text-align: left; color: var(--fg); background: var(--surface); border: 2px solid var(--line);
+  border-radius: 16px; padding: 12px; display: grid; gap: 4px; cursor: pointer;
+}
+.tile b { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; text-transform: uppercase; letter-spacing: .02em; }
+.tile span { font-size: .85rem; color: var(--muted); line-height: 1.35; }
+.tile.todo { border-color: var(--accent); }
+.modules { display: grid; gap: 8px; }
+.mod {
+  font: inherit; color: var(--fg); text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; cursor: pointer;
+}
+.mod b { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; text-transform: uppercase; letter-spacing: .02em; }
+.mod .goal { grid-column: 1; font-size: .85rem; color: var(--muted); }
+.mod .lvl { grid-row: 1 / span 2; grid-column: 2; text-align: right; font-size: .8rem; color: var(--muted); display: grid; gap: 4px; justify-items: end; }
+.mod .lvl i { display: block; width: 64px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.mod .lvl i::after { content: ""; display: block; height: 100%; width: var(--p, 0%); background: var(--keep); }
+.mod.done .lvl { color: var(--keep); font-weight: 700; }
+
+/* Training screen */
+.runhead { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; flex: none; }
+.iconbtn {
+  font: inherit; font-weight: 700; font-size: 1.3rem; width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--line);
+  background: var(--surface); color: var(--fg); cursor: pointer; display: grid; place-items: center; line-height: 1;
+}
+.runtitle { display: grid; min-width: 0; }
+.runtitle b { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; line-height: 1.05; }
+.runtitle span { font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.runmeta { display: grid; justify-items: end; font-variant-numeric: tabular-nums; }
+.runmeta b { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; line-height: 1; }
+.runmeta span { font-size: .78rem; color: var(--muted); }
+.runmeta.slow span, .runmeta.long b { color: var(--warn); }
+/* The step and the coach share one grid cell, so a coach message never moves the pad. */
+.stepcard { display: grid; flex: none; min-height: 132px; border-radius: 16px; overflow: hidden; }
+.stepbody, .coach { grid-area: 1 / 1; padding: 4px 2px; display: grid; gap: 6px; align-content: start; }
+.coach { padding: 12px 14px; border-radius: 16px; gap: 10px; background: var(--fg); color: var(--bg); }
+.coach p { font-weight: 700; }
+.coach .btn { border-color: var(--bg); color: var(--bg); }
+.coach .btn.solid { background: var(--bg); color: var(--fg); }
+.stepcard.coaching .stepbody, .stepcard:not(.coaching) .coach { visibility: hidden; }
+.markwhen { font-size: 1.25rem; line-height: 1.3; font-weight: 700; }
+.markwhen::before { content: "YES "; font-family: var(--font-display); font-weight: 800; color: var(--accent); letter-spacing: .03em; }
+.steplinks { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.holdbtn {
+  font: inherit; font-weight: 700; border-radius: 12px; border: 2px solid var(--keep); color: var(--keep); background: transparent;
+  min-height: 44px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.holdbtn.running { background: var(--keep); color: var(--surface); }
+.reprow { display: flex; align-items: center; gap: 10px; flex: none; }
+.reps { display: flex; gap: 6px; flex: 1; align-items: center; }
+.reps i { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); position: relative; }
+.reps i.y { background: var(--keep); border-color: var(--keep); }
+.reps i.n { border-color: var(--miss); }
+.reps i.n::after { content: ""; position: absolute; inset: 7px 2px; background: var(--miss); border-radius: 1px; }
+.chip {
+  font: inherit; font-size: .85rem; font-weight: 700; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--fg);
+  padding: 6px 12px; min-height: 36px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.chip.rec.on { border-color: var(--miss); color: var(--miss); }
+.chip.rec.on::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--miss); }
+.chip.recall { border-color: var(--catch); color: var(--catch); }
+.padwrap { flex: 1; min-height: 160px; position: relative; display: flex; }
+.pad {
+  flex: 1; border: 0; border-radius: 24px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  touch-action: none; cursor: pointer; transition: transform .06s ease-out, filter .06s; font: inherit;
+}
+.pad strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(4rem, 24vw, 8rem); line-height: .9; letter-spacing: .02em; }
+.pad small { font-size: .95rem; opacity: .85; }
+.pad.hit, .mk.hit { transform: scale(.975); filter: brightness(1.15); }
+.campreview {
+  position: absolute; top: 10px; right: 10px; width: 30%; max-width: 140px; aspect-ratio: 3 / 4; object-fit: cover;
+  border-radius: 12px; border: 2px solid var(--accent-ink); pointer-events: none; background: #000;
+}
+.markers { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; flex: none; }
+.mk {
+  border: 2px solid currentColor; background: var(--surface); border-radius: 16px; min-height: 64px; padding: 4px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font: inherit; touch-action: none; cursor: pointer; transition: transform .06s, filter .06s;
+}
+.mk strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.05rem, 5vw, 1.4rem); line-height: 1; text-transform: uppercase; letter-spacing: .03em; text-align: center; }
+.mk small { font-size: .7rem; color: var(--muted); }
+.mk.miss { color: var(--miss); } .mk.catch { color: var(--catch); } .mk.keep { color: var(--keep); } .mk.free { color: var(--free); }
+
+/* Charge */
+.charge-face {
+  flex: 1; min-height: 220px; border-radius: 22px; background: var(--surface); border: 2px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 16px;
+}
+.charge-face strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(3rem, 16vw, 5.5rem); line-height: .95; text-transform: uppercase; }
+.charge-face.treat { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.dots { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+.dots i { height: 10px; border-radius: 5px; background: var(--line); }
+.dots i.on { background: var(--accent); }
+
+/* Settings */
+.sounds { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.history { display: grid; gap: 6px; font-size: .9rem; }
+.history div { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.faq { border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.faq summary { font-weight: 700; cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+.faq p { margin-top: 4px; }
+button, label.btn, summary { touch-action: manipulation; }
+/* Landscape on a phone leaves no room for the pad. */
+.turn { display: none; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .turn {
+    display: flex; position: fixed; inset: 0; z-index: 60; background: var(--bg); color: var(--fg);
+    align-items: center; justify-content: center; text-align: center; padding: 24px; font-weight: 700; font-size: 1.2rem;
+  }
+}
+
+/* Tabs + floating recall */
+.tabs {
+  display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); background: var(--surface);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+}
+.tab {
+  font: inherit; border: 0; background: transparent; color: var(--muted); padding: 10px 4px 12px; cursor: pointer;
+  font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; text-transform: uppercase; letter-spacing: .08em;
+  border-top: 3px solid transparent;
+}
+.tab[aria-selected="true"] { color: var(--fg); border-top-color: var(--accent); }
+.fab {
+  position: fixed; z-index: 20; right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  font: inherit; border: 0; border-radius: 999px; background: var(--catch); color: #fff; padding: 14px 20px; cursor: pointer; touch-action: none;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; text-transform: uppercase; letter-spacing: .05em;
+  box-shadow: 0 6px 18px rgb(0 0 0 / .25);
+}
+.toast {
+  position: fixed; z-index: 45; left: 50%; transform: translateX(-50%); bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+  background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 700; max-width: min(90vw, 420px); text-align: center;
+}
+
+/* Sheets: Yes guide, step how-to, video review */
+.sheet {
+  position: fixed; inset: 0; z-index: 30; background: var(--bg); overflow-y: auto;
+  padding-top: max(12px, env(safe-area-inset-top, 0px)); padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px; -webkit-user-select: text; user-select: text;
+}
+.rules { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.rules li { display: grid; grid-template-columns: 1.6rem 1fr; gap: 8px; line-height: 1.45; }
+.rules li > b { font-family: var(--font-display); font-size: 1.25rem; color: var(--accent); }
+.rules li strong { display: block; }
+.rules.blue li > b { color: var(--catch); }
+.soundmap { display: grid; gap: 8px; }
+.soundmap div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 10px; align-items: baseline; }
+.soundmap b { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; text-transform: uppercase; }
+.rv-stage { position: relative; background: #000; border-radius: 16px; overflow: hidden; }
+.rv-stage video { display: block; width: 100%; max-height: 52vh; object-fit: contain; }
+.rv-flash {
+  position: absolute; left: 12px; top: 12px; padding: 4px 10px; border-radius: 8px; background: var(--accent); color: var(--accent-ink);
+  font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase;
+}
+.rv-flash.miss { background: var(--miss); }
+.rv-line { position: relative; height: 40px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; touch-action: none; cursor: pointer; }
+.rv-line i { position: absolute; top: 6px; bottom: 6px; width: 3px; margin-left: -1px; border-radius: 2px; background: var(--accent); pointer-events: none; }
+.rv-line i.miss { background: var(--miss); }
+.rv-line i.sel { top: 0; bottom: 0; width: 5px; margin-left: -2px; }
+.rv-line .head { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--fg); pointer-events: none; }
+.rv-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rv-controls .btn { padding-inline: 6px; }
+
+.flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 50; }
+.flash.go { animation: flash .18s ease-out; }
+@keyframes flash { from { opacity: .95; } to { opacity: 0; } }
+.haptic { position: absolute; left: -9999px; top: 0; opacity: 0; }
+.unlock {
+  position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 92%, transparent);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.unlock .btn { font-size: 1.2rem; padding: 14px 28px; }
+button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .pad, .mk { transition: none; } .flash.go { animation-duration: .01s; } }
+@media (max-height: 640px) { .pad strong { font-size: 3.6rem; } .mk { min-height: 56px; } .markwhen { font-size: 1.1rem; } }
+
+/* v2: places, the session plan, week strip, rings, skill map, profile wizard, passport, summary */
+.dogswitch, .places, .choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice, .pchip {
+  font: inherit; font-weight: 700; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--fg);
+  padding: 8px 14px; min-height: 40px; cursor: pointer;
+}
+.choice[aria-pressed="true"], .pchip[aria-checked="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.choices .choice { flex: 1 1 auto; }
+.choices.days .choice { flex: 1 1 0; padding-inline: 4px; min-width: 40px; }
+.plan { display: grid; gap: 8px; }
+.plancard { border-radius: 20px; background: var(--accent); color: var(--accent-ink); padding: 16px; display: grid; gap: 10px; }
+.plancard .eyebrow { color: inherit; opacity: .85; }
+.plancard ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.plancard li { display: grid; grid-template-columns: 4.6rem 1fr; gap: 8px; align-items: baseline; }
+.plancard li span { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; opacity: .8; }
+.plancard li b { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; text-transform: uppercase; line-height: 1.05; }
+.plancard li small { grid-column: 2; font-size: .9rem; opacity: .9; line-height: 1.3; }
+.plancard .go {
+  font: inherit; border: 0; cursor: pointer; background: var(--accent-ink); color: var(--accent); border-radius: 12px; padding: 12px; text-align: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; letter-spacing: .04em;
+}
+.plancard .links { display: flex; gap: 18px; }
+.plancard .links button { font: inherit; font-weight: 700; font-size: .88rem; color: inherit; background: none; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.plandone { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 8px; }
+.week { display: grid; grid-template-columns: repeat(7, 1fr) auto; gap: 6px; align-items: center; }
+.week i { height: 28px; border-radius: 8px; border: 2px dashed var(--line); display: grid; place-items: center; font-style: normal; font-size: .7rem; font-weight: 700; color: var(--muted); }
+.week i.plan { border-style: solid; }
+.week i.done { background: var(--keep); border-color: var(--keep); color: var(--surface); }
+.week i.today { outline: 2px solid var(--fg); outline-offset: 1px; }
+.week span { font-size: .85rem; color: var(--muted); padding-left: 4px; }
+.ring { display: block; flex: none; }
+.track { display: grid; gap: 8px; }
+.track h2 { margin-top: 6px; }
+.track > p { margin-top: -4px; }
+.skrow {
+  font: inherit; color: var(--fg); text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 10px 12px; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; cursor: pointer;
+}
+.skrow .ring { grid-row: 1 / span 2; }
+.skrow b { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; text-transform: uppercase; letter-spacing: .02em; }
+.skrow span { font-size: .85rem; color: var(--muted); }
+.skrow.locked { opacity: .62; }
+.skhead { display: flex; gap: 14px; align-items: center; }
+.sknext { font-weight: 700; font-size: 1.1rem; line-height: 1.35; }
+.ladder { margin: 0; padding-left: 1.4rem; display: grid; gap: 6px; }
+.ladder li.done { color: var(--muted); text-decoration: line-through; }
+.ladder li.now { font-weight: 700; }
+.proofbars { display: grid; gap: 8px; }
+.proofbars div { display: grid; gap: 4px; }
+.proofbars i { display: block; height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.proofbars i::after { content: ""; display: block; height: 100%; width: var(--p, 0%); background: var(--keep); }
+.onbstep { display: none; gap: 14px; }
+.onbstep.on { display: grid; }
+.onbstep input[type="text"], .onbstep input[type="date"] { font-size: 1.15rem; }
+.onbnav { margin-top: 8px; }
+.onbnav .btn { flex: 1; }
+.doglist { display: grid; gap: 8px; }
+.doglist div { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.ppgroup { display: grid; gap: 8px; margin-bottom: 12px; }
+.ppitems { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.ppitem { font: inherit; text-align: left; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); padding: 8px 10px; cursor: pointer; display: grid; gap: 2px; }
+.ppitem small { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.ppitem.happy { border-color: var(--keep); } .ppitem.happy small { color: var(--keep); }
+.ppitem.unsure { border-color: var(--warn); } .ppitem.unsure small { color: var(--warn); }
+.ppitem.scared { border-color: var(--miss); } .ppitem.scared small { color: var(--miss); }
+.sumblocks { display: grid; gap: 8px; }
+.sumblocks div { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+.sumblocks .ring { grid-row: 1 / span 2; }
+.sumblocks span { font-size: .88rem; color: var(--muted); }
+.sumblocks b.up { color: var(--keep); }
+</style>
+
+<div class="app">
+  <!-- TODAY -->
+  <section class="screen" id="s-today" aria-label="Today">
+    <div class="todayhead"><h1 id="today-title">Today</h1><span class="muted num" id="today-date"></span></div>
+    <div class="card" id="install" hidden>
+      <div class="row between"><b>Install it for the park</b><button class="linkbtn" type="button" id="install-close">Later</button></div>
+      <p class="muted">In Safari tap Share, then Add to Home Screen. The installed app opens full screen and works with no signal. Progress made here in the browser does not carry over, so install it before you start (or use Save a backup in Settings).</p>
+    </div>
+    <div class="dogswitch" id="dogswitch" hidden></div>
+    <div class="card" id="profile-ask" hidden>
+      <b id="profile-ask-title">Set up your dog</b>
+      <p class="muted">Six quick answers (about a minute) so the plan fits their age, breed and goals.</p>
+      <button class="btn solid" type="button" id="profile-ask-go">Set up</button>
+    </div>
+    <p class="muted" id="hardweek" hidden></p>
+    <span class="eyebrow" id="places-label">Where are you training?</span>
+    <div class="places" id="places" role="radiogroup" aria-labelledby="places-label"></div>
+    <div class="plan" id="plan"></div>
+    <div class="card" id="pup-passport" hidden>
+      <div class="row between"><b>Socialization passport</b><span class="muted num" id="pup-passport-n"></span></div>
+      <p class="muted" id="pup-passport-sub"></p>
+      <button class="btn" type="button" id="pup-passport-go">Open the passport</button>
+    </div>
+    <div class="card" id="pup-potty" hidden>
+      <div class="row between"><b>Potty plan</b><button class="linkbtn" type="button" id="potty-off">Turn off</button></div>
+      <p id="potty-next" class="num"></p>
+      <div class="row"><button class="btn solid" type="button" id="potty-ok">Went outside</button><button class="btn" type="button" id="potty-acc">Accident inside</button></div>
+    </div>
+    <div class="week" id="week"></div>
+    <div class="card summary" id="last" hidden>
+      <div class="row between"><span class="eyebrow" id="last-title">Last session</span><button class="linkbtn" type="button" id="last-close">Dismiss</button></div>
+      <div class="figs">
+        <div class="fig"><b id="last-time">0:00</b><span>Time</span></div>
+        <div class="fig"><b id="last-marks">0</b><span>Marks</span></div>
+        <div class="fig" id="last-rate-wrap"><b id="last-rate">0</b><span>Per minute</span></div>
+      </div>
+      <p class="muted" id="last-note"></p>
+      <button class="btn" type="button" id="last-review" hidden>Review the video</button>
+    </div>
+    <button class="linkbtn" type="button" id="pick-other">Train something else</button>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="screen" id="s-skills" aria-label="Skills" hidden>
+    <h1>Skills</h1>
+    <div class="starter">
+      <button class="tile" type="button" id="open-guide"><b>How Yes works</b><span>When to tap it, what each sound means, and the recall whistle.</span></button>
+      <button class="tile" type="button" id="go-charge"><b id="charge-tile-title">Charge Yes</b><span id="charge-tile-sub">Do this first: 2 minutes so your dog learns Yes means food.</span></button>
+    </div>
+    <div class="modules" id="modules"></div>
+  </section>
+
+  <!-- TRAINING -->
+  <section class="screen run" id="s-run" aria-label="Training" hidden>
+    <div class="runhead">
+      <button class="iconbtn" type="button" id="run-back" aria-label="End session">‹</button>
+      <div class="runtitle"><b id="run-name"></b><span class="num" id="run-step-n"></span></div>
+      <div class="runmeta" id="run-meta"><b id="run-clock">0:00</b><span id="run-rate">tap to start</span></div>
+    </div>
+    <div class="stepcard" id="stepcard">
+      <div class="stepbody">
+        <p class="markwhen" id="run-mark"></p>
+        <div class="steplinks">
+          <button class="linkbtn" type="button" id="step-prev">‹ Easier</button>
+          <button class="linkbtn" type="button" id="open-howto">How to set up</button>
+          <button class="linkbtn" type="button" id="step-next">Harder ›</button>
+          <button class="linkbtn" type="button" id="block-skip">Next block ›</button>
+        </div>
+        <p class="muted" id="run-proof" hidden></p>
+        <button class="holdbtn" type="button" id="hold" hidden></button>
+      </div>
+      <div class="coach">
+        <p id="coach-text"></p>
+        <div class="row" id="coach-actions"></div>
+      </div>
+    </div>
+    <div class="reprow">
+      <div class="reps" id="reps" aria-label="Last 5 tries"></div>
+      <button class="chip" type="button" id="undo" hidden>Undo</button>
+      <button class="chip rec" type="button" id="rec" hidden>Record</button>
+      <button class="chip recall" type="button" id="run-recall">Recall</button>
+    </div>
+    <div class="padwrap">
+      <button class="pad" id="pad" type="button" aria-label="Mark: Yes">
+        <strong>YES</strong>
+        <small id="pad-sub">Tap the moment it happens. Then treat.</small>
+      </button>
+      <video class="campreview" id="cam" playsinline muted autoplay hidden></video>
+    </div>
+    <div class="markers" id="markers">
+      <button class="mk miss" type="button" data-sound="miss" id="miss"><strong>Miss</strong><small>no sound</small></button>
+      <button class="mk catch" type="button" data-sound="catch"><strong>Catch</strong><small>treat thrown</small></button>
+      <button class="mk keep" type="button" data-sound="keep" id="mk-keep"><strong>Keep going</strong><small>no treat</small></button>
+      <button class="mk free" type="button" data-sound="free"><strong>Free</strong><small>release</small></button>
+    </div>
+  </section>
+
+  <!-- CHARGE -->
+  <section class="screen run" id="s-charge" aria-label="Charge the marker" hidden>
+    <div class="runhead">
+      <button class="iconbtn" type="button" id="charge-back" aria-label="Back">‹</button>
+      <div class="runtitle"><b>Charge Yes</b><span>20 treats, about 2 minutes</span></div>
+      <span></span>
+    </div>
+    <p class="muted">Teaches your dog that the Yes sound means food. The app plays Yes at random moments; you hand over one treat each time. Your dog does not need to do anything.</p>
+    <div class="charge-face" id="charge-face"><strong id="charge-big">Ready</strong><span id="charge-sub">Have 20 small treats in hand.</span></div>
+    <div class="dots" id="dots"></div>
+    <div class="row"><button class="btn solid" type="button" id="charge-go">Start</button><button class="btn" type="button" id="charge-reset">Reset</button></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="screen" id="s-setup" aria-label="Settings" hidden>
+    <h1>Settings</h1>
+    <div class="card">
+      <h2>Dogs</h2>
+      <div class="doglist" id="doglist"></div>
+      <button class="btn" type="button" id="dog-add">Add a dog</button>
+    </div>
+    <div class="card">
+      <h2>Sounds</h2>
+      <div class="sounds">
+        <button class="btn" type="button" data-try="yes">Yes</button>
+        <button class="btn" type="button" data-try="catch">Catch</button>
+        <button class="btn" type="button" data-try="keep">Keep going</button>
+        <button class="btn" type="button" data-try="free">Free</button>
+        <button class="btn" type="button" data-try="recall">Recall</button>
+      </div>
+      <div class="field"><label for="vol">Volume <span class="muted num" id="vol-out"></span></label><span></span></div>
+      <input type="range" id="vol" min="0.1" max="1" step="0.05">
+      <p class="muted" id="vol-warn" hidden>Above 85% the marker is loud at close range. Fine outdoors; lower it indoors.</p>
+    </div>
+    <div class="card">
+      <h2>Your own marker</h2>
+      <p class="muted">Record yourself saying "Yes!" in Voice Memos, share it to Files, then pick it here. The app trims the silence at the start so it plays instantly, and plays the identical take every time.</p>
+      <div class="row">
+        <label class="btn" for="custom-file" style="display:inline-flex;align-items:center">Choose recording</label>
+        <input type="file" id="custom-file" accept="audio/*" hidden>
+        <button class="btn" type="button" id="custom-clear" hidden>Use built-in click</button>
+      </div>
+      <p class="muted" id="custom-status">Using the built-in click for Yes.</p>
+    </div>
+    <div class="card">
+      <h2>Feedback</h2>
+      <div class="field"><label for="opt-haptic">Vibrate on every mark</label><input class="tog" type="checkbox" id="opt-haptic"></div>
+      <div class="field"><label for="opt-flash">Flash the screen (deaf dogs)</label><input class="tog" type="checkbox" id="opt-flash"></div>
+      <div class="field"><label for="opt-budget">Daily treat budget</label><input type="number" id="opt-budget" min="0" max="999" inputmode="numeric"></div>
+    </div>
+    <div class="card">
+      <h2>Practice log</h2>
+      <div class="history num" id="history"></div>
+    </div>
+    <div class="card">
+      <h2>Help</h2>
+      <details class="faq"><summary>No sound</summary><p class="muted">Turn the volume up with the side buttons (sound plays even with the silent switch on, on iOS 17 and later). If it's still quiet, close the app fully and open it again. Using your own recording? Tap "Use built-in click" to rule it out.</p></details>
+      <details class="faq"><summary>The sound comes late</summary><p class="muted">Use the phone speaker. Bluetooth speakers and AirPods add up to 200 ms, enough to mark the wrong moment. Low Power Mode can also slow it a little.</p></details>
+      <details class="faq"><summary>No vibration</summary><p class="muted">iPhone vibration on taps needs iOS 18 and System Haptics on (Settings, Sounds &amp; Haptics). It's a bonus; the sound is what your dog learns from.</p></details>
+      <details class="faq"><summary>Record does nothing or the camera is blocked</summary><p class="muted">Allow the camera: Settings, Apps, Safari, Camera, Ask or Allow. Then close the app and open it again. Filming stops if you leave the app or lock the phone.</p></details>
+      <details class="faq"><summary>My dog isn't getting it</summary><p class="muted">Go back a step (‹ Easier), train in a quieter room, use better treats and keep sessions to 2 or 3 minutes. Aim for 8 or more rewards a minute. If Yes doesn't make your dog look up, do another round of Charge Yes.</p></details>
+      <details class="faq"><summary>My progress is gone</summary><p class="muted">Progress lives on this phone only, separately in Safari and in the installed app. Clearing Safari's website data or deleting the app erases it. Save a backup now and then, below.</p></details>
+      <details class="faq"><summary>Keyboard or Bluetooth remote</summary><p class="muted">Space or Enter = Yes, C = Catch, K = Keep going, F = Free, M = Miss, R = Recall.</p></details>
+      <details class="faq"><summary>Getting updates</summary><p class="muted">The app updates itself when it has signal. A new version takes effect the next time you open it.</p></details>
+    </div>
+    <div class="card">
+      <h2>Your data</h2>
+      <p class="muted">Everything stays on this phone. Nothing is sent anywhere.</p>
+      <div class="row">
+        <button class="btn" type="button" id="backup-save">Save a backup</button>
+        <label class="btn" for="backup-file" style="display:inline-flex;align-items:center">Restore a backup</label>
+        <input type="file" id="backup-file" accept="application/json,.json" hidden>
+      </div>
+      <button class="linkbtn" type="button" id="erase-all" style="color:var(--miss);justify-self:start">Erase everything and start over</button>
+      <p class="muted num" id="version"></p>
+    </div>
+  </section>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" aria-selected="true" data-tab="today" type="button">Today</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="skills" type="button">Skills</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="setup" type="button">Settings</button>
+  </nav>
+</div>
+
+<button class="fab" type="button" id="fab" aria-label="Play the recall whistle">Recall</button>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<!-- Dog profile: six questions, one at a time -->
+<div class="sheet" id="onb" hidden role="dialog" aria-label="Dog profile">
+  <div class="row between"><span class="eyebrow num" id="onb-count"></span><button class="btn" type="button" id="onb-close">Close</button></div>
+  <div class="onbstep" data-q="name">
+    <h1>What's your dog's name?</h1>
+    <input type="text" id="onb-name" autocomplete="off" placeholder="Milo">
+  </div>
+  <div class="onbstep" data-q="age">
+    <h1 id="onb-age-h">How old is your dog?</h1>
+    <div class="choices" id="onb-age"></div>
+    <label class="muted" for="onb-birth">Or their birthday (a guess is fine)</label>
+    <input type="date" id="onb-birth">
+  </div>
+  <div class="onbstep" data-q="breed">
+    <h1>What breed?</h1>
+    <p class="muted">For a mix, pick the breed they look most like, or Not sure.</p>
+    <input type="text" id="onb-breed" list="breedlist" autocomplete="off" placeholder="Start typing, e.g. Labrador">
+    <datalist id="breedlist"></datalist>
+    <button class="linkbtn" type="button" id="onb-unsure">Not sure</button>
+    <div id="onb-quiz" hidden>
+      <p class="muted">Four quick questions instead. Tap the ones that sound like your dog:</p>
+      <div class="choices multi" id="onb-quiz-q"></div>
+    </div>
+    <p class="muted" id="onb-drive"></p>
+  </div>
+  <div class="onbstep" data-q="size">
+    <h1>How big when grown?</h1>
+    <div class="choices" id="onb-size"></div>
+  </div>
+  <div class="onbstep" data-q="goals">
+    <h1>What do you want to work on?</h1>
+    <p class="muted">Pick any. The plan leans toward these.</p>
+    <div class="choices multi" id="onb-goals"></div>
+  </div>
+  <div class="onbstep" data-q="reward">
+    <h1>What does your dog love most?</h1>
+    <div class="choices" id="onb-reward"></div>
+  </div>
+  <div class="onbstep" data-q="days">
+    <h1>Which days can you train?</h1>
+    <p class="muted">A few minutes is enough. Rest days are part of the plan.</p>
+    <div class="choices multi days" id="onb-days"></div>
+  </div>
+  <div class="row onbnav"><button class="btn" type="button" id="onb-back">Back</button><button class="btn solid" type="button" id="onb-next">Next</button></div>
+  <button class="linkbtn" type="button" id="onb-delete" hidden style="color:var(--miss);align-self:flex-start">Remove this dog</button>
+</div>
+
+<!-- One skill: level, what's next, the ladder -->
+<div class="sheet" id="skill" hidden role="dialog" aria-label="Skill">
+  <div class="row between"><span class="eyebrow" id="sk-track"></span><button class="btn" type="button" id="sk-close">Done</button></div>
+  <div class="skhead"><span id="sk-ring"></span><div><h1 id="sk-name"></h1><p class="muted" id="sk-goal"></p></div></div>
+  <p class="sknext" id="sk-next"></p>
+  <button class="btn solid" type="button" id="sk-train">Train this now</button>
+  <h2>Steps</h2>
+  <ol class="ladder" id="sk-steps"></ol>
+  <div id="sk-proof-wrap"><h2>Proofing</h2><div class="proofbars" id="sk-proof"></div></div>
+  <div id="sk-places-wrap"><h2>Places passed</h2><p class="muted" id="sk-places"></p></div>
+  <button class="linkbtn" type="button" id="sk-reset" style="color:var(--miss);align-self:flex-start">Start this skill over</button>
+</div>
+
+<!-- Socialization passport -->
+<div class="sheet" id="passport" hidden role="dialog" aria-label="Socialization passport">
+  <div class="row between"><h1>Passport</h1><button class="btn" type="button" id="pp-close">Done</button></div>
+  <p class="muted">Each new thing should be a good experience: keep your distance, pair it with food, and leave before your puppy worries. Tap an item to log how it went.</p>
+  <div id="pp-groups"></div>
+</div>
+
+<!-- Session summary -->
+<div class="sheet" id="summary" hidden role="dialog" aria-label="Session summary">
+  <h1>Nice work</h1>
+  <div class="figs summary">
+    <div class="fig"><b id="sum-time">0:00</b><span>Time</span></div>
+    <div class="fig"><b id="sum-marks">0</b><span>Marks</span></div>
+    <div class="fig" id="sum-rate-wrap"><b id="sum-rate">0</b><span>Per minute</span></div>
+  </div>
+  <div class="sumblocks" id="sum-blocks"></div>
+  <h2>How was your dog?</h2>
+  <div class="choices" id="sum-rate-dog">
+    <button class="choice" type="button" data-r="keen">Keen</button>
+    <button class="choice" type="button" data-r="ok">OK</button>
+    <button class="choice" type="button" data-r="tired">Tired</button>
+  </div>
+  <p class="muted">A nap or quiet time now helps the session stick.</p>
+  <button class="btn solid" type="button" id="sum-done">Done</button>
+</div>
+
+<!-- How Yes works -->
+<div class="sheet" id="guide" hidden role="dialog" aria-label="How Yes works">
+  <div class="row between"><h1>How Yes works</h1><button class="btn" type="button" id="close-guide">Done</button></div>
+  <p>Yes is a camera shutter. It tells your dog the exact moment they earned the treat, so they can repeat that moment. The treat comes a second later; the sound is the part they learn from.</p>
+  <h2>The rules</h2>
+  <ol class="rules">
+    <li><b>1</b><span><strong>Charge it first.</strong>Before Yes means anything, it has to mean food. Do the 2-minute Charge routine once or twice, then start training.</span></li>
+    <li><b>2</b><span><strong>Tap the instant it happens.</strong>Mark when the rear touches the floor, not when the dog is already getting up again. Every step tells you exactly what to mark.</span></li>
+    <li><b>3</b><span><strong>Every Yes gets a treat.</strong>Even an accidental one. A Yes without food teaches your dog to ignore it.</span></li>
+    <li><b>4</b><span><strong>Hands still, then treat.</strong>Tap first, then reach for the treat. If your hand moves first, your dog watches your hand instead of listening.</span></li>
+    <li><b>5</b><span><strong>Yes ends the rep.</strong>After Yes your dog may move to get the treat. That's fine. Set up the next rep, or tap Free to finish.</span></li>
+    <li><b>6</b><span><strong>No Yes for nothing.</strong>Don't use it to call your dog, to get attention, or as praise. Praise all you want, but with your voice.</span></li>
+    <li><b>7</b><span><strong>Missed it? Tap Miss.</strong>No sound, no treat, no scolding. Just reset and try again. Two misses in a row means the step is too hard: make it easier.</span></li>
+  </ol>
+  <h2>When to use Yes</h2>
+  <p>Use it while you're teaching or polishing a skill. Once a step is solid (4 of 5 right on at least two different days, in more than one place), you can reward with praise, play, or a door opening instead, and save Yes for new steps. Whenever you do use Yes, food follows.</p>
+  <h2>The four sounds</h2>
+  <div class="soundmap">
+    <div><b style="color:var(--accent)">Yes</b><span>That was it. Come get your treat from my hand.</span></div>
+    <div><b style="color:var(--catch)">Catch</b><span>That was it, and the treat is flying. Toss it so your dog moves away and resets for the next rep.</span></div>
+    <div><b style="color:var(--keep)">Keep going</b><span>You're on the right track, keep doing it. No treat. It only shows on holds and walking steps.</span></div>
+    <div><b>Free</b><span>You're released. The session is over, go sniff.</span></div>
+  </div>
+  <h2>The recall whistle</h2>
+  <ol class="rules blue">
+    <li><b>1</b><span>The blue Recall button plays it from any screen. Use it only to call your dog, never to scold or interrupt.</span></li>
+    <li><b>2</b><span>Every time it plays, pay a jackpot: 5 or more treats in a row, or the best toy.</span></li>
+    <li><b>3</b><span>Charge it at home first: play it, then jackpot, ten times over a few days, before you ever need it outside.</span></li>
+  </ol>
+  <h2>Filming a session</h2>
+  <p>In the installed app, tap Record on the training screen. Hold the phone at your chest with the screen facing you; the back camera sees your dog. Afterwards, Review shows every tap on the video so you can see whether you marked the right moment.</p>
+  <button class="btn solid" type="button" id="close-guide-2">Got it</button>
+</div>
+
+<!-- How to set up the current step -->
+<div class="sheet" id="howto" hidden role="dialog" aria-label="How to set up this step">
+  <div class="row between"><h1 id="howto-title"></h1><button class="btn" type="button" id="close-howto">Done</button></div>
+  <p class="markwhen" id="howto-mark"></p>
+  <ol class="rules">
+    <li><b>1</b><span><strong>Set up</strong><span id="howto-setup"></span></span></li>
+    <li><b>2</b><span><strong>Reward</strong><span id="howto-reward"></span></span></li>
+    <li><b>3</b><span><strong>Cue</strong><span id="howto-cue"></span></span></li>
+  </ol>
+  <p class="muted">Short rounds of 5 tries. Tap Miss when it doesn't happen; the app tells you when to move on or make it easier.</p>
+  <button class="btn solid" type="button" id="close-howto-2">Start</button>
+  <button class="linkbtn" type="button" id="skill-reset" style="color:var(--miss);justify-self:start;align-self:flex-start">Start this skill over from step 1</button>
+</div>
+
+<!-- Video review -->
+<div class="sheet" id="review" hidden role="dialog" aria-label="Review the session video">
+  <div class="row between"><h1>Review</h1><button class="btn" type="button" id="rv-close">Done</button></div>
+  <div class="rv-stage">
+    <video id="rv-video" playsinline muted preload="auto"></video>
+    <span class="rv-flash" id="rv-flash" hidden>Yes</span>
+  </div>
+  <div class="rv-line" id="rv-line" aria-label="Timeline with your marks"><span class="head" id="rv-head"></span></div>
+  <div class="rv-controls">
+    <button class="btn" type="button" id="rv-prev">‹ Mark</button>
+    <button class="btn solid" type="button" id="rv-play">Play slow</button>
+    <button class="btn" type="button" id="rv-next">Mark ›</button>
+    <button class="btn" type="button" id="rv-back1">− Frame</button>
+    <button class="btn" type="button" id="rv-moment">Here</button>
+    <button class="btn" type="button" id="rv-fwd1">+ Frame</button>
+  </div>
+  <p id="rv-info">Jump to a mark, step frame by frame to the moment it really happened (rump on the floor, nose on the palm), then tap Here.</p>
+  <p class="muted num" id="rv-summary"></p>
+  <button class="btn" type="button" id="rv-save" hidden>Save video</button>
+</div>
+
+<div class="unlock" id="unlock">
+  <h1>Pocket Trainer</h1>
+  <p class="muted">Phones need one tap before they can play sound. Turn your volume up.</p>
+  <button class="btn solid" type="button" id="unlock-btn">Start training</button>
+</div>
+<div class="turn" aria-hidden="true">Turn your phone upright to train.</div>
+<div class="flash" id="flash"></div>
+<label class="haptic" id="haptic" aria-hidden="true"><input type="checkbox" switch tabindex="-1"></label>
+
