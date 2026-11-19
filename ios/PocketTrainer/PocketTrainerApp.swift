@@ -9,6 +9,7 @@ struct PocketTrainerApp: App {
             RootView()
                 .environmentObject(model)
                 .environmentObject(model.recorder)
+                .environmentObject(model.gps)
         }
     }
 }
@@ -41,28 +42,32 @@ struct RootView: View {
             .padding(.trailing, 16).padding(.bottom, 64)
         }
         .appOverlays()
-        .fullScreenCover(item: $model.route) { route in
+        .fullScreenCover(item: $model.route, onDismiss: { model.showPendingSummary() }) { route in
             Group {
                 switch route {
-                case .training(let id): TrainingView(module: Catalog.module(id))
+                case .training: TrainingView()
                 case .charge: ChargeView()
                 }
             }
             .environmentObject(model)
             .environmentObject(model.recorder)
+            .environmentObject(model.gps)
         }
-        .sheet(isPresented: $model.showGuide, onDismiss: { model.state.guideSeen = true }) {
-            GuideView()
-        }
+        .sheet(isPresented: $model.showGuide, onDismiss: { model.root.guideSeen = true }) { GuideView() }
+        .sheet(item: $model.showOnboarding) { d in OnboardingView(draft: d).environmentObject(model) }
+        .sheet(item: $model.finished) { f in SummaryView(f: f).environmentObject(model) }
         .onChange(of: phase) { _, p in
             if p == .active { model.becameActive() }
         }
-        #if DEBUG
         .onAppear {
+            if model.root.dogs.isEmpty { model.showOnboarding = Dog() }
+            #if DEBUG
             let args = ProcessInfo.processInfo.arguments
             if let i = args.firstIndex(of: "-tab"), i + 1 < args.count { tab = args[i + 1] }
-            if args.contains("-openTraining") { model.start("sit") }
+            if args.contains("-openTraining") { model.startSingle("stay") }
+            if args.contains("-openSound") { model.startSingle("snd:gun") }
+            if args.contains("-openField") { model.startSingle("marks") }
+            #endif
         }
-        #endif
     }
 }

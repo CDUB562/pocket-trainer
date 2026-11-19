@@ -12,6 +12,7 @@ final class MarkerAudio {
     private let engine = AVAudioEngine()
     private let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1)!
     private var buffers: [Sound: AVAudioPCMBuffer] = [:]
+    private var named: [String: AVAudioPCMBuffer] = [:]   // field whistles and sound-ladder sounds
     private var custom: AVAudioPCMBuffer?
     private var players: [AVAudioPlayerNode] = []
     private var nextPlayer = 0
@@ -78,10 +79,21 @@ final class MarkerAudio {
     }
 
     func play(_ sound: Sound) {
-        ensureRunning()
         guard let buf = (sound == .yes ? custom : nil) ?? buffers[sound] else { return }
+        schedule(buf, volume: 1)
+    }
+
+    /// A field whistle (wsit, wcome, wturn) or a sound-ladder sound, optionally quieter for a ladder step.
+    func play(named name: String, volume: Float = 1) {
+        guard let buf = named[name] else { return }
+        schedule(buf, volume: volume)
+    }
+
+    private func schedule(_ buf: AVAudioPCMBuffer, volume: Float) {
+        ensureRunning()
         let p = players[nextPlayer]
         nextPlayer = (nextPlayer + 1) % players.count
+        p.volume = volume
         p.scheduleBuffer(buf, at: nil, options: .interrupts, completionHandler: nil)
         if !p.isPlaying { p.play() }
     }
@@ -129,6 +141,51 @@ final class MarkerAudio {
             phase += 2 * .pi * f / sr
             return min(1, u / 0.01) * min(1, (len - u) / 0.02) * sin(phase)
         }
+        buildFieldSounds()
+    }
+
+    // Field whistles and the sound-ladder sounds, synthesized like the web app's so both apps sound the same.
+    private func buildFieldSounds() {
+        func noise() -> Double { Double.random(in: -1...1) }
+        // A pea whistle: about 2.9 kHz with the pea's fast warble.
+        func pea(_ t: Double, _ start: Double, _ len: Double) -> Double {
+            let u = t - start
+            if u < 0 || u > len { return 0 }
+            return min(1, u / 0.01) * min(1, (len - u) / 0.015) * (0.65 + 0.35 * sin(2 * .pi * 34 * u)) * sin(2 * .pi * 2900 * u)
+        }
+        named["wsit"] = render(0.6) { t, _ in pea(t, 0, 0.55) }
+        named["wcome"] = render(0.95) { t, _ in (0..<7).reduce(0.0) { $0 + pea(t, Double($1) * 0.13, 0.08) } }
+        named["wturn"] = render(0.42) { t, _ in pea(t, 0, 0.12) + pea(t, 0.24, 0.12) }
+        named["doorbell"] = render(1.7) { t, _ in
+            func ding(_ f: Double, _ s0: Double) -> Double { let u = t - s0; return u < 0 ? 0 : exp(-u / 0.5) * (sin(2 * .pi * f * u) + 0.3 * sin(4 * .pi * f * u)) }
+            return ding(659, 0) + ding(523, 0.55)
+        }
+        // Brown noise (a running sum, kept from drifting) for traffic and thunder.
+        var brown = 0.0
+        func rumble() -> Double { brown = (brown + 0.02 * noise()) * 0.997; return brown }
+        named["traffic"] = render(4) { t, _ in rumble() * exp(-pow((t - 2) / 0.9, 2)) * 3 }
+        named["thunder"] = render(4) { t, _ in
+            let env = min(1, t / 0.25) * exp(-t / 1.3) * (1 + 0.5 * sin(2 * .pi * 1.7 * t))
+            return rumble() * env * 4
+        }
+        // Fireworks: three bangs, each with a crackle tail.
+        func bang(_ t: Double, _ s0: Double) -> Double {
+            let u = t - s0
+            if u < 0 { return 0 }
+            let crackle = u > 0.15 && Double.random(in: 0...1) < 0.02 ? noise() * exp(-(u - 0.15) / 0.5) : 0
+            return noise() * exp(-u / 0.07) + 0.6 * sin(2 * .pi * 55 * u) * exp(-u / 0.12) + crackle
+        }
+        named["fireworks"] = render(2.6) { t, _ in bang(t, 0) + 0.8 * bang(t, 0.8) + 0.9 * bang(t, 1.5) }
+        // A duck call: three nasal quacks with a falling pitch.
+        func quack(_ t: Double, _ s0: Double) -> Double {
+            let u = t - s0
+            if u < 0 || u > 0.2 { return 0 }
+            let f = 420 - 220 * u, ph = (f * u).truncatingRemainder(dividingBy: 1)
+            return min(1, u / 0.01) * min(1, (0.2 - u) / 0.04) * ((2 * ph - 1) * 0.7 + 0.3 * sin(2 * .pi * 3 * f * u))
+        }
+        named["duck"] = render(1.1) { t, _ in quack(t, 0) + quack(t, 0.32) + quack(t, 0.62) }
+        // A gunshot: a sharp noise crack, a low thump and a short echo.
+        named["gun"] = render(1.4) { t, _ in noise() * (exp(-t / 0.035) + 0.18 * exp(-t / 0.5)) + 0.9 * sin(2 * .pi * 60 * t) * exp(-t / 0.09) }
     }
 
     // MARK: Your own marker

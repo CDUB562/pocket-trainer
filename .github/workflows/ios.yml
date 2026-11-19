@@ -53,8 +53,10 @@ jobs:
           shot 2-skills -demo -tab skills
           shot 3-training -demo -openTraining
           shot 4-settings -demo -tab setup
+          shot 5-sound-ladder -demo -openSound
+          shot 6-field-outcomes -demo -openField
           xcrun simctl ui "$UDID" appearance dark
-          shot 5-training-dark -demo -openTraining
+          shot 7-today-dark -demo
           # The app must still be running (no crash) after all of that.
           xcrun simctl spawn "$UDID" launchctl list | grep -q "$ID" && echo "app alive"
 

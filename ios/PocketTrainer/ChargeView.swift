@@ -84,9 +84,10 @@ struct ChargeView: View {
             }
             if Task.isCancelled { return }
             running = false
-            model.state.charged = true
-            model.markPlanDone("charge")
-            show("Charged", "Do one more round tomorrow. Next: your first skill on Today.", false)
+            model.st.charged = true
+            if !model.st.days.contains(model.today) { model.st.days.append(model.today) }
+            model.st.plan = nil
+            show("Charged", "Do one more round tomorrow. Your first skills are on Today now.", false)
         }
     }
 }

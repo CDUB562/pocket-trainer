@@ -69,6 +69,10 @@ final class Recorder: NSObject, ObservableObject, AVCaptureFileOutputRecordingDe
         queue.async { if self.output.isRecording { self.output.stopRecording() } }
     }
 
+    var markCount: Int { marks.count }
+    /// Undo removes the last mark from the video timeline too.
+    func trimMarks(to n: Int) { if marks.count > n { marks.removeLast(marks.count - n) } }
+
     /// Tap times use the touch's own timestamp (seconds since boot), the same clock as the recording start.
     func addMark(_ kind: String, at uptime: TimeInterval) {
         guard isRecording else { return }

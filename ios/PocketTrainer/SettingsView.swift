@@ -23,9 +23,15 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Your dog") {
-                    TextField("Name", text: $model.state.settings.dog)
-                        .textInputAutocapitalization(.words)
+                Section("Dogs") {
+                    ForEach(model.root.dogs) { d in
+                        HStack {
+                            Text((d.name.isEmpty ? "Unnamed" : d.name) + (d.breed.map { " · \($0)" } ?? "") + (d.id == model.root.active ? " · active" : ""))
+                            Spacer()
+                            Button("Edit") { model.showOnboarding = d }.foregroundStyle(Theme.toss)
+                        }
+                    }
+                    Button("Add a dog") { model.showOnboarding = Dog() }
                 }
 
                 Section {
@@ -38,14 +44,22 @@ struct SettingsView: View {
                         }
                     }
                     .padding(.vertical, 4)
+                    HStack(spacing: 8) {
+                        ForEach(["wsit", "wcome", "wturn"], id: \.self) { w in
+                            Button { model.audio.play(named: w) } label: {
+                                Text(w == "wsit" ? "Sit whistle" : w == "wcome" ? "Come whistle" : "Turn whistle").lineLimit(1).minimumScaleFactor(0.7).frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(OutlineButtonStyle())
+                        }
+                    }
                     VStack(alignment: .leading) {
-                        Text("Volume \(Int(model.state.settings.volume * 100))%").monospacedDigit()
-                        Slider(value: $model.state.settings.volume, in: 0.1...1, step: 0.05, onEditingChanged: { editing in
+                        Text("Volume \(Int(model.root.settings.volume * 100))%").monospacedDigit()
+                        Slider(value: $model.root.settings.volume, in: 0.1...1, step: 0.05, onEditingChanged: { editing in
                             if !editing { model.audio.play(.yes) }
                         })
                         .tint(Theme.accent)
                     }
-                    if model.state.settings.volume > 0.85 {
+                    if model.root.settings.volume > 0.85 {
                         Text("Above 85% the marker is loud at close range. Fine outdoors; lower it indoors.").font(.footnote).foregroundStyle(Theme.muted)
                     }
                 } header: { Text("Sounds") } footer: {
@@ -75,20 +89,20 @@ struct SettingsView: View {
                 }
 
                 Section("Feedback") {
-                    Toggle("Vibrate on every mark", isOn: $model.state.settings.haptic)
-                    Toggle("Flash the screen (deaf dogs)", isOn: $model.state.settings.flash)
-                    Stepper("Daily treat budget: \(model.state.settings.budget)", value: $model.state.settings.budget, in: 0...500, step: 5)
+                    Toggle("Vibrate on every mark", isOn: $model.root.settings.haptic)
+                    Toggle("Flash the screen (deaf dogs)", isOn: $model.root.settings.flash)
+                    Stepper("Daily treat budget: \(model.root.settings.budget)", value: $model.root.settings.budget, in: 0...500, step: 5)
                 }
                 .tint(Theme.accent)
 
                 Section("Practice log") {
-                    if model.state.history.isEmpty {
+                    if model.st.history.isEmpty {
                         Text("Finished sessions show up here.").foregroundStyle(Theme.muted)
                     }
-                    ForEach(model.state.history.prefix(12)) { h in
+                    ForEach(model.st.history.prefix(12)) { h in
                         HStack {
                             Text(h.at, format: .dateTime.month(.abbreviated).day())
-                            Text("· " + Catalog.module(h.module).name)
+                            Text("· " + (h.blocks.count > 2 ? "\(Catalog.any(h.blocks[0]).name) + \(h.blocks.count - 1)" : h.blocks.map { Catalog.any($0).name }.joined(separator: ", "))).lineLimit(1)
                             Spacer()
                             Text("\(h.marks) marks").foregroundStyle(Theme.muted)
                             Text(clock(h.secs)).foregroundStyle(Theme.muted)
@@ -103,6 +117,8 @@ struct SettingsView: View {
                     faq("No vibration", "Check that \"Vibrate on every mark\" is on, and that System Haptics is on in the iPhone's Settings, Sounds & Haptics.")
                     faq("Record does nothing", "Allow the camera: iPhone Settings, Pocket Trainer, Camera. Filming stops if you leave the app or lock the phone; what was filmed is kept.")
                     faq("My dog isn't getting it", "Go back a step (‹ Easier), train in a quieter room, use better treats and keep sessions to 2 or 3 minutes. Aim for 8 or more rewards a minute. If Yes doesn't make your dog look up, do another round of Charge Yes.")
+                    faq("Distance shows nothing", "Allow location: iPhone Settings, Pocket Trainer, Location, While Using. It's used only while the Distance chip is on, and never leaves the phone. GPS needs open sky; the ± number is its accuracy.")
+                    faq("Gun conditioning is locked", "It opens once the Gunshot sound ladder reaches step 7 with calm sessions since any startle. If your dog was worried, it relocks on purpose: a few calm days on the ladder first.")
                     faq("Moving to a new phone", "Save a backup below, keep it in Files or iCloud Drive, then use Restore a backup on the new phone. Videos and your recorded Yes are not in the backup.")
                 }
 
@@ -122,7 +138,7 @@ struct SettingsView: View {
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 72) }
             .background(Theme.bg)
             .navigationTitle("Settings")
-            .onChange(of: model.state.settings.volume) { _, v in model.audio.volume = Float(v) }
+            .onChange(of: model.root.settings.volume) { _, v in model.audio.volume = Float(v) }
             .fileExporter(isPresented: $exporting, document: backupDoc, contentType: .json,
                           defaultFilename: "pocket-trainer-backup-\(model.today)") { result in
                 if case .success = result { model.toast("Backup saved.") }

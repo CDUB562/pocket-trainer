@@ -1,0 +1,3799 @@
+{
+ "tracks": [
+  {
+   "id": "foundations",
+   "name": "Foundations",
+   "blurb": "The core every dog needs."
+  },
+  {
+   "id": "puppy",
+   "name": "Puppy",
+   "blurb": "First weeks home: confidence, crate, gentle mouth."
+  },
+  {
+   "id": "life",
+   "name": "Life skills",
+   "blurb": "Vet, grooming, car, guests and going out."
+  },
+  {
+   "id": "field",
+   "name": "Field basics",
+   "blurb": "Whistles, the retrieve, birds and gunfire. Shared by every bird track.",
+   "goals": [
+    "waterfowl",
+    "upland"
+   ]
+  },
+  {
+   "id": "waterfowl",
+   "name": "Waterfowl",
+   "blurb": "Ducks and geese: steadiness, marks, water, blinds.",
+   "goals": [
+    "waterfowl"
+   ]
+  },
+  {
+   "id": "upland",
+   "name": "Upland pointing",
+   "blurb": "Quail, pheasant, chukar: point, whoa, steady to wing and shot.",
+   "goals": [
+    "upland"
+   ]
+  }
+ ],
+ "places": [
+  {
+   "id": "home",
+   "name": "Home"
+  },
+  {
+   "id": "yard",
+   "name": "Yard"
+  },
+  {
+   "id": "street",
+   "name": "Street"
+  },
+  {
+   "id": "park",
+   "name": "Park"
+  },
+  {
+   "id": "field",
+   "name": "Field"
+  },
+  {
+   "id": "water",
+   "name": "Water"
+  }
+ ],
+ "levels": [
+  "Learning",
+  "Fluent",
+  "Proofed",
+  "Reliable",
+  "Maintained"
+ ],
+ "sounds": [
+  {
+   "id": "doorbell",
+   "name": "Doorbell"
+  },
+  {
+   "id": "traffic",
+   "name": "Traffic"
+  },
+  {
+   "id": "thunder",
+   "name": "Thunder"
+  },
+  {
+   "id": "fireworks",
+   "name": "Fireworks"
+  },
+  {
+   "id": "duck",
+   "name": "Duck call"
+  },
+  {
+   "id": "gun",
+   "name": "Gunshot"
+  }
+ ],
+ "seasons": {
+  "waterfowl": {
+   "name": "Waterfowl opener",
+   "milestones": [
+    "retrieve",
+    "gun",
+    "steady",
+    "marks",
+    "waterentry",
+    "waterdelivery",
+    "doubles",
+    "blindmanners"
+   ]
+  },
+  "upland": {
+   "name": "Upland opener",
+   "milestones": [
+    "birdintro",
+    "whoa",
+    "pointdur",
+    "steadywing",
+    "steadyshot",
+    "range"
+   ]
+  }
+ },
+ "passport": [
+  {
+   "id": "people",
+   "name": "People",
+   "items": [
+    "Man with a beard",
+    "Woman in a hat",
+    "Child",
+    "Toddler",
+    "Person in a uniform",
+    "Person with a cane or walker",
+    "Person in sunglasses",
+    "Person in a hood",
+    "Delivery person",
+    "Small crowd"
+   ]
+  },
+  {
+   "id": "surfaces",
+   "name": "Surfaces",
+   "items": [
+    "Grass",
+    "Gravel",
+    "Wet pavement",
+    "Metal grate",
+    "Slippery tile",
+    "Carpeted stairs",
+    "Wobbly board",
+    "Sand",
+    "Puddle",
+    "Bridge or deck"
+   ]
+  },
+  {
+   "id": "sounds",
+   "name": "Sounds",
+   "items": [
+    "Vacuum",
+    "Blender",
+    "Doorbell",
+    "Traffic",
+    "Thunder (recording, quiet)",
+    "Fireworks (recording, quiet)",
+    "Dog barking",
+    "Baby crying",
+    "Hair dryer",
+    "Lawn mower"
+   ]
+  },
+  {
+   "id": "handling",
+   "name": "Handling",
+   "items": [
+    "Paws held",
+    "Ears looked in",
+    "Mouth opened",
+    "Nails touched",
+    "Collar grabbed",
+    "Brushed",
+    "Bath",
+    "Towel dry"
+   ]
+  },
+  {
+   "id": "places",
+   "name": "Places",
+   "items": [
+    "Car ride",
+    "Pet store",
+    "Vet lobby (happy visit)",
+    "Friend's house",
+    "Park",
+    "Parking lot",
+    "Outdoor café",
+    "Elevator"
+   ]
+  },
+  {
+   "id": "animals",
+   "name": "Animals",
+   "items": [
+    "Calm adult dog",
+    "Another puppy",
+    "Cat",
+    "Horses or livestock at a distance",
+    "Birds",
+    "Small pet"
+   ]
+  },
+  {
+   "id": "objects",
+   "name": "Objects",
+   "items": [
+    "Umbrella opening",
+    "Bicycle",
+    "Skateboard",
+    "Stroller",
+    "Shopping cart",
+    "Balloon",
+    "Flapping flag",
+    "Trash can lid"
+   ]
+  }
+ ],
+ "drives": {
+  "retrieve": {
+   "name": "Retriever type",
+   "reward": "Food, and a thrown toy as a bonus",
+   "watch": "mouthing, breaking on thrown things, door dashing"
+  },
+  "point": {
+   "name": "Pointing type",
+   "reward": "Food; a flirt pole for play",
+   "watch": "range on walks, recall around bird scent"
+  },
+  "flush": {
+   "name": "Flushing spaniel type",
+   "reward": "Food and toys",
+   "watch": "range, staying steady when something flies"
+  },
+  "scent": {
+   "name": "Scent hound type",
+   "reward": "High-value food",
+   "watch": "recall with the nose down, howling"
+  },
+  "sight": {
+   "name": "Sighthound type",
+   "reward": "Food; a lure toy for play",
+   "watch": "chasing small animals, recall in open spaces"
+  },
+  "herd": {
+   "name": "Herding type",
+   "reward": "Toys and tug; food works too",
+   "watch": "chasing motion, sensitivity to noise"
+  },
+  "terrier": {
+   "name": "Terrier type",
+   "reward": "Tug and food",
+   "watch": "leave it, digging, other dogs"
+  },
+  "guard": {
+   "name": "Guardian or bull type",
+   "reward": "Food",
+   "watch": "greetings, other dogs, guarding things"
+  },
+  "companion": {
+   "name": "Companion type",
+   "reward": "Small, soft food",
+   "watch": "potty training, being left alone, jumping up"
+  }
+ },
+ "breeds": [
+  {
+   "name": "Labrador Retriever",
+   "drive": "retrieve",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Golden Retriever",
+   "drive": "retrieve",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Chesapeake Bay Retriever",
+   "drive": "retrieve",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Flat-Coated Retriever",
+   "drive": "retrieve",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Nova Scotia Duck Tolling Retriever",
+   "drive": "retrieve",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Boykin Spaniel",
+   "drive": "flush",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "English Springer Spaniel",
+   "drive": "flush",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Cocker Spaniel",
+   "drive": "flush",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "German Shorthaired Pointer",
+   "drive": "point",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "German Wirehaired Pointer",
+   "drive": "point",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "English Pointer",
+   "drive": "point",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "English Setter",
+   "drive": "point",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Irish Setter",
+   "drive": "point",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Brittany",
+   "drive": "point",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Vizsla",
+   "drive": "point",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Weimaraner",
+   "drive": "point",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Wirehaired Pointing Griffon",
+   "drive": "point",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Small Munsterlander",
+   "drive": "point",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Beagle",
+   "drive": "scent",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Bloodhound",
+   "drive": "scent",
+   "size": "g",
+   "flat": false
+  },
+  {
+   "name": "Coonhound",
+   "drive": "scent",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Basset Hound",
+   "drive": "scent",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Dachshund",
+   "drive": "scent",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Catahoula Leopard Dog",
+   "drive": "herd",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Blackmouth Cur",
+   "drive": "scent",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Plott Hound",
+   "drive": "scent",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Greyhound",
+   "drive": "sight",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Whippet",
+   "drive": "sight",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Border Collie",
+   "drive": "herd",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Australian Shepherd",
+   "drive": "herd",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Australian Cattle Dog",
+   "drive": "herd",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "German Shepherd",
+   "drive": "herd",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Belgian Malinois",
+   "drive": "herd",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Shetland Sheepdog",
+   "drive": "herd",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Corgi",
+   "drive": "herd",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Jack Russell Terrier",
+   "drive": "terrier",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Rat Terrier",
+   "drive": "terrier",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Yorkshire Terrier",
+   "drive": "terrier",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Miniature Schnauzer",
+   "drive": "terrier",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Bull Terrier",
+   "drive": "terrier",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "American Pit Bull Terrier",
+   "drive": "guard",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "American Staffordshire Terrier",
+   "drive": "guard",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Rottweiler",
+   "drive": "guard",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Doberman",
+   "drive": "guard",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Boxer",
+   "drive": "guard",
+   "size": "l",
+   "flat": true
+  },
+  {
+   "name": "Mastiff",
+   "drive": "guard",
+   "size": "g",
+   "flat": false
+  },
+  {
+   "name": "Cane Corso",
+   "drive": "guard",
+   "size": "g",
+   "flat": false
+  },
+  {
+   "name": "Great Dane",
+   "drive": "guard",
+   "size": "g",
+   "flat": false
+  },
+  {
+   "name": "Bernese Mountain Dog",
+   "drive": "guard",
+   "size": "g",
+   "flat": false
+  },
+  {
+   "name": "Dogo Argentino",
+   "drive": "guard",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Siberian Husky",
+   "drive": "sight",
+   "size": "l",
+   "flat": false
+  },
+  {
+   "name": "Poodle",
+   "drive": "retrieve",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Goldendoodle",
+   "drive": "companion",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Labradoodle",
+   "drive": "companion",
+   "size": "m",
+   "flat": false
+  },
+  {
+   "name": "Cavalier King Charles Spaniel",
+   "drive": "companion",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Shih Tzu",
+   "drive": "companion",
+   "size": "s",
+   "flat": true
+  },
+  {
+   "name": "Maltese",
+   "drive": "companion",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Chihuahua",
+   "drive": "companion",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Pomeranian",
+   "drive": "companion",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "Havanese",
+   "drive": "companion",
+   "size": "s",
+   "flat": false
+  },
+  {
+   "name": "French Bulldog",
+   "drive": "companion",
+   "size": "s",
+   "flat": true
+  },
+  {
+   "name": "English Bulldog",
+   "drive": "guard",
+   "size": "m",
+   "flat": true
+  },
+  {
+   "name": "Pug",
+   "drive": "companion",
+   "size": "s",
+   "flat": true
+  },
+  {
+   "name": "Boston Terrier",
+   "drive": "companion",
+   "size": "s",
+   "flat": true
+  }
+ ],
+ "skills": [
+  {
+   "id": "name",
+   "track": "foundations",
+   "name": "Name",
+   "goal": "Eyes on you when you say their name.",
+   "cue": "Their name, said once in a happy voice.",
+   "proofMark": "they look at you after their name, said once.",
+   "needs": [
+    "charge"
+   ],
+   "proof": {
+    "dis": [
+     {
+      "v": 0,
+      "t": "a quiet room"
+     },
+     {
+      "v": 1,
+      "t": "a toy on the floor"
+     },
+     {
+      "v": 2,
+      "t": "someone moving around"
+     },
+     {
+      "v": 3,
+      "t": "outside"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Free eye contact",
+     "mark": "your dog looks at your face on their own.",
+     "setup": "Quiet room, treats ready, say nothing. Just wait.",
+     "reward": "Hand the treat at your chest so their eyes come back up to you."
+    },
+    {
+     "t": "Name, then look",
+     "mark": "they turn their head toward you after you say their name.",
+     "setup": "Wait until they glance away (not busy sniffing), say the name once.",
+     "reward": "Treat at your chest."
+    },
+    {
+     "t": "Mild distraction",
+     "mark": "they look at you after their name, with a toy on the floor nearby.",
+     "setup": "Toy or another person in the room. Say the name once. No repeats.",
+     "reward": "Treat at your chest. If they don't look in 3 s, move closer."
+    },
+    {
+     "t": "Across the room",
+     "mark": "they look or start toward you from across the room.",
+     "setup": "They're 3 to 5 m away, not busy. Name once.",
+     "reward": "Catch works here: toss the treat toward them."
+    },
+    {
+     "t": "Outside",
+     "mark": "they look at you after their name in the yard or on the sidewalk.",
+     "setup": "On leash, a quiet spot first. Name once.",
+     "reward": "Your best treats outside."
+    }
+   ]
+  },
+  {
+   "id": "touch",
+   "track": "foundations",
+   "name": "Hand target",
+   "goal": "Nose to your palm. A handy way to move them anywhere.",
+   "cue": "\"Touch\"",
+   "proofMark": "their nose hits your palm on \"Touch\".",
+   "needs": [
+    "charge"
+   ],
+   "proof": {
+    "dist": [
+     {
+      "v": 0,
+      "t": "palm beside you"
+     },
+     {
+      "v": 1,
+      "t": "palm 1 m away"
+     },
+     {
+      "v": 2,
+      "t": "palm 3 m away"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "a quiet room"
+     },
+     {
+      "v": 1,
+      "t": "a toy nearby"
+     },
+     {
+      "v": 2,
+      "t": "outside"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Bump the palm",
+     "mark": "their nose touches your flat palm.",
+     "setup": "Hold a flat palm 5 cm from their nose. Most dogs sniff it right away.",
+     "reward": "Treat from your OTHER hand, then hide the palm behind your back and present again."
+    },
+    {
+     "t": "Move the palm",
+     "mark": "they move to bump your palm held 20 to 30 cm to the left, right, up or low.",
+     "setup": "Change the spot each rep.",
+     "reward": "Treat from the other hand."
+    },
+    {
+     "t": "Add the word",
+     "mark": "they bump your palm after you say \"Touch\".",
+     "setup": "Say \"Touch\", then present the palm. Word first, hand second.",
+     "reward": "Treat from the other hand."
+    },
+    {
+     "t": "Come to the hand",
+     "mark": "their nose hits your palm after they walk 2 or 3 steps to it.",
+     "setup": "Step away, say \"Touch\", hold the palm out.",
+     "reward": "Treat at the palm."
+    },
+    {
+     "t": "Use it for real",
+     "mark": "they touch on cue in a new room or outside.",
+     "setup": "Use Touch to move them off the couch, past a dog, or through a door.",
+     "reward": "Treat at the palm."
+    }
+   ]
+  },
+  {
+   "id": "sit",
+   "track": "foundations",
+   "name": "Sit",
+   "goal": "Rear on the floor, from a word.",
+   "cue": "\"Sit\"",
+   "proofMark": "they sit on one cue.",
+   "needs": [
+    "charge"
+   ],
+   "proof": {
+    "dist": [
+     {
+      "v": 0,
+      "t": "beside you"
+     },
+     {
+      "v": 1,
+      "t": "2 steps away"
+     },
+     {
+      "v": 2,
+      "t": "5 steps away"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "a quiet room"
+     },
+     {
+      "v": 1,
+      "t": "you moving your hands"
+     },
+     {
+      "v": 2,
+      "t": "a dropped treat"
+     },
+     {
+      "v": 3,
+      "t": "outside"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Lure",
+     "mark": "the rear touches the floor.",
+     "setup": "Treat at their nose, move it slowly up and back over the head. The rear drops as the head goes up.",
+     "reward": "Give the lure treat while they're still sitting."
+    },
+    {
+     "t": "Empty hand",
+     "mark": "the rear touches the floor.",
+     "setup": "Same hand motion, no treat in that hand.",
+     "reward": "Treat from your other hand or pouch, delivered while they sit."
+    },
+    {
+     "t": "Small signal",
+     "mark": "the rear touches the floor after a small upward flick of your hand.",
+     "setup": "Make the motion smaller each rep, standing up straight.",
+     "reward": "Treat while they sit."
+    },
+    {
+     "t": "Add the word",
+     "mark": "the rear touches the floor.",
+     "setup": "Say \"Sit\" once, wait half a second, THEN give the hand signal.",
+     "reward": "Treat while they sit. Soon they'll sit before the signal."
+    },
+    {
+     "t": "Word only",
+     "mark": "they sit after \"Sit\" with your hands still.",
+     "setup": "Hands at your sides. If no sit in 3 seconds, go back a step.",
+     "reward": "Treat while they sit."
+    },
+    {
+     "t": "Hold the sit",
+     "mark": "they've held the sit until the timer marks it.",
+     "setup": "Ask for Sit, then start the hold. Tap Miss if they get up.",
+     "reward": "Yes is their release. Hand the treat over right away.",
+     "hold": [
+      2,
+      6
+     ]
+    },
+    {
+     "t": "New places",
+     "mark": "they sit on one cue in the yard, a hallway, the sidewalk.",
+     "setup": "New place = easier step. Start with the hand signal again if needed.",
+     "reward": "Treat while they sit."
+    }
+   ]
+  },
+  {
+   "id": "down",
+   "track": "foundations",
+   "name": "Down",
+   "goal": "Elbows on the floor, from a word.",
+   "cue": "\"Down\"",
+   "proofMark": "they lie down on one cue.",
+   "needs": [
+    "sit"
+   ],
+   "proof": {
+    "dist": [
+     {
+      "v": 0,
+      "t": "beside you"
+     },
+     {
+      "v": 1,
+      "t": "2 steps away"
+     },
+     {
+      "v": 2,
+      "t": "5 steps away"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "a quiet room"
+     },
+     {
+      "v": 1,
+      "t": "you moving your hands"
+     },
+     {
+      "v": 2,
+      "t": "a dropped treat"
+     },
+     {
+      "v": 3,
+      "t": "outside"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Lure",
+     "mark": "both elbows touch the floor.",
+     "setup": "From a sit, move a treat from their nose straight down between the front paws, then slowly along the floor.",
+     "reward": "Give the treat on the floor between their paws."
+    },
+    {
+     "t": "Empty hand",
+     "mark": "both elbows touch the floor.",
+     "setup": "Same motion, no treat in that hand.",
+     "reward": "Treat from the other hand, placed between their paws."
+    },
+    {
+     "t": "Small signal",
+     "mark": "the elbows touch after you point at the floor while standing taller.",
+     "setup": "Bend less each rep.",
+     "reward": "Treat on the floor between the paws."
+    },
+    {
+     "t": "Add the word",
+     "mark": "both elbows touch the floor.",
+     "setup": "Say \"Down\" once, pause half a second, then give the signal.",
+     "reward": "Treat between the paws."
+    },
+    {
+     "t": "Word only",
+     "mark": "they lie down after \"Down\" with your hands still.",
+     "setup": "If nothing in 3 seconds, go back a step.",
+     "reward": "Treat between the paws."
+    },
+    {
+     "t": "New places",
+     "mark": "they go down on one cue somewhere new.",
+     "setup": "Soft ground first (grass, a mat). Hard floors are harder.",
+     "reward": "Treat between the paws."
+    }
+   ]
+  },
+  {
+   "id": "stay",
+   "track": "foundations",
+   "name": "Stay",
+   "goal": "Hold a sit or down until you release them.",
+   "cue": "\"Stay\". Yes is the release (or Free, to end without a treat).",
+   "proofMark": "they're still in position when the timer marks it.",
+   "needs": [
+    "sit@3"
+   ],
+   "proof": {
+    "dur": [
+     {
+      "v": 5,
+      "t": "5 s"
+     },
+     {
+      "v": 10,
+      "t": "10 s"
+     },
+     {
+      "v": 20,
+      "t": "20 s"
+     },
+     {
+      "v": 30,
+      "t": "30 s"
+     },
+     {
+      "v": 60,
+      "t": "1 minute"
+     }
+    ],
+    "dist": [
+     {
+      "v": 0,
+      "t": "you beside them"
+     },
+     {
+      "v": 1,
+      "t": "you 1 step away"
+     },
+     {
+      "v": 2,
+      "t": "you 3 steps away"
+     },
+     {
+      "v": 3,
+      "t": "you 5 steps away"
+     },
+     {
+      "v": 4,
+      "t": "you across the room"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "no distraction"
+     },
+     {
+      "v": 1,
+      "t": "you shifting your weight"
+     },
+     {
+      "v": 2,
+      "t": "a dropped treat"
+     },
+     {
+      "v": 3,
+      "t": "someone walking by"
+     },
+     {
+      "v": 4,
+      "t": "a toy tossed past"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Tiny hold",
+     "mark": "they're still sitting when the timer marks it.",
+     "setup": "Ask for Sit, say \"Stay\", start the hold. Stand right in front of them.",
+     "reward": "Yes ends the stay. Treat right away; getting up after Yes is fine.",
+     "hold": [
+      1,
+      3
+     ]
+    },
+    {
+     "t": "Longer hold",
+     "mark": "they're still sitting when the timer marks it.",
+     "setup": "Same, but the time varies so they can't guess the end. Tap Miss if they get up.",
+     "reward": "Yes ends the stay. Treat right away.",
+     "hold": [
+      3,
+      10
+     ]
+    },
+    {
+     "t": "One step away",
+     "mark": "you've stepped back, returned, and they're still sitting.",
+     "setup": "Say \"Stay\", one step back, step back in. Mark when you're back beside them.",
+     "reward": "Yes ends the stay. Treat right away.",
+     "keep": true
+    },
+    {
+     "t": "Distance",
+     "mark": "you've walked 3 to 5 steps away and back and they're still sitting.",
+     "setup": "Going farther? Keep the time short.",
+     "reward": "Treat as soon as you're back beside them. Never call them out of a stay.",
+     "keep": true
+    },
+    {
+     "t": "Distraction",
+     "mark": "they hold the stay while you drop a toy, clap, or knock.",
+     "setup": "Stand close again. Distraction up = distance and time down.",
+     "reward": "Yes ends the stay. Treat right away.",
+     "hold": [
+      3,
+      8
+     ]
+    },
+    {
+     "t": "New places",
+     "mark": "they hold a short stay somewhere new.",
+     "setup": "Start at the Tiny hold level in each new place.",
+     "reward": "Yes ends the stay. Treat right away.",
+     "hold": [
+      2,
+      6
+     ]
+    }
+   ]
+  },
+  {
+   "id": "come",
+   "track": "foundations",
+   "name": "Come",
+   "goal": "Run to you every time you call.",
+   "cue": "Name + \"Come\", once. The Recall whistle is for emergencies.",
+   "proofMark": "they run all the way to you on one call.",
+   "needs": [
+    "name"
+   ],
+   "proof": {
+    "dist": [
+     {
+      "v": 0,
+      "t": "3 m"
+     },
+     {
+      "v": 1,
+      "t": "5 m"
+     },
+     {
+      "v": 2,
+      "t": "10 m"
+     },
+     {
+      "v": 3,
+      "t": "20 m"
+     },
+     {
+      "v": 4,
+      "t": "30 m"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "no distraction"
+     },
+     {
+      "v": 1,
+      "t": "toys nearby"
+     },
+     {
+      "v": 2,
+      "t": "food on the ground"
+     },
+     {
+      "v": 3,
+      "t": "another dog nearby"
+     },
+     {
+      "v": 4,
+      "t": "people playing"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Ping-pong indoors",
+     "mark": "their front feet reach you.",
+     "setup": "2 to 3 m away. Say name + \"Come\" once, take a step backward, clap if needed.",
+     "reward": "Treat at your knees, then touch their collar."
+    },
+    {
+     "t": "Collar touch",
+     "mark": "you hold their collar and they stay with you.",
+     "setup": "Call, then gently take the collar. This keeps recall from meaning \"fun is over\".",
+     "reward": "Treat while you hold the collar, then let go."
+    },
+    {
+     "t": "Other room",
+     "mark": "they arrive from another room.",
+     "setup": "Call once from out of sight.",
+     "reward": "Two or three treats in a row. Arriving should feel great."
+    },
+    {
+     "t": "Long line",
+     "mark": "they turn and run to you in the yard or park.",
+     "setup": "5 to 10 m line, call when they're not busy sniffing.",
+     "reward": "Jackpot: several treats or a toy game."
+    },
+    {
+     "t": "Away from a sniff",
+     "mark": "they leave a smell to come to you.",
+     "setup": "Long line. If they don't turn in 3 s, go back a step. Never reel them in angry.",
+     "reward": "Jackpot, then send them back to the sniff."
+    }
+   ]
+  },
+  {
+   "id": "leave",
+   "track": "foundations",
+   "name": "Leave it",
+   "goal": "Back off whatever you point out.",
+   "cue": "\"Leave it\"",
+   "proofMark": "they leave it on one cue and look back at you.",
+   "needs": [
+    "charge"
+   ],
+   "proof": {
+    "dis": [
+     {
+      "v": 0,
+      "t": "a treat in your fist"
+     },
+     {
+      "v": 1,
+      "t": "a treat on the floor"
+     },
+     {
+      "v": 2,
+      "t": "food you drop by surprise"
+     },
+     {
+      "v": 3,
+      "t": "food you walk past"
+     },
+     {
+      "v": 4,
+      "t": "food on a walk"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Closed fist",
+     "mark": "their nose moves away from your closed fist.",
+     "setup": "Treat in a closed fist at their nose level. Let them lick and nudge. Say nothing. Wait.",
+     "reward": "Treat from your OTHER hand. Never from the fist."
+    },
+    {
+     "t": "Open palm",
+     "mark": "they back off the treat on your open palm.",
+     "setup": "Open your palm. If they dive in, close it. Wait for them to pull back.",
+     "reward": "Treat from the other hand."
+    },
+    {
+     "t": "Add the word",
+     "mark": "they look away after \"Leave it\".",
+     "setup": "Say \"Leave it\" once as you show the fist or palm.",
+     "reward": "Treat from the other hand."
+    },
+    {
+     "t": "Floor",
+     "mark": "they look away from a treat on the floor, or look at you.",
+     "setup": "Drop a treat, foot ready to cover it. \"Leave it\" once.",
+     "reward": "Treat from your hand, never the one on the floor."
+    },
+    {
+     "t": "Walk past",
+     "mark": "they walk past a treat on the floor without lunging.",
+     "setup": "On leash, walk past at a distance they can manage, then closer.",
+     "reward": "Treat at your side as you pass."
+    },
+    {
+     "t": "Real life",
+     "mark": "they leave wrappers, food or droppings on a walk.",
+     "setup": "On leash, spot it before they do and cue early.",
+     "reward": "Your best treats."
+    }
+   ]
+  },
+  {
+   "id": "drop",
+   "track": "foundations",
+   "name": "Drop it",
+   "goal": "Let go of what's in their mouth.",
+   "cue": "\"Drop\"",
+   "proofMark": "they let go on one cue.",
+   "needs": [
+    "charge"
+   ],
+   "proof": {
+    "dis": [
+     {
+      "v": 0,
+      "t": "a so-so toy"
+     },
+     {
+      "v": 1,
+      "t": "a favorite toy"
+     },
+     {
+      "v": 2,
+      "t": "a found object"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Trade",
+     "mark": "the toy leaves their mouth.",
+     "setup": "Play tug or fetch with a so-so toy. Put a great treat at their nose.",
+     "reward": "Give the treat, then give the toy back. Getting it back is the secret."
+    },
+    {
+     "t": "Add the word",
+     "mark": "the toy leaves their mouth after \"Drop\".",
+     "setup": "Say \"Drop\", then show the treat.",
+     "reward": "Treat, then toy back."
+    },
+    {
+     "t": "Hidden treat",
+     "mark": "they let go after \"Drop\" with no treat in sight.",
+     "setup": "Treat in your pouch or pocket.",
+     "reward": "Treat, then toy back."
+    },
+    {
+     "t": "Favorite toy",
+     "mark": "they drop their favorite toy.",
+     "setup": "Use your best food.",
+     "reward": "Treat, then toy back."
+    },
+    {
+     "t": "Found items",
+     "mark": "they drop a sock, stick or found object.",
+     "setup": "Don't chase. Calm voice, \"Drop\", show food.",
+     "reward": "Your best treat. Then swap the item for a toy."
+    }
+   ]
+  },
+  {
+   "id": "leash",
+   "track": "foundations",
+   "name": "Loose leash",
+   "goal": "Walk with a slack leash.",
+   "cue": "None needed; a slack leash is the cue.",
+   "proofMark": "the leash stays slack.",
+   "needs": [
+    "name"
+   ],
+   "proof": {
+    "dur": [
+     {
+      "v": 10,
+      "t": "10 steps"
+     },
+     {
+      "v": 25,
+      "t": "25 steps"
+     },
+     {
+      "v": 50,
+      "t": "50 steps"
+     },
+     {
+      "v": 100,
+      "t": "100 steps"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "a hallway"
+     },
+     {
+      "v": 1,
+      "t": "a quiet street"
+     },
+     {
+      "v": 2,
+      "t": "another walker"
+     },
+     {
+      "v": 3,
+      "t": "a dog across the street"
+     },
+     {
+      "v": 4,
+      "t": "a busy sidewalk"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Standing still",
+     "mark": "the leash hangs slack, or they glance at you.",
+     "setup": "Leash on, stand in a hallway or yard. Don't move.",
+     "reward": "Treat at your pant seam on the side they walk."
+    },
+    {
+     "t": "One step",
+     "mark": "they're beside you with a slack leash after you take a step.",
+     "setup": "One step, stop. Repeat.",
+     "reward": "Treat at your seam."
+    },
+    {
+     "t": "A few steps",
+     "mark": "the leash is still slack after 2 or 3 steps.",
+     "setup": "High rate: mark often. Keep going between marks is fine.",
+     "reward": "Treat at your seam, without stopping.",
+     "keep": true
+    },
+    {
+     "t": "Tight = stop",
+     "mark": "the leash goes slack again after you stopped.",
+     "setup": "When the leash gets tight, freeze. Wait for slack, mark, then walk on.",
+     "reward": "Treat at your seam, then walk."
+    },
+    {
+     "t": "Turns",
+     "mark": "they catch up to your side after you turn around.",
+     "setup": "Turn and walk the other way, cheerfully.",
+     "reward": "Treat at your seam."
+    },
+    {
+     "t": "Sidewalk",
+     "mark": "the leash stays slack for a few steps outside.",
+     "setup": "Short walks, many marks. A sniff break (Free) is a reward too.",
+     "reward": "Treat at your seam, or Free to sniff.",
+     "keep": true
+    }
+   ]
+  },
+  {
+   "id": "mat",
+   "track": "foundations",
+   "name": "Mat and settle",
+   "goal": "Go to a mat and relax there.",
+   "cue": "\"Mat\"",
+   "proofMark": "they're still relaxed on the mat when the timer marks it.",
+   "needs": [
+    "down"
+   ],
+   "proof": {
+    "dur": [
+     {
+      "v": 30,
+      "t": "30 s"
+     },
+     {
+      "v": 60,
+      "t": "1 minute"
+     },
+     {
+      "v": 180,
+      "t": "3 minutes"
+     },
+     {
+      "v": 300,
+      "t": "5 minutes"
+     },
+     {
+      "v": 900,
+      "t": "15 minutes"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "a quiet room"
+     },
+     {
+      "v": 1,
+      "t": "the TV on"
+     },
+     {
+      "v": 2,
+      "t": "you leaving the room"
+     },
+     {
+      "v": 3,
+      "t": "a guest arriving"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Notice the mat",
+     "mark": "they look at or sniff the mat.",
+     "setup": "Put a towel or mat down. Wait.",
+     "reward": "Tap Catch and toss the treat onto the mat."
+    },
+    {
+     "t": "One paw",
+     "mark": "one paw touches the mat.",
+     "setup": "Wait for it. Don't lure.",
+     "reward": "Catch: toss the treat onto the mat."
+    },
+    {
+     "t": "Four paws",
+     "mark": "all four paws are on the mat.",
+     "setup": "Wait for the full step-on.",
+     "reward": "Treat on the mat, between the front paws."
+    },
+    {
+     "t": "Down on the mat",
+     "mark": "they lie down on the mat.",
+     "setup": "Cue Down if they know it, otherwise wait.",
+     "reward": "Treat between the paws on the mat."
+    },
+    {
+     "t": "Stay a while",
+     "mark": "they're still lying on the mat when the timer marks it.",
+     "setup": "Sit nearby. Tap Miss if they leave.",
+     "reward": "Yes ends it. Treat between the paws.",
+     "hold": [
+      5,
+      30
+     ]
+    },
+    {
+     "t": "Send to mat",
+     "mark": "they go to the mat when you say \"Mat\" from a meter away.",
+     "setup": "Say \"Mat\", point. Increase the distance slowly.",
+     "reward": "Treat on the mat."
+    },
+    {
+     "t": "Settle",
+     "mark": "they're relaxed on the mat: head down, hips rolled to one side.",
+     "setup": "Sit on the couch with a book or TV. Calm, slow pace.",
+     "reward": "Mark softly or just place a treat between the paws every 30 to 60 s. Calm is the goal.",
+     "keep": true
+    }
+   ]
+  },
+  {
+   "id": "place",
+   "track": "foundations",
+   "name": "Place",
+   "goal": "Go to a raised bed or board and stay there. The base for duck blinds, boats and calm at home.",
+   "cue": "\"Place\"",
+   "proofMark": "they're still on the board when the timer marks it.",
+   "needs": [
+    "mat"
+   ],
+   "proof": {
+    "dur": [
+     {
+      "v": 10,
+      "t": "10 s"
+     },
+     {
+      "v": 30,
+      "t": "30 s"
+     },
+     {
+      "v": 60,
+      "t": "1 minute"
+     },
+     {
+      "v": 120,
+      "t": "2 minutes"
+     },
+     {
+      "v": 300,
+      "t": "5 minutes"
+     }
+    ],
+    "dist": [
+     {
+      "v": 0,
+      "t": "you beside the board"
+     },
+     {
+      "v": 1,
+      "t": "you 3 steps away"
+     },
+     {
+      "v": 2,
+      "t": "you across the room"
+     },
+     {
+      "v": 3,
+      "t": "you out of sight 5 s"
+     },
+     {
+      "v": 4,
+      "t": "you out of sight 30 s"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "no distraction"
+     },
+     {
+      "v": 1,
+      "t": "you walking around"
+     },
+     {
+      "v": 2,
+      "t": "a dropped treat"
+     },
+     {
+      "v": 3,
+      "t": "a knock at the door"
+     },
+     {
+      "v": 4,
+      "t": "someone walking by"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Two paws on",
+     "mark": "both front paws touch the board or cot.",
+     "setup": "A raised board, cot or low step. Lure toward it once, then wait for the paws.",
+     "reward": "Treat while the paws are on it."
+    },
+    {
+     "t": "Four paws on",
+     "mark": "all four paws are on the board.",
+     "setup": "Wait for the back feet to climb on. Don't lure this time.",
+     "reward": "Treat on the board, between the front paws."
+    },
+    {
+     "t": "Down on place",
+     "mark": "they lie down on the board.",
+     "setup": "Once they're on, ask for Down.",
+     "reward": "Treat between the paws, on the board."
+    },
+    {
+     "t": "Hold place",
+     "mark": "they've stayed on the board until the timer marks it.",
+     "setup": "Say \"Place\", start the hold. Tap Miss if they step off.",
+     "reward": "Yes releases them. Treat on the board.",
+     "hold": [
+      5,
+      30
+     ]
+    },
+    {
+     "t": "Send to place",
+     "mark": "they go to the board when you say \"Place\" from 3 m away.",
+     "setup": "Point once. Add distance a step at a time.",
+     "reward": "Treat on the board."
+    }
+   ]
+  },
+  {
+   "id": "wait",
+   "track": "foundations",
+   "name": "Wait",
+   "goal": "Pause at doors, the car and the food bowl until released.",
+   "cue": "\"Wait\", then \"OK\" to release",
+   "proofMark": "they wait until you say \"OK\".",
+   "needs": [
+    "sit"
+   ],
+   "proof": {
+    "dur": [
+     {
+      "v": 1,
+      "t": "1 s"
+     },
+     {
+      "v": 3,
+      "t": "3 s"
+     },
+     {
+      "v": 5,
+      "t": "5 s"
+     },
+     {
+      "v": 10,
+      "t": "10 s"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "no distraction"
+     },
+     {
+      "v": 1,
+      "t": "you stepping through first"
+     },
+     {
+      "v": 2,
+      "t": "someone outside"
+     },
+     {
+      "v": 3,
+      "t": "another dog nearby"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Door crack",
+     "mark": "they stay put as you open the door a crack.",
+     "setup": "Leash on, dog at the door. Open 5 cm. If they move toward it, close it gently.",
+     "reward": "Treat from your hand, back away from the door."
+    },
+    {
+     "t": "Door open",
+     "mark": "they stay while the door is fully open for a second.",
+     "setup": "Open it wide, count one, close it.",
+     "reward": "Treat back from the door."
+    },
+    {
+     "t": "Release word",
+     "mark": "they wait until you say \"OK\", then go through.",
+     "setup": "Open, count 3, say OK and walk through together.",
+     "reward": "Going through is the reward; add a treat on the other side."
+    },
+    {
+     "t": "Car door",
+     "mark": "they wait in the car with the door open until released.",
+     "setup": "Leash on, someone holding it the first few times.",
+     "reward": "Treat in the car, then release."
+    },
+    {
+     "t": "Food bowl",
+     "mark": "they wait while you set the bowl down, until released.",
+     "setup": "Lift the bowl back up if they dive in. Try again.",
+     "reward": "The meal is the reward."
+    }
+   ]
+  },
+  {
+   "id": "checkin",
+   "track": "foundations",
+   "name": "Check-in",
+   "goal": "Look back at you on walks without being asked.",
+   "cue": "None. Checking in is their idea.",
+   "proofMark": "they look back at you on their own.",
+   "needs": [
+    "name"
+   ],
+   "proof": {
+    "dis": [
+     {
+      "v": 0,
+      "t": "a quiet street"
+     },
+     {
+      "v": 1,
+      "t": "another walker"
+     },
+     {
+      "v": 2,
+      "t": "a dog 20 m away"
+     },
+     {
+      "v": 3,
+      "t": "a busy park"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Any glance",
+     "mark": "they glance at your face on a walk.",
+     "setup": "Quiet street, loose leash, say nothing.",
+     "reward": "Treat at your pant seam."
+    },
+    {
+     "t": "Every 10 steps",
+     "mark": "they look back at you within 10 steps.",
+     "setup": "Walk at a normal pace. Count steps in your head.",
+     "reward": "Treat at your seam."
+    },
+    {
+     "t": "At turns",
+     "mark": "they look at you when you change direction.",
+     "setup": "Turn without a word.",
+     "reward": "Treat at your seam as they catch up."
+    },
+    {
+     "t": "Mild distraction",
+     "mark": "they check in with a dog or person 20 m away.",
+     "setup": "Keep your distance so they can still eat.",
+     "reward": "Your best treats."
+    },
+    {
+     "t": "Off leash, fenced",
+     "mark": "they come back to check in without being called.",
+     "setup": "Fenced field or yard. Stand still and wait.",
+     "reward": "Treat, then send them off to sniff again."
+    }
+   ]
+  },
+  {
+   "id": "heel",
+   "track": "foundations",
+   "name": "Heel",
+   "goal": "Walk at your left knee. For crowds, roads and the field.",
+   "cue": "\"Heel\"",
+   "proofMark": "they're still at your left knee.",
+   "needs": [
+    "leash"
+   ],
+   "proof": {
+    "dur": [
+     {
+      "v": 10,
+      "t": "10 steps"
+     },
+     {
+      "v": 20,
+      "t": "20 steps"
+     },
+     {
+      "v": 40,
+      "t": "40 steps"
+     },
+     {
+      "v": 80,
+      "t": "80 steps"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "a quiet hallway"
+     },
+     {
+      "v": 1,
+      "t": "other people"
+     },
+     {
+      "v": 2,
+      "t": "a dog 20 m away"
+     },
+     {
+      "v": 3,
+      "t": "a busy sidewalk"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Find heel",
+     "mark": "they're at your left leg, shoulder level with your knee.",
+     "setup": "Lure them into place with your left hand.",
+     "reward": "Treat at your left seam."
+    },
+    {
+     "t": "One step",
+     "mark": "they stay at your left knee as you take one step.",
+     "setup": "Step off with your left foot.",
+     "reward": "Treat at the seam."
+    },
+    {
+     "t": "Five steps",
+     "mark": "they hold position for 5 steps.",
+     "setup": "Count out loud if it helps you.",
+     "reward": "Treat at the seam, while walking."
+    },
+    {
+     "t": "Turns",
+     "mark": "they stay in position through a right turn and a left turn.",
+     "setup": "Slow down before each turn.",
+     "reward": "Treat right after the turn."
+    },
+    {
+     "t": "Pace changes",
+     "mark": "they hold position as you slow down and speed up.",
+     "setup": "Change pace for 5 steps at a time.",
+     "reward": "Treat at the seam."
+    },
+    {
+     "t": "Off leash, fenced",
+     "mark": "they heel 20 steps off leash in a fenced area.",
+     "setup": "Start right after a good on-leash round.",
+     "reward": "Treat, then a release to play."
+    }
+   ]
+  },
+  {
+   "id": "edown",
+   "track": "foundations",
+   "name": "Emergency down",
+   "goal": "Drop on the spot from a distance. Stops a dog before a road or a hazard.",
+   "cue": "\"Down!\" said sharply, or one hand straight up",
+   "needs": [
+    "down",
+    "stay"
+   ],
+   "steps": [
+    {
+     "t": "Down at your side",
+     "mark": "their elbows hit the floor within 1 second of the cue.",
+     "setup": "Standing together, cue once, sharply.",
+     "reward": "Toss the treat between their paws."
+    },
+    {
+     "t": "At 2 m",
+     "mark": "they drop 2 m away from you.",
+     "setup": "Step back first, then cue.",
+     "reward": "Walk in and treat between the paws."
+    },
+    {
+     "t": "While walking",
+     "mark": "they drop mid-stride as you walk together.",
+     "setup": "Keep walking a step after the cue the first few times.",
+     "reward": "Go back and treat between the paws."
+    },
+    {
+     "t": "At 10 m",
+     "mark": "they drop 10 m away.",
+     "setup": "Long line on. Cue once; don't repeat it.",
+     "reward": "Throw the treat to them so staying down pays."
+    },
+    {
+     "t": "Running toward you",
+     "mark": "they drop while trotting toward you.",
+     "setup": "A helper holds them, you call, then cue Down halfway.",
+     "reward": "Throw the treat to them, then call them in for a second one."
+    }
+   ]
+  },
+  {
+   "id": "crate",
+   "track": "puppy",
+   "name": "Crate love",
+   "goal": "A crate that feels like a safe bedroom.",
+   "cue": "\"Crate\"",
+   "needs": [],
+   "steps": [
+    {
+     "t": "Treats inside",
+     "mark": "they step in to get a treat you tossed in.",
+     "setup": "Door open, treats tossed to the back.",
+     "reward": "The tossed treat; toss another while they're in."
+    },
+    {
+     "t": "Walks in",
+     "mark": "they walk in on their own.",
+     "setup": "Stand near the crate and wait.",
+     "reward": "Treat inside the crate."
+    },
+    {
+     "t": "Lies down",
+     "mark": "they lie down inside.",
+     "setup": "Just wait. No luring.",
+     "reward": "Treat between the paws."
+    },
+    {
+     "t": "Door closed",
+     "mark": "they stay calm with the door closed until the timer marks it.",
+     "setup": "Close the door, sit beside it. Start the hold.",
+     "reward": "Yes, then treat through the bars and open the door.",
+     "hold": [
+      5,
+      30
+     ]
+    },
+    {
+     "t": "You leave the room",
+     "mark": "they stay calm while you step out for 30 seconds.",
+     "setup": "Give a chew first. Step out, step back.",
+     "reward": "Calm treat through the bars.",
+     "hold": [
+      20,
+      60
+     ]
+    },
+    {
+     "t": "Naps",
+     "mark": "they settle and nap in the crate.",
+     "setup": "After play and potty, quiet room, door open or closed.",
+     "reward": "Mark softly and drop a treat in now and then.",
+     "keep": true
+    }
+   ]
+  },
+  {
+   "id": "mouth",
+   "track": "puppy",
+   "name": "Gentle mouth",
+   "goal": "Soft mouth on skin, and toys instead of hands.",
+   "cue": "None",
+   "needs": [],
+   "steps": [
+    {
+     "t": "Soft mouth",
+     "mark": "their teeth touch your hand softly.",
+     "setup": "Gentle play. A hard bite means a quiet \"ouch\" and 5 seconds of stillness.",
+     "reward": "Keep playing. Play is the reward."
+    },
+    {
+     "t": "Trade to a toy",
+     "mark": "they take the toy you offer instead of your sleeve.",
+     "setup": "Keep a toy in your pocket; offer it before they grab.",
+     "reward": "Tug the toy with them for a few seconds."
+    },
+    {
+     "t": "Calm hands",
+     "mark": "they stay calm while you stroke their face.",
+     "setup": "After a walk, when they're sleepy.",
+     "reward": "Treat from your other hand."
+    },
+    {
+     "t": "Settle after play",
+     "mark": "they settle within a minute after play stops.",
+     "setup": "Stop play, sit down, say nothing.",
+     "reward": "Calm treat between the paws."
+    }
+   ]
+  },
+  {
+   "id": "handling",
+   "track": "puppy",
+   "name": "Handling",
+   "goal": "Relaxed about paws, ears, mouth and collar. Makes vet visits and grooming easy.",
+   "cue": "None",
+   "needs": [],
+   "steps": [
+    {
+     "t": "Paw touch",
+     "mark": "you touch a paw and they stay relaxed.",
+     "setup": "Touch, let go, mark.",
+     "reward": "Treat right after the touch."
+    },
+    {
+     "t": "Ears and mouth",
+     "mark": "they stay relaxed while you lift an ear or a lip.",
+     "setup": "One second at a time.",
+     "reward": "Treat right after."
+    },
+    {
+     "t": "Collar grab",
+     "mark": "they stay relaxed when you take the collar.",
+     "setup": "Slip a finger under it from the side, not from above.",
+     "reward": "Treat while you still hold it."
+    },
+    {
+     "t": "Hold 2 seconds",
+     "mark": "they stay relaxed through a 2-second hold of any part.",
+     "setup": "Count two, let go.",
+     "reward": "Treat after letting go."
+    },
+    {
+     "t": "Towel and brush",
+     "mark": "they stay relaxed for a towel rub or a few brush strokes.",
+     "setup": "Short, gentle strokes.",
+     "reward": "Treat after each few strokes."
+    },
+    {
+     "t": "Strangers' hands",
+     "mark": "they stay relaxed when a friend handles a paw.",
+     "setup": "The friend touches; you mark and treat.",
+     "reward": "Your treat, right after the touch."
+    }
+   ]
+  },
+  {
+   "id": "alone",
+   "track": "puppy",
+   "name": "Alone time",
+   "goal": "Calm when left alone. Built up before any crying starts.",
+   "cue": "\"Back soon\"",
+   "needs": [
+    "crate@2"
+   ],
+   "steps": [
+    {
+     "t": "10 seconds",
+     "mark": "you come back after 10 seconds and they stayed calm.",
+     "setup": "Give a chew, step out, close the door.",
+     "reward": "A calm hello and a treat. No big greeting."
+    },
+    {
+     "t": "1 minute",
+     "mark": "they stayed calm for a minute alone.",
+     "setup": "Same setup, a minute away.",
+     "reward": "Calm treat."
+    },
+    {
+     "t": "5 minutes",
+     "mark": "they stayed calm for 5 minutes.",
+     "setup": "Film them once to check they really settle.",
+     "reward": "Calm treat."
+    },
+    {
+     "t": "15 minutes",
+     "mark": "they stayed calm for 15 minutes.",
+     "setup": "A walk or a meal first.",
+     "reward": "Calm treat."
+    },
+    {
+     "t": "30 minutes",
+     "mark": "they stayed calm for 30 minutes.",
+     "setup": "Leave the house this time.",
+     "reward": "Calm treat."
+    }
+   ]
+  },
+  {
+   "id": "hallret",
+   "track": "puppy",
+   "name": "Hallway retrieve",
+   "goal": "Bring things back. The seed of every retrieve, for sport puppies and family dogs.",
+   "cue": "Their name, then the throw",
+   "needs": [],
+   "steps": [
+    {
+     "t": "Chase",
+     "mark": "they chase a toy rolled down the hallway.",
+     "setup": "Close the hallway doors so there's nowhere to run off to.",
+     "reward": "The chase is the reward."
+    },
+    {
+     "t": "Pick up",
+     "mark": "they pick the toy up.",
+     "setup": "A soft toy that's easy to carry.",
+     "reward": "Cheer, then the next step."
+    },
+    {
+     "t": "Come back",
+     "mark": "they turn and come toward you with it.",
+     "setup": "Sit on the floor at the closed end. Clap softly.",
+     "reward": "Praise as they come."
+    },
+    {
+     "t": "To hand",
+     "mark": "they bring it to your hand.",
+     "setup": "Hold your hand low and still.",
+     "reward": "Trade for a treat, then throw again right away."
+    },
+    {
+     "t": "Hold a moment",
+     "mark": "they hold it in front of you for a second before the trade.",
+     "setup": "Wait a beat before taking it.",
+     "reward": "Trade for a treat and throw again."
+    }
+   ]
+  },
+  {
+   "id": "chin",
+   "track": "life",
+   "name": "Chin rest",
+   "goal": "Chin on your hand while you check eyes, ears and teeth. Their way of saying \"go ahead\".",
+   "cue": "\"Chin\"",
+   "needs": [
+    "touch"
+   ],
+   "steps": [
+    {
+     "t": "Chin on palm",
+     "mark": "their chin rests on your open palm.",
+     "setup": "Hold your palm flat, just below their chin.",
+     "reward": "Treat from your other hand."
+    },
+    {
+     "t": "Hold a few seconds",
+     "mark": "their chin stays down until the timer marks it.",
+     "setup": "Start the hold once the chin is down.",
+     "reward": "Treat from the other hand.",
+     "hold": [
+      3,
+      6
+     ]
+    },
+    {
+     "t": "On a towel",
+     "mark": "their chin rests on a folded towel on your knee.",
+     "setup": "Sit on the floor with the towel.",
+     "reward": "Treat while the chin is down."
+    },
+    {
+     "t": "While you touch an ear",
+     "mark": "their chin stays down while you lift an ear.",
+     "setup": "If the chin lifts, stop touching. That's their say.",
+     "reward": "Treat while the chin is down."
+    },
+    {
+     "t": "At the vet",
+     "mark": "the chin rest holds in the vet's lobby.",
+     "setup": "Bring the towel and great treats.",
+     "reward": "Treat while the chin is down."
+    }
+   ]
+  },
+  {
+   "id": "nails",
+   "track": "life",
+   "name": "Nail care",
+   "goal": "Calm nail trims, one nail at a time.",
+   "cue": "\"Nails\"",
+   "needs": [
+    "chin"
+   ],
+   "steps": [
+    {
+     "t": "Paw in hand",
+     "mark": "they let you hold a paw for 2 seconds.",
+     "setup": "Chin rest first, then lift the paw.",
+     "reward": "Treat after letting go."
+    },
+    {
+     "t": "Clipper touch",
+     "mark": "the clipper touches a nail and they stay relaxed.",
+     "setup": "Just a touch. No cutting yet.",
+     "reward": "Treat right after."
+    },
+    {
+     "t": "One nail",
+     "mark": "you trim one nail tip calmly.",
+     "setup": "A tiny tip. Stop after one.",
+     "reward": "Jackpot: several treats."
+    },
+    {
+     "t": "One paw",
+     "mark": "you trim a whole paw calmly.",
+     "setup": "Treat after each nail.",
+     "reward": "Treat per nail."
+    },
+    {
+     "t": "All paws",
+     "mark": "you trim all four paws in one sitting, calmly.",
+     "setup": "Split it over days if needed.",
+     "reward": "Treat per nail, jackpot at the end."
+    }
+   ]
+  },
+  {
+   "id": "teeth",
+   "track": "life",
+   "name": "Tooth brushing",
+   "goal": "Teeth brushed in under a minute, without a fuss.",
+   "cue": "\"Teeth\"",
+   "needs": [
+    "chin"
+   ],
+   "steps": [
+    {
+     "t": "Lift lip",
+     "mark": "they stay relaxed while you lift a lip.",
+     "setup": "Chin rest, then lift.",
+     "reward": "Treat after."
+    },
+    {
+     "t": "Finger on teeth",
+     "mark": "they stay relaxed with your finger on their teeth.",
+     "setup": "A dab of dog toothpaste on your finger.",
+     "reward": "Treat after."
+    },
+    {
+     "t": "Brush touch",
+     "mark": "the brush touches their teeth and they stay relaxed.",
+     "setup": "Dog toothpaste on the brush.",
+     "reward": "Treat after."
+    },
+    {
+     "t": "Front teeth",
+     "mark": "you brush the front teeth for 5 seconds.",
+     "setup": "Small circles.",
+     "reward": "Treat after."
+    },
+    {
+     "t": "All teeth",
+     "mark": "you brush all the outer surfaces.",
+     "setup": "Back teeth last.",
+     "reward": "Jackpot."
+    }
+   ]
+  },
+  {
+   "id": "vet",
+   "track": "life",
+   "name": "Vet visit",
+   "goal": "Happy visits so the real ones are easy.",
+   "cue": "None",
+   "needs": [
+    "chin"
+   ],
+   "steps": [
+    {
+     "t": "Parking lot",
+     "mark": "they take treats calmly in the vet's parking lot.",
+     "setup": "Just visit. Leave after a few treats.",
+     "reward": "Great treats."
+    },
+    {
+     "t": "Lobby",
+     "mark": "they take treats calmly in the lobby.",
+     "setup": "Ask the front desk; most clinics welcome happy visits.",
+     "reward": "Great treats."
+    },
+    {
+     "t": "Scale",
+     "mark": "they step on the scale.",
+     "setup": "Lure on once if needed.",
+     "reward": "Treat on the scale."
+    },
+    {
+     "t": "Exam room",
+     "mark": "they stay relaxed in the exam room.",
+     "setup": "Do a chin rest in there.",
+     "reward": "Treat on the chin rest."
+    },
+    {
+     "t": "Exam table",
+     "mark": "they stay relaxed on the exam table.",
+     "setup": "With the staff's help.",
+     "reward": "Jackpot."
+    }
+   ]
+  },
+  {
+   "id": "car",
+   "track": "life",
+   "name": "Car manners",
+   "goal": "Load up on cue, ride calmly, wait to get out.",
+   "cue": "\"Load up\"",
+   "needs": [
+    "wait"
+   ],
+   "steps": [
+    {
+     "t": "Hop in",
+     "mark": "they jump or step into the car on \"Load up\".",
+     "setup": "Small dogs: lift on cue. A ramp for big or older dogs.",
+     "reward": "Treat in the car."
+    },
+    {
+     "t": "Settle",
+     "mark": "they lie down in the car.",
+     "setup": "Engine off first.",
+     "reward": "Treat between the paws."
+    },
+    {
+     "t": "Short ride",
+     "mark": "they stay settled for a 5-minute ride.",
+     "setup": "A helper drives; you mark.",
+     "reward": "Treat when you park."
+    },
+    {
+     "t": "Wait to exit",
+     "mark": "they wait at the open door until released.",
+     "setup": "Leash on before the door opens.",
+     "reward": "Treat, then release."
+    }
+   ]
+  },
+  {
+   "id": "floor",
+   "track": "life",
+   "name": "Four on the floor",
+   "goal": "Greet people without jumping up.",
+   "cue": "None",
+   "needs": [
+    "sit"
+   ],
+   "steps": [
+    {
+     "t": "Feet down",
+     "mark": "all four paws are on the floor as you come home.",
+     "setup": "Toss treats at their feet as you walk in.",
+     "reward": "Treats on the floor."
+    },
+    {
+     "t": "Helper approaches",
+     "mark": "four paws stay down as a helper walks up.",
+     "setup": "Leash on. The helper turns away if they jump.",
+     "reward": "Treat at their feet."
+    },
+    {
+     "t": "Helper greets",
+     "mark": "paws stay down while the helper pets them.",
+     "setup": "Short petting, then the helper steps back.",
+     "reward": "Treat at their feet."
+    },
+    {
+     "t": "Stranger",
+     "mark": "paws stay down when a new person says hi.",
+     "setup": "Ask a friendly stranger to help.",
+     "reward": "Treat at their feet."
+    }
+   ]
+  },
+  {
+   "id": "doorbell",
+   "track": "life",
+   "name": "Doorbell calm",
+   "goal": "The doorbell means \"go to your mat\", not \"bark and rush\".",
+   "cue": "The bell itself",
+   "needs": [
+    "mat"
+   ],
+   "steps": [
+    {
+     "t": "Bell, then mat",
+     "mark": "they go to the mat after the doorbell sound.",
+     "setup": "Play a doorbell sound on another phone, then cue Mat.",
+     "reward": "Treat on the mat."
+    },
+    {
+     "t": "Stay as the door opens",
+     "mark": "they stay on the mat while you open the door.",
+     "setup": "No one there yet.",
+     "reward": "Treat on the mat."
+    },
+    {
+     "t": "Real knock",
+     "mark": "they go to the mat at a real knock.",
+     "setup": "A helper knocks outside.",
+     "reward": "Treat on the mat."
+    },
+    {
+     "t": "Guest comes in",
+     "mark": "they stay on the mat while a guest walks in.",
+     "setup": "The guest ignores them until released.",
+     "reward": "Treat on the mat, then release to say hi."
+    }
+   ]
+  },
+  {
+   "id": "public",
+   "track": "life",
+   "name": "Calm in public",
+   "goal": "Settle at a café, a park bench or a busy entrance.",
+   "cue": "\"Settle\"",
+   "needs": [
+    "mat"
+   ],
+   "places": [
+    "street",
+    "park",
+    "field"
+   ],
+   "steps": [
+    {
+     "t": "Quiet park",
+     "mark": "they settle on their mat at a quiet park.",
+     "setup": "Bring the mat and a chew.",
+     "reward": "Calm treat between the paws."
+    },
+    {
+     "t": "Patio",
+     "mark": "they settle at an outdoor café table.",
+     "setup": "A quiet time of day.",
+     "reward": "Calm treat between the paws."
+    },
+    {
+     "t": "Store entrance",
+     "mark": "they settle near a busy entrance.",
+     "setup": "Stand back from the doors.",
+     "reward": "Calm treat."
+    },
+    {
+     "t": "15 minutes",
+     "mark": "they stay settled for 15 minutes.",
+     "setup": "Mark calm moments every minute or so.",
+     "reward": "Calm treats.",
+     "keep": true
+    }
+   ]
+  },
+  {
+   "id": "dogmeet",
+   "track": "life",
+   "name": "Polite dog meetings",
+   "goal": "Pass other dogs calmly, and greet only when invited.",
+   "cue": "\"Say hi\" and \"Let's go\"",
+   "needs": [
+    "checkin"
+   ],
+   "places": [
+    "street",
+    "park",
+    "field"
+   ],
+   "steps": [
+    {
+     "t": "Parallel at 15 m",
+     "mark": "they walk calmly with another dog 15 m away.",
+     "setup": "A friend's calm dog, walking the same direction.",
+     "reward": "Treat at your seam."
+    },
+    {
+     "t": "10 m",
+     "mark": "they walk calmly at 10 m.",
+     "setup": "Close the gap slowly.",
+     "reward": "Treat at your seam."
+    },
+    {
+     "t": "5 m",
+     "mark": "they walk calmly at 5 m.",
+     "setup": "Keep leashes loose.",
+     "reward": "Treat at your seam."
+    },
+    {
+     "t": "Brief sniff",
+     "mark": "they sniff for 3 seconds and come away on \"Let's go\".",
+     "setup": "Count three, cue, walk off.",
+     "reward": "Treat as they follow you."
+    }
+   ]
+  },
+  {
+   "id": "whistle",
+   "track": "field",
+   "name": "Whistle signals",
+   "goal": "Sit, come and turn on the whistle, so you can steer a dog 100 yards out.",
+   "cue": "One blast = sit · a trill = come · two pips = turn",
+   "proofMark": "they answer the whistle the moment it sounds.",
+   "needs": [
+    "sit",
+    "come@1"
+   ],
+   "whistle": true,
+   "gear": [
+    "a whistle (or the app's)"
+   ],
+   "proof": {
+    "dist": [
+     {
+      "v": 0,
+      "t": "5 m"
+     },
+     {
+      "v": 1,
+      "t": "20 m"
+     },
+     {
+      "v": 2,
+      "t": "40 m"
+     },
+     {
+      "v": 3,
+      "t": "75 m"
+     },
+     {
+      "v": 4,
+      "t": "100 m"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "no distraction"
+     },
+     {
+      "v": 1,
+      "t": "a thrown bumper"
+     },
+     {
+      "v": 2,
+      "t": "another dog"
+     },
+     {
+      "v": 3,
+      "t": "birds around"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Sit blast at your side",
+     "mark": "they sit as the single blast ends.",
+     "setup": "Dog beside you. One blast (tap Sit on the whistle bar), then your usual sit cue. Soon the blast alone means sit.",
+     "reward": "Treat while they sit."
+    },
+    {
+     "t": "Sit blast alone",
+     "mark": "they sit on the blast with no other cue.",
+     "setup": "Blast only. If no sit in 2 seconds, help with your hand signal.",
+     "reward": "Treat while they sit."
+    },
+    {
+     "t": "Recall trill",
+     "mark": "they turn and run in on the trill.",
+     "setup": "Start at 5 m in the house or yard. Trill once, back up a step.",
+     "reward": "Treat at your knees, then a second one."
+    },
+    {
+     "t": "Turn pips",
+     "mark": "they turn toward you on two pips while trotting ahead.",
+     "setup": "On a walk when they're 5 to 10 m ahead. Change direction as you pip.",
+     "reward": "Treat as they reach you, then send them on."
+    },
+    {
+     "t": "Sit at 20 m",
+     "mark": "they sit on the blast 20 m away.",
+     "setup": "Long line on. One blast; never repeat it.",
+     "reward": "Walk out and treat while they sit, or toss it to them."
+    }
+   ]
+  },
+  {
+   "id": "retrieve",
+   "track": "field",
+   "name": "Retrieve",
+   "goal": "Chase, pick up, carry back and deliver to hand. Taught with rewards; no force fetch.",
+   "cue": "Their name sends them; \"Give\" for the delivery",
+   "proofMark": "they bring it straight back and deliver to hand.",
+   "needs": [
+    "hallret|drop"
+   ],
+   "gear": [
+    "bumpers"
+   ],
+   "steps": [
+    {
+     "t": "Chase and pick up",
+     "mark": "they pick up a bumper tossed 3 m away.",
+     "setup": "A soft canvas or plastic bumper. A short, exciting toss down a hallway or narrow yard.",
+     "reward": "Cheer. The next steps pay with food."
+    },
+    {
+     "t": "Come back",
+     "mark": "they turn back toward you carrying it.",
+     "setup": "Turn and jog away a few steps to draw them in.",
+     "reward": "Praise as they come."
+    },
+    {
+     "t": "Hold 2 seconds",
+     "mark": "they hold the bumper calmly in front of you until the timer marks it.",
+     "setup": "Hand under their chin, no pulling. Start the hold.",
+     "reward": "Trade for a treat.",
+     "hold": [
+      1,
+      3
+     ]
+    },
+    {
+     "t": "Hold while you walk",
+     "mark": "they carry it beside you for 10 steps.",
+     "setup": "Walk slowly with your hand near the bumper.",
+     "reward": "Trade for a treat."
+    },
+    {
+     "t": "Deliver to hand",
+     "mark": "they put the bumper in your hand.",
+     "setup": "Stand still, hand open at chest height. Say \"Give\".",
+     "reward": "Trade for a treat, then throw again right away."
+    },
+    {
+     "t": "Sent on their name",
+     "mark": "they wait for their name, then go.",
+     "setup": "Hold the collar lightly, toss, count two, say their name.",
+     "reward": "The retrieve is the reward; treat on delivery."
+    }
+   ]
+  },
+  {
+   "id": "birds",
+   "track": "field",
+   "name": "Bumper and bird intro",
+   "goal": "Happy to carry bumpers, wings and birds.",
+   "cue": "Their name",
+   "proofMark": "they carry it back gently and deliver to hand.",
+   "needs": [
+    "retrieve@2"
+   ],
+   "gear": [
+    "bumpers",
+    "a duck or pigeon wing"
+   ],
+   "steps": [
+    {
+     "t": "Soft bumper",
+     "mark": "they pick up and carry a soft bumper.",
+     "setup": "Short, fun tosses.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Hard bumper",
+     "mark": "they carry a plastic or canvas bumper back.",
+     "setup": "Same short tosses.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Wing on a bumper",
+     "mark": "they retrieve a bumper with a wing taped on.",
+     "setup": "A fresh or frozen wing, taped on with electrical tape.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Thawed bird",
+     "mark": "they pick up and carry a thawed duck or pigeon.",
+     "setup": "Short, easy tosses. A cold bird is less tempting to chew.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Fresh bird, with a mentor",
+     "mark": "they retrieve a freshly shot bird calmly.",
+     "setup": "With an experienced trainer or hunting mentor, following your state's rules on birds.",
+     "reward": "Big praise and a treat on delivery."
+    }
+   ]
+  },
+  {
+   "id": "gun",
+   "track": "field",
+   "name": "Gun conditioning",
+   "goal": "Gunfire means the fun is happening. Always far away first, and never at a nervous dog.",
+   "cue": "None",
+   "needs": [
+    "retrieve@4",
+    "sound:gun:7"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Happy",
+    "Noticed it",
+    "Worried"
+   ],
+   "startle": true,
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a helper with a blank pistol"
+   ],
+   "steps": [
+    {
+     "t": "Blank at 100 yd",
+     "mark": "they keep chasing the bumper happily as the shot goes off 100 yards away.",
+     "setup": "A helper 100 yd off with a blank pistol. They fire the moment your dog is chasing a thrown bumper.",
+     "reward": "The retrieve, plus a treat on delivery."
+    },
+    {
+     "t": "Blank at 50 yd",
+     "mark": "they stay happy with the shot 50 yards away.",
+     "setup": "Same setup. Only move closer after happy sessions.",
+     "reward": "The retrieve, plus a treat."
+    },
+    {
+     "t": "Blank at 30 yd",
+     "mark": "they stay happy with the shot 30 yards away.",
+     "setup": "Same setup.",
+     "reward": "The retrieve, plus a treat."
+    },
+    {
+     "t": "Blank at 20 yd",
+     "mark": "they stay happy with the shot 20 yards away.",
+     "setup": "Same setup.",
+     "reward": "The retrieve, plus a treat."
+    },
+    {
+     "t": "Shotgun at 75 yd",
+     "mark": "they stay happy with a shotgun fired 75 yards away during a retrieve.",
+     "setup": "A safe range, ear protection for people, the helper far off.",
+     "reward": "The retrieve, plus a treat."
+    },
+    {
+     "t": "Your shot",
+     "mark": "they stay happy when you fire beside them.",
+     "setup": "Only after several happy sessions at every step. Gun pointed well away.",
+     "reward": "A bird or bumper to retrieve."
+    }
+   ]
+  },
+  {
+   "id": "steady",
+   "track": "waterfowl",
+   "name": "Steadiness",
+   "goal": "Sit still while things fall and fly, until sent by name.",
+   "cue": "Sit, then their name to send",
+   "proofMark": "they stay sitting until you say their name.",
+   "needs": [
+    "stay:proofed",
+    "retrieve"
+   ],
+   "gear": [
+    "bumpers"
+   ],
+   "steps": [
+    {
+     "t": "Dropped bumper",
+     "mark": "they stay sitting while you drop a bumper at your feet.",
+     "setup": "Leash on, your foot on the leash. Drop it, wait 2 seconds, mark.",
+     "reward": "Treat to them while they sit. Then pick it up yourself, or send them."
+    },
+    {
+     "t": "Tossed bumper",
+     "mark": "they stay sitting as you toss a bumper 3 m.",
+     "setup": "Send them only every other time; you pick up the rest. Staying has to pay too.",
+     "reward": "Treat while they sit."
+    },
+    {
+     "t": "Thrown 20 yd",
+     "mark": "they stay sitting through a 20-yard throw.",
+     "setup": "Same: send only some of the time.",
+     "reward": "Treat, or the retrieve."
+    },
+    {
+     "t": "Throw and shot",
+     "mark": "they stay sitting through a throw with a shot.",
+     "setup": "A helper fires a blank as you throw. Only after Gun conditioning step 3.",
+     "reward": "The retrieve."
+    },
+    {
+     "t": "Two throws",
+     "mark": "they stay sitting through two throws.",
+     "setup": "Throws wide apart.",
+     "reward": "The retrieve."
+    },
+    {
+     "t": "Honoring",
+     "mark": "they stay sitting while another dog retrieves.",
+     "setup": "A calm partner dog 3 m to the side.",
+     "reward": "Treat while they sit, then their own turn."
+    }
+   ]
+  },
+  {
+   "id": "marks",
+   "track": "waterfowl",
+   "name": "Single marks",
+   "goal": "Watch a bird fall and go straight to it.",
+   "cue": "Their name",
+   "proofMark": "a clean pickup and straight return.",
+   "needs": [
+    "retrieve",
+    "steady@2"
+   ],
+   "rep": "outcome",
+   "youngCap": 2,
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "bumpers",
+    "a helper to throw"
+   ],
+   "steps": [
+    {
+     "t": "10 yd, short grass",
+     "mark": "a clean pickup and return on a 10-yard mark.",
+     "setup": "A helper throws with a shout or duck call so the dog looks. Send on their name after it lands.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "25 yd",
+     "mark": "a clean retrieve on a 25-yard mark.",
+     "setup": "Short grass, wind at your back.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "50 yd",
+     "mark": "a clean retrieve on a 50-yard mark.",
+     "setup": "White bumpers show up best.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "75 yd",
+     "mark": "a clean retrieve on a 75-yard mark.",
+     "setup": "Use the distance tracker to check it.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "100 yd",
+     "mark": "a clean retrieve on a 100-yard mark.",
+     "setup": "A helper with a duck call or launcher.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "In cover",
+     "mark": "a clean retrieve from tall grass or cattails at 50 yards.",
+     "setup": "Shorter again in new cover.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Ditch and wind",
+     "mark": "a clean retrieve across a ditch or into the wind.",
+     "setup": "The dog should cross, not run around.",
+     "reward": "Treat on delivery."
+    }
+   ]
+  },
+  {
+   "id": "waterentry",
+   "track": "waterfowl",
+   "name": "Water entry",
+   "goal": "Into the water with confidence, straight to the bird.",
+   "cue": "Their name",
+   "proofMark": "a straight, confident entry and swim to the bumper.",
+   "needs": [
+    "retrieve"
+   ],
+   "rep": "outcome",
+   "places": [
+    "water"
+   ],
+   "gear": [
+    "bumpers",
+    "a dog-safe pond or lake"
+   ],
+   "steps": [
+    {
+     "t": "Wade and play",
+     "mark": "they wade in on their own to chest depth.",
+     "setup": "Warm water and a gentle bank. Wade in yourself. In cold water keep it short and dry them off after.",
+     "reward": "Treats and play in the shallows."
+    },
+    {
+     "t": "Swim 2 m",
+     "mark": "they swim a few strokes to a bumper.",
+     "setup": "Toss it just past their depth.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Water mark 10 yd",
+     "mark": "a clean 10-yard water retrieve.",
+     "setup": "Throw parallel to the shore at first.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "25 yd",
+     "mark": "a clean 25-yard water retrieve.",
+     "setup": "Straight out from the shore.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "50 yd",
+     "mark": "a clean 50-yard water retrieve.",
+     "setup": "Calm water, no wind.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Angled entry",
+     "mark": "they go straight in at an angle instead of running the bank.",
+     "setup": "Throw at a 45 degree angle to the shore.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Among decoys",
+     "mark": "they swim past decoys to the bumper and leave the decoys alone.",
+     "setup": "Three decoys first, wide apart.",
+     "reward": "Treat on delivery."
+    }
+   ]
+  },
+  {
+   "id": "waterdelivery",
+   "track": "waterfowl",
+   "name": "Water delivery",
+   "goal": "Out of the water and straight to hand before shaking.",
+   "cue": "\"Give\"",
+   "proofMark": "they come straight out and deliver before shaking.",
+   "needs": [
+    "waterentry@2",
+    "retrieve"
+   ],
+   "rep": "outcome",
+   "places": [
+    "water"
+   ],
+   "gear": [
+    "bumpers"
+   ],
+   "steps": [
+    {
+     "t": "Out with it",
+     "mark": "they carry the bumper out of the water without dropping it.",
+     "setup": "Stand at the water's edge.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Straight to you",
+     "mark": "they come straight to you instead of shaking first.",
+     "setup": "Back up 2 m from the edge.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Deliver, then shake",
+     "mark": "they deliver to hand from 5 m back, then shake.",
+     "setup": "Back up 5 m. Take the bumper before the shake.",
+     "reward": "Treat, then \"shake\" is allowed."
+    }
+   ]
+  },
+  {
+   "id": "doubles",
+   "track": "waterfowl",
+   "name": "Doubles",
+   "goal": "Remember two falls and pick up both.",
+   "cue": "Their name, then a hand line to the memory bird",
+   "proofMark": "both birds picked up cleanly, last first.",
+   "needs": [
+    "marks@2",
+    "steady"
+   ],
+   "rep": "outcome",
+   "youngCap": 2,
+   "places": [
+    "yard",
+    "park",
+    "field",
+    "water"
+   ],
+   "gear": [
+    "bumpers",
+    "a helper"
+   ],
+   "steps": [
+    {
+     "t": "Wide apart",
+     "mark": "they pick up the last throw, then go back for the first.",
+     "setup": "Two throws 90 degrees apart at 25 yd. After the first delivery, line them up on the memory bird.",
+     "reward": "Treat on each delivery."
+    },
+    {
+     "t": "Memory bird",
+     "mark": "they remember the first bird after delivering the second.",
+     "setup": "Same, with a pause before the second send.",
+     "reward": "Treat on each delivery."
+    },
+    {
+     "t": "Tighter angles",
+     "mark": "they pick up both with the throws 45 degrees apart.",
+     "setup": "Keep the distance at 25 yd.",
+     "reward": "Treat on each delivery."
+    },
+    {
+     "t": "Land and water",
+     "mark": "they pick up one bird on land and one in water.",
+     "setup": "Water bird last thrown.",
+     "reward": "Treat on each delivery."
+    },
+    {
+     "t": "50 yd",
+     "mark": "they pick up both at 50 yards.",
+     "setup": "Wide angles again at the new distance.",
+     "reward": "Treat on each delivery."
+    }
+   ]
+  },
+  {
+   "id": "lining",
+   "track": "waterfowl",
+   "name": "Lining",
+   "goal": "Run straight where you point, toward a bird they didn't see fall.",
+   "cue": "\"Back\"",
+   "proofMark": "a straight line to the bumper.",
+   "needs": [
+    "marks@2"
+   ],
+   "rep": "outcome",
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "white bumpers"
+   ],
+   "steps": [
+    {
+     "t": "Pile at 10 yd",
+     "mark": "they run straight to a visible pile of bumpers on \"Back\".",
+     "setup": "Dog at your left, your hand flat beside their head pointing at the pile.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Pile at 25 yd",
+     "mark": "they run straight to the pile at 25 yards.",
+     "setup": "Same.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Pile at 50 yd",
+     "mark": "they run straight to the pile at 50 yards.",
+     "setup": "Same.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Single bumper at 50 yd",
+     "mark": "they run straight to a single bumper they watched you place.",
+     "setup": "Walk out with them, place it, walk back.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Cold blind at 75 yd",
+     "mark": "they run straight to a bumper they didn't see placed.",
+     "setup": "Plant it before the session.",
+     "reward": "Treat on delivery."
+    }
+   ]
+  },
+  {
+   "id": "casts",
+   "track": "waterfowl",
+   "name": "Handling casts",
+   "goal": "Stop on the whistle and go where your arm sends them.",
+   "cue": "One blast = stop; arm signals \"Over\" and \"Back\"",
+   "proofMark": "a stop on the whistle and the right cast.",
+   "needs": [
+    "lining",
+    "whistle"
+   ],
+   "rep": "outcome",
+   "whistle": true,
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "white bumpers",
+    "a whistle"
+   ],
+   "steps": [
+    {
+     "t": "Stop at 10 yd",
+     "mark": "they stop and sit facing you on the whistle, 10 yards out.",
+     "setup": "Send to a pile; blast halfway.",
+     "reward": "Walk out and treat, then send them on."
+    },
+    {
+     "t": "Over",
+     "mark": "they go left or right to the bumper you point to.",
+     "setup": "Dog sitting on a mound, bumpers to each side.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Back",
+     "mark": "they turn and go straight back on \"Back\".",
+     "setup": "Bumpers behind them.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Diamond at 30 yd",
+     "mark": "they take a correct cast 30 yards out.",
+     "setup": "The baseball-diamond drill: piles at first, second and third base.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "At 50 yd",
+     "mark": "they stop and take a correct cast 50 yards out.",
+     "setup": "Same drill, bigger diamond.",
+     "reward": "Treat on delivery."
+    }
+   ]
+  },
+  {
+   "id": "blinds",
+   "track": "waterfowl",
+   "name": "Blind retrieves",
+   "goal": "Find a bird they never saw fall, guided by you.",
+   "cue": "\"Back\", the whistle and casts",
+   "proofMark": "the bird found with a clean line or a handle or two.",
+   "needs": [
+    "lining",
+    "casts"
+   ],
+   "rep": "outcome",
+   "youngCap": 1,
+   "places": [
+    "park",
+    "field",
+    "water"
+   ],
+   "gear": [
+    "bumpers or birds"
+   ],
+   "steps": [
+    {
+     "t": "Cold blind 25 yd",
+     "mark": "a clean pickup on a 25-yard blind.",
+     "setup": "Plant the bumper before you bring the dog out.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "50 yd",
+     "mark": "a clean 50-yard blind.",
+     "setup": "Clear terrain.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "100 yd",
+     "mark": "a 100-yard blind with a straight line or one handle.",
+     "setup": "Use the distance tracker.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "With a handle",
+     "mark": "they take one stop and cast and find it.",
+     "setup": "Plant it slightly off a natural line.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Across water",
+     "mark": "a blind across a pond or channel.",
+     "setup": "Short water first.",
+     "reward": "Treat on delivery."
+    }
+   ]
+  },
+  {
+   "id": "huntdead",
+   "track": "waterfowl",
+   "name": "Hunt dead",
+   "goal": "Search an area for a crippled bird and bring it back.",
+   "cue": "\"Dead bird\"",
+   "proofMark": "they search the area and bring back the hidden bird.",
+   "needs": [
+    "retrieve"
+   ],
+   "rep": "outcome",
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "bumpers or a bird"
+   ],
+   "steps": [
+    {
+     "t": "Short cover",
+     "mark": "they search on \"Dead bird\" and find a hidden bumper in short grass.",
+     "setup": "Hide it 5 m away; let them watch you walk out.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Tall cover",
+     "mark": "they find it in tall grass or brush.",
+     "setup": "Hide it before you bring them.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "After a wait",
+     "mark": "they find a hidden duck after a 2-minute wait.",
+     "setup": "The scent has time to spread; send them downwind.",
+     "reward": "Treat on delivery."
+    }
+   ]
+  },
+  {
+   "id": "blindmanners",
+   "track": "waterfowl",
+   "name": "Blind and boat manners",
+   "goal": "Still and quiet in a blind or boat while calls blow and guns move.",
+   "cue": "\"Place\"",
+   "proofMark": "they stay still and quiet on their spot.",
+   "needs": [
+    "place:proofed"
+   ],
+   "places": [
+    "yard",
+    "field",
+    "water"
+   ],
+   "gear": [
+    "a dog stand or board",
+    "decoys"
+   ],
+   "steps": [
+    {
+     "t": "Dog stand",
+     "mark": "they hold place on a dog stand or in a boat on land until the timer marks it.",
+     "setup": "The stand on flat ground first.",
+     "reward": "Treat on the stand.",
+     "hold": [
+      10,
+      60
+     ]
+    },
+    {
+     "t": "Through duck calls",
+     "mark": "they stay put while a duck call blows.",
+     "setup": "Blow a call, or play the Duck call from the sound ladder.",
+     "reward": "Treat on the stand.",
+     "keep": true
+    },
+    {
+     "t": "Through motion",
+     "mark": "they stay put while you stand, sit and shoulder an empty gun.",
+     "setup": "Slow movements first.",
+     "reward": "Treat on the stand.",
+     "keep": true
+    },
+    {
+     "t": "In a blind",
+     "mark": "they stay quiet and still in a blind for 10 minutes.",
+     "setup": "A practice blind or a layout spot.",
+     "reward": "Calm treats now and then.",
+     "keep": true
+    },
+    {
+     "t": "Decoys ignored",
+     "mark": "they walk past decoys without picking them up.",
+     "setup": "On leash, then off.",
+     "reward": "Treat as they pass."
+    }
+   ]
+  },
+  {
+   "id": "birdintro",
+   "track": "upland",
+   "name": "Bird intro and sight point",
+   "goal": "Love birds, and freeze at the sight of one.",
+   "cue": "None",
+   "proofMark": "they freeze and hold on the bird.",
+   "needs": [
+    "charge"
+   ],
+   "places": [
+    "home",
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a flirt pole",
+    "a wing"
+   ],
+   "steps": [
+    {
+     "t": "Chase the wing",
+     "mark": "they chase a wing on a flirt pole.",
+     "setup": "A wing tied to a flirt pole line. Drag it in circles; let them chase, not catch.",
+     "reward": "Let them catch it now and then: the catch is the reward."
+    },
+    {
+     "t": "Freeze when it stops",
+     "mark": "they freeze, staring, when the wing stops.",
+     "setup": "Stop the wing dead in the grass and wait.",
+     "reward": "Flick the wing away so they can chase again."
+    },
+    {
+     "t": "Hold 3 seconds",
+     "mark": "they hold the freeze until the timer marks it.",
+     "setup": "Stop the wing, start the hold.",
+     "reward": "Release them to chase the wing.",
+     "hold": [
+      3,
+      4
+     ]
+    },
+    {
+     "t": "Hold 10 seconds",
+     "mark": "they hold the freeze until the timer marks it.",
+     "setup": "Same.",
+     "reward": "Release them to chase the wing.",
+     "hold": [
+      8,
+      12
+     ]
+    },
+    {
+     "t": "Launcher pigeon, with a mentor",
+     "mark": "they point a pigeon in a launcher.",
+     "setup": "With an experienced trainer, check cord on. Release the bird only while they hold.",
+     "reward": "The flight is the reward."
+    },
+    {
+     "t": "Call-back quail",
+     "mark": "they point a quail from a call-back pen.",
+     "setup": "With a mentor or at a preserve.",
+     "reward": "The flight is the reward."
+    }
+   ]
+  },
+  {
+   "id": "whoa",
+   "track": "upland",
+   "name": "Whoa",
+   "goal": "Stop and stand still on one word, taught with rewards on a board.",
+   "cue": "\"Whoa\" (stand still; not sit)",
+   "proofMark": "they stand still on \"Whoa\" until released.",
+   "needs": [
+    "stay"
+   ],
+   "gear": [
+    "a low board or table",
+    "a check cord"
+   ],
+   "proof": {
+    "dur": [
+     {
+      "v": 3,
+      "t": "3 s"
+     },
+     {
+      "v": 10,
+      "t": "10 s"
+     },
+     {
+      "v": 30,
+      "t": "30 s"
+     }
+    ],
+    "dist": [
+     {
+      "v": 0,
+      "t": "you beside them"
+     },
+     {
+      "v": 1,
+      "t": "10 m"
+     },
+     {
+      "v": 2,
+      "t": "30 m"
+     }
+    ],
+    "dis": [
+     {
+      "v": 0,
+      "t": "no distraction"
+     },
+     {
+      "v": 1,
+      "t": "a dropped bumper"
+     },
+     {
+      "v": 2,
+      "t": "a wing on the ground"
+     },
+     {
+      "v": 3,
+      "t": "a bird in a launcher"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "t": "Stand on a board",
+     "mark": "they stand still on a raised board.",
+     "setup": "A low table or board. Lift them on, a hand under the belly at first.",
+     "reward": "Treat to the mouth while they stand."
+    },
+    {
+     "t": "Whoa on the board",
+     "mark": "they stay standing on \"Whoa\" until the timer marks it.",
+     "setup": "Say \"Whoa\", start the hold. Tap Miss if they sit or step.",
+     "reward": "Treat while they stand, then release.",
+     "hold": [
+      2,
+      5
+     ]
+    },
+    {
+     "t": "Off the board",
+     "mark": "they stand still on \"Whoa\" on the ground.",
+     "setup": "Right beside the board at first.",
+     "reward": "Treat while they stand."
+    },
+    {
+     "t": "While walking",
+     "mark": "they stop and stand when you say \"Whoa\" mid-walk.",
+     "setup": "Slow walk, leash loose.",
+     "reward": "Treat while they stand."
+    },
+    {
+     "t": "At 10 m",
+     "mark": "they stop and stand on \"Whoa\" 10 m ahead of you.",
+     "setup": "Check cord on.",
+     "reward": "Walk up and treat while they stand."
+    },
+    {
+     "t": "At 30 m",
+     "mark": "they stop and stand on \"Whoa\" 30 m ahead.",
+     "setup": "Check cord on.",
+     "reward": "Walk up and treat while they stand."
+    }
+   ]
+  },
+  {
+   "id": "pointdur",
+   "track": "upland",
+   "name": "Point duration",
+   "goal": "Hold point while you walk in to flush.",
+   "cue": "None, or \"Whoa\" as a reminder",
+   "proofMark": "they hold point until released.",
+   "needs": [
+    "birdintro@2",
+    "whoa@2"
+   ],
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a wing or a bird in a launcher"
+   ],
+   "steps": [
+    {
+     "t": "Hold 3 seconds",
+     "mark": "they hold point until the timer marks it.",
+     "setup": "Wing on a pole, or a planted bird with a mentor.",
+     "reward": "Release to the wing or the flush.",
+     "hold": [
+      3,
+      4
+     ]
+    },
+    {
+     "t": "Hold 10 seconds",
+     "mark": "they hold point until the timer marks it.",
+     "setup": "Same.",
+     "reward": "Release to the wing or the flush.",
+     "hold": [
+      8,
+      12
+     ]
+    },
+    {
+     "t": "Hold 30 seconds",
+     "mark": "they hold point until the timer marks it.",
+     "setup": "Same.",
+     "reward": "Release to the wing or the flush.",
+     "hold": [
+      25,
+      35
+     ],
+     "keep": true
+    },
+    {
+     "t": "You walk in front",
+     "mark": "they hold point while you walk past their nose.",
+     "setup": "Walk a wide arc first, then closer.",
+     "reward": "Release to the flush.",
+     "keep": true
+    },
+    {
+     "t": "You kick the cover",
+     "mark": "they hold point while you kick the grass for the bird.",
+     "setup": "Kick around the bird for a few seconds.",
+     "reward": "Release to the flush.",
+     "keep": true
+    }
+   ]
+  },
+  {
+   "id": "steadywing",
+   "track": "upland",
+   "name": "Steady to wing",
+   "goal": "Stay on point while the bird flies.",
+   "cue": "\"Whoa\" if needed",
+   "proofMark": "they stay put as the bird flies.",
+   "needs": [
+    "pointdur@2"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Steady",
+    "Crept",
+    "Broke"
+   ],
+   "places": [
+    "yard",
+    "field"
+   ],
+   "gear": [
+    "a bird launcher",
+    "a check cord"
+   ],
+   "steps": [
+    {
+     "t": "Launcher at 10 yd",
+     "mark": "they hold point while the launcher fires.",
+     "setup": "Check cord on. A helper fires the launcher on your nod.",
+     "reward": "Release to hunt on or to a retrieve."
+    },
+    {
+     "t": "Bird flies off",
+     "mark": "they hold as a bird flies away.",
+     "setup": "Same, with a live bird and a mentor.",
+     "reward": "Release to hunt on."
+    },
+    {
+     "t": "Two flushes",
+     "mark": "they stay steady through two flushes in a row.",
+     "setup": "Two launchers.",
+     "reward": "Release to hunt on."
+    }
+   ]
+  },
+  {
+   "id": "steadyshot",
+   "track": "upland",
+   "name": "Steady to shot",
+   "goal": "Stay on point through the flush and the shot.",
+   "cue": "\"Whoa\" if needed",
+   "proofMark": "they stay put through the flush and the shot.",
+   "needs": [
+    "steadywing",
+    "gun@2"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Steady",
+    "Crept",
+    "Broke"
+   ],
+   "places": [
+    "field"
+   ],
+   "gear": [
+    "a launcher",
+    "a blank pistol",
+    "a helper"
+   ],
+   "steps": [
+    {
+     "t": "Blank at 30 yd",
+     "mark": "they stay steady through the flush and a blank 30 yards away.",
+     "setup": "A helper fires as the bird lifts.",
+     "reward": "Release to hunt on."
+    },
+    {
+     "t": "Blank at 10 yd",
+     "mark": "they stay steady with the blank 10 yards away.",
+     "setup": "Same.",
+     "reward": "Release to hunt on."
+    },
+    {
+     "t": "Your shot",
+     "mark": "they stay steady when you shoot.",
+     "setup": "Safe direction, the dog well behind your line of fire.",
+     "reward": "Release to the retrieve or to hunt on."
+    }
+   ]
+  },
+  {
+   "id": "steadyfall",
+   "track": "upland",
+   "name": "Steady to fall",
+   "goal": "Hold until the bird is down and you send them.",
+   "cue": "Their name to send",
+   "proofMark": "they hold through the fall and go only on their name.",
+   "needs": [
+    "steadyshot"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Steady",
+    "Crept",
+    "Broke"
+   ],
+   "places": [
+    "field"
+   ],
+   "gear": [
+    "birds",
+    "a helper"
+   ],
+   "steps": [
+    {
+     "t": "Hold through the fall",
+     "mark": "they hold until the bird is down and you send them.",
+     "setup": "A helper shoots; you stay near the dog.",
+     "reward": "The retrieve."
+    },
+    {
+     "t": "Released by name",
+     "mark": "they go only on their name, to retrieve or to hunt on.",
+     "setup": "Vary it: sometimes send, sometimes pick up the bird yourself.",
+     "reward": "The retrieve, or hunting on."
+    }
+   ]
+  },
+  {
+   "id": "backing",
+   "track": "upland",
+   "name": "Backing",
+   "goal": "Stop and honor another dog's point.",
+   "cue": "\"Whoa\" if needed",
+   "proofMark": "they stop on sight of the pointing dog.",
+   "needs": [
+    "whoa"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Backed",
+    "Slowed",
+    "Ran past"
+   ],
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a cardboard pointing-dog cutout"
+   ],
+   "steps": [
+    {
+     "t": "Cardboard dog",
+     "mark": "they stop on sight of a cardboard pointing dog 10 m away.",
+     "setup": "Stand the cutout in short grass; walk them up to it.",
+     "reward": "Treat while they stand."
+    },
+    {
+     "t": "Statue in cover",
+     "mark": "they stop when they come on a dog decoy in cover.",
+     "setup": "Hide it so they find it suddenly.",
+     "reward": "Treat while they stand."
+    },
+    {
+     "t": "Real dog at 20 m",
+     "mark": "they stop on a real pointing dog 20 m away.",
+     "setup": "A steady partner dog on a planted bird.",
+     "reward": "Treat while they stand."
+    },
+    {
+     "t": "Real dog at 50 m",
+     "mark": "they stop on a real pointing dog 50 m away.",
+     "setup": "Same, bigger field.",
+     "reward": "Walk up and treat."
+    }
+   ]
+  },
+  {
+   "id": "covey",
+   "track": "upland",
+   "name": "Covey and singles",
+   "goal": "Handle a covey rise and work the scattered singles.",
+   "cue": "None",
+   "proofMark": "a covey pointed and singles worked slowly.",
+   "needs": [
+    "steadywing"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Clean",
+    "Needed help",
+    "Bumped birds"
+   ],
+   "places": [
+    "field"
+   ],
+   "gear": [
+    "quail (call-back pen or preserve)"
+   ],
+   "steps": [
+    {
+     "t": "Point the covey",
+     "mark": "they point a covey find and hold.",
+     "setup": "A preserve or call-back pen, with a mentor.",
+     "reward": "Release after the rise."
+    },
+    {
+     "t": "Through the covey rise",
+     "mark": "they stay steady as the covey flushes.",
+     "setup": "Check cord on.",
+     "reward": "Release to the singles."
+    },
+    {
+     "t": "Hunt the singles",
+     "mark": "they work slowly and point scattered singles.",
+     "setup": "Head where the birds landed.",
+     "reward": "Release after each flush."
+    }
+   ]
+  },
+  {
+   "id": "range",
+   "track": "upland",
+   "name": "Range and handling",
+   "goal": "Hunt out front at gun range and turn on the whistle.",
+   "cue": "Two pips = turn; trill = come",
+   "proofMark": "they hunt in range and answer the whistle.",
+   "needs": [
+    "come:reliable",
+    "whistle"
+   ],
+   "rep": "outcome",
+   "whistle": true,
+   "places": [
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a whistle",
+    "a long line or GPS collar"
+   ],
+   "steps": [
+    {
+     "t": "Check in at 50 yd",
+     "mark": "they swing back to check in within 50 yards.",
+     "setup": "Open field. Walk with the wind in your face.",
+     "reward": "Treat when they check in, then send them on."
+    },
+    {
+     "t": "Turn on the whistle",
+     "mark": "they turn on two pips from 50 yards or more.",
+     "setup": "Pip as you change direction.",
+     "reward": "Treat when they reach you, sometimes."
+    },
+    {
+     "t": "Recall from 100 yd",
+     "mark": "they come in on the trill from 100 yards in cover.",
+     "setup": "Use the distance tracker to check the range.",
+     "reward": "Jackpot."
+    }
+   ]
+  }
+ ]
+}

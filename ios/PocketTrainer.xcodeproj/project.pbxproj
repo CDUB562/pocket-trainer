@@ -190,6 +190,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Pocket Trainer films your training sessions so you can check whether you tapped Yes at the right moment. Videos stay on your phone.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Pocket Trainer measures how far your dog ran on a retrieve or a recall, only while the Distance chip is on. Your location stays on your phone.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pocket Trainer records you saying Yes once, to use as your own marker sound. The recording stays on your phone.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -223,6 +224,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Pocket Trainer films your training sessions so you can check whether you tapped Yes at the right moment. Videos stay on your phone.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Pocket Trainer measures how far your dog ran on a retrieve or a recall, only while the Distance chip is on. Your location stays on your phone.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pocket Trainer records you saying Yes once, to use as your own marker sound. The recording stays on your phone.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
