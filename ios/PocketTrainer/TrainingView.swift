@@ -355,6 +355,7 @@ struct HowtoView: View {
                         Spacer()
                         Button("Done") { dismiss() }.buttonStyle(OutlineButtonStyle())
                     }
+                    StepAnimation(skill: s.id, step: model.currentStepIndex, dog: model.dog?.name ?? "")
                     (Text((s.isOutcome ? "GOAL " : "YES ")).font(.display(22)).foregroundColor(s.isOutcome ? Theme.keep : Theme.accent) + Text(model.markText).font(.title3.weight(.bold)))
                     numbered(1, "Set up", step.setup)
                     numbered(2, "Reward", step.reward)

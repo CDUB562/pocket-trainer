@@ -55,6 +55,7 @@ jobs:
           shot 4-settings -demo -tab setup
           shot 5-sound-ladder -demo -openSound
           shot 6-field-outcomes -demo -openField
+          shot 8-howto -demo -openHowto
           xcrun simctl ui "$UDID" appearance dark
           shot 7-today-dark -demo
           # The app must still be running (no crash) after all of that.

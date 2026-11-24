@@ -3,18 +3,23 @@
 # and into docs/ (the installable offline app served by GitHub Pages).
 #   src/page.html   markup and styles
 #   src/catalog.js  skills, passport, breeds (plain data)
+#   src/anim.js, src/anim-steps.js  step animations (also bundled into the iPhone app as ios/PocketTrainer/anim.html)
 #   src/app.js      the app
 set -e
 cd "$(dirname "$0")"
-node -e 'new Function(require("fs").readFileSync("src/catalog.js","utf8") + require("fs").readFileSync("src/app.js","utf8"))' # syntax check
+node -e 'new Function(["catalog","anim","anim-steps","app"].map(f=>require("fs").readFileSync("src/"+f+".js","utf8")).join("\n"))' # syntax check
 {
   cat src/page.html
   printf '<script>\n'
   cat src/catalog.js
   printf '\n'
+  cat src/anim.js src/anim-steps.js
+  printf '\n'
   cat src/app.js
   printf '</script>\n'
 } > index.html
+# The iPhone app plays the same animations in an offline web view.
+node tools/gen_anim.js
 mkdir -p docs
 VERSION=$(cat index.html pwa/sw.js pwa/manifest.webmanifest | sha1sum | cut -c1-10)
 {

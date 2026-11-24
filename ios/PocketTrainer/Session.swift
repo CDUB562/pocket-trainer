@@ -86,6 +86,13 @@ extension AppModel {
     }
 
     /// The step shown on screen: the current ladder step while learning; afterwards the hold step (or the last).
+    /// Where the step on screen sits in its skill's ladder (the animation is looked up by this).
+    var currentStepIndex: Int {
+        guard let b = block else { return 0 }
+        let steps = Catalog.any(b.id).steps
+        if b.kind == "learn" { return prog(b.id).step }
+        return steps.firstIndex(where: { $0.hold != nil }) ?? max(0, steps.count - 1)
+    }
     var currentStep: Step? {
         guard let b = block else { return nil }
         let s = Catalog.any(b.id)

@@ -109,6 +109,7 @@ struct SkillSheet: View {
     @Environment(\.dismiss) private var dismiss
     let id: String
     @State private var confirmReset = false
+    @State private var watching: Int?
 
     var body: some View {
         let s = Catalog.any(id), lv = model.level(id), open = model.isOpen(id), p = model.prog(id)
@@ -134,11 +135,18 @@ struct SkillSheet: View {
                 Text("STEPS").font(.display(19)).foregroundStyle(Theme.muted)
                 ForEach(Array(s.steps.enumerated()), id: \.offset) { i, step in
                     let done = lv >= 1 || i < p.step, now = i == p.step && model.started(id) && lv == 0
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Button { watching = watching == i ? nil : i } label: {
+                      HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text("\(i + 1)").font(.display(18)).foregroundStyle(done ? Theme.keep : Theme.accent).frame(width: 20, alignment: .leading)
                         Text("\(step.t): \(step.mark)").font(now ? .body.weight(.bold) : .body)
-                            .foregroundStyle(done ? Theme.muted : Theme.fg).strikethrough(done)
+                            .foregroundStyle(done ? Theme.muted : Theme.fg).strikethrough(done).multilineTextAlignment(.leading)
+                        Spacer(minLength: 8)
+                        Text(watching == i ? "Close" : "Watch").font(.subheadline.weight(.bold)).foregroundStyle(Theme.toss)
+                      }
+                      .frame(minHeight: 44).contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
+                    if watching == i { StepAnimation(skill: id, step: i, dog: model.dog?.name ?? "") }
                 }
                 if !s.dims.isEmpty {
                     Text("PROOFING").font(.display(19)).foregroundStyle(Theme.muted)

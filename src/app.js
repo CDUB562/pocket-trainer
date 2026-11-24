@@ -800,7 +800,7 @@
     return b;
   }
 
-  let sheetSkill = null;
+  let sheetSkill = null, howtoAnim = null;
   function openSkill(id) {
     sheetSkill = id;
     const s = getSkill(id), p = peek(id) || { step: 0 }, lv = level(id), open = isOpen(id);
@@ -812,8 +812,16 @@
     $("sk-train").hidden = !open;
     const ol = $("sk-steps"); ol.replaceChildren();
     s.steps.forEach((step, i) => {
-      const li = el("li", lv >= 1 || i < p.step ? "done" : i === p.step && started(id) ? "now" : "", `${step.t}: ${step.mark}`);
-      ol.append(li);
+      const li = el("li", lv >= 1 || i < p.step ? "done" : i === p.step && started(id) ? "now" : "", null);
+      const b = el("button", "watch"); b.type = "button"; b.setAttribute("aria-expanded", "false");
+      const w = el("i", "", "Watch"); b.append(el("span", "", `${step.t}: ${step.mark}`), w);
+      const box = el("div"); box.hidden = true;
+      b.addEventListener("click", () => {
+        const opening = box.hidden;
+        ol.querySelectorAll(".watch").forEach((x) => { x.setAttribute("aria-expanded", "false"); x.lastChild.textContent = "Watch"; x.nextSibling.replaceChildren(); x.nextSibling.hidden = true; });
+        if (opening && PTSteps.player(box, id, i, dog && dog.name)) { b.setAttribute("aria-expanded", "true"); w.textContent = "Close"; }
+      });
+      li.append(b, box); ol.append(li);
     });
     const pw = $("sk-proof"); pw.replaceChildren();
     $("sk-proof-wrap").hidden = !dims(s).length;
@@ -1020,6 +1028,7 @@
     $("step-next").disabled = p.step === s.steps.length - 1;
     $("howto-title").textContent = `${s.name}: ${step.t}`;
     $("howto-mark").textContent = markText;
+    howtoAnim = [b.id, s.steps.indexOf(step)];
     $("howto-setup").textContent = step.setup;
     $("howto-reward").textContent = step.reward;
     $("howto-cue").textContent = s.cue;
@@ -1441,7 +1450,7 @@
   $("open-guide").addEventListener("click", openGuide);
   for (const id of ["close-guide", "close-guide-2"]) $(id).addEventListener("click", () => (guide.hidden = true));
   $("go-charge").addEventListener("click", () => { if (dog) show("charge"); else openOnboarding(null); });
-  function openHowto() { howto.hidden = false; howto.scrollTop = 0; }
+  function openHowto() { howto.hidden = false; howto.scrollTop = 0; if (howtoAnim) PTSteps.player($("howto-anim"), howtoAnim[0], howtoAnim[1], dog && dog.name); }
   $("open-howto").addEventListener("click", openHowto);
   for (const id of ["close-howto", "close-howto-2"]) $(id).addEventListener("click", () => (howto.hidden = true));
   $("skill-reset").addEventListener("click", () => {

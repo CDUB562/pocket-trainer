@@ -65,6 +65,7 @@ struct RootView: View {
             let args = ProcessInfo.processInfo.arguments
             if let i = args.firstIndex(of: "-tab"), i + 1 < args.count { tab = args[i + 1] }
             if args.contains("-openTraining") { model.startSingle("stay") }
+            if args.contains("-openHowto") { model.startSingle("sit"); DispatchQueue.main.asyncAfter(deadline: .now() + 1) { model.howtoOpen = true } }
             if args.contains("-openSound") { model.startSingle("snd:gun") }
             if args.contains("-openField") { model.startSingle("marks") }
             #endif
