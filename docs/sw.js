@@ -1,8 +1,8 @@
 // Offline cache. The build stamps a new version on every change, which clears the old cache.
-const CACHE = "pocket-trainer-89deb57cec";
+const CACHE = "pocket-trainer-eb7dd10a0f";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
-// Voice clips are named by their words, so they never change: kept across versions.
-const VOICE = "pocket-trainer-voice";
+// Voice clips are named by their words, so they never change: kept across versions. New number = new recordings, drops the old ones.
+const VOICE = "pocket-trainer-voice-2";
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", (e) => {

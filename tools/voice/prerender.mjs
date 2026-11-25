@@ -1,4 +1,4 @@
-// Records every spoken line of the voice guide once (Kokoro "Bella", on this computer, free) into voice/<key>.m4a.
+// Records every spoken line of the voice guide once (Kokoro "Heart", on this computer, free) into voice/<key>.m4a.
 // Rerun after any wording change: it records what's missing. `node tools/voice/prerender.mjs 1/6` renders one shard;
 // `--prune` deletes clips nothing uses any more. Needs kokoro-js (borrowed from ../imprint/tools/voice) and ffmpeg.
 import { createRequire } from "node:module";
@@ -15,14 +15,21 @@ if (arg === "--prune") {
   for (const f of readdirSync(dir)) if (!keep.has(f)) { unlinkSync(join(dir, f)); n++; }
   console.log(`removed ${n}, kept ${readdirSync(dir).length} of ${lines.length}`); process.exit(0);
 }
+// Only the silence at the ends is cut. No compressor, loudness filter or low bitrate: they made the voice sound doubled.
+function trim(x, sr) {
+  const pad = Math.round(sr * 0.08), loud = (v) => Math.abs(v) > 0.004;
+  let a = 0, b = x.length - 1;
+  while (a < b && !loud(x[a])) a++;
+  while (b > a && !loud(x[b])) b--;
+  return x.subarray(Math.max(0, a - pad), Math.min(x.length, b + 2 * pad));
+}
 function encode(audio, sr, out) {
+  audio = trim(audio, sr);
   const pcm = Buffer.alloc(audio.length * 2);
   for (let i = 0; i < audio.length; i++) pcm.writeInt16LE(Math.round(Math.max(-1, Math.min(1, audio[i])) * 32767), i * 2);
   return new Promise((res, rej) => {
-    // Gentle low-cut, even loudness across clips, trimmed silence.
     const ff = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "s16le", "-ar", String(sr), "-ac", "1", "-i", "pipe:0",
-      "-af", "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05,highpass=f=70,acompressor=threshold=-20dB:ratio=2:attack=8:release=120,loudnorm=I=-17:TP=-1.5:LRA=7,aresample=24000",
-      "-c:a", "aac", "-b:a", "40k", "-movflags", "+faststart", out]);
+      "-c:a", "aac", "-b:a", "64k", "-movflags", "+faststart", out]);
     ff.on("error", rej); ff.on("close", (c) => (c === 0 ? res() : rej(new Error("ffmpeg " + c)))); ff.stdin.end(pcm);
   });
 }

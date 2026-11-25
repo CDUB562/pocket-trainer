@@ -848,10 +848,10 @@ const BREEDS = [
   ["Boston Terrier", "companion", "s", 1],
 ];
 
-// The voice guide: recorded clips (Kokoro "Bella", made by tools/voice/prerender.mjs) that talk through one step
+// The voice guide: recorded clips (Kokoro "Heart", made by tools/voice/prerender.mjs) that talk through one step
 // in time with its animation. Clips are named by a hash of the spoken text, so any wording change needs a rerun.
 const PTVoice = (() => {
-  const VOICE = "af_bella", SPEED = 0.95;
+  const VOICE = "af_heart", SPEED = 0.95;
   // What is said for a written line: no shorthand, no capitals shouted.
   const UNITS = [[/(\d)\s*cm\b/g, "$1 centimeters"], [/\b1 m\b/g, "1 meter"], [/(\d)\s*m\b/g, "$1 meters"], [/\b1 yd\b/g, "1 yard"], [/(\d)\s*yd\b/g, "$1 yards"],
     [/\b1 s\b/g, "1 second"], [/(\d)\s*s\b/g, "$1 seconds"], [/\b1 h\b/g, "1 hour"], [/(\d)\s*h\b/g, "$1 hours"], [/(\d)\s*min\b/g, "$1 minutes"], [/(\d)\s*oz\b/g, "$1 ounces"], [/(\d)\s*ft\b/g, "$1 feet"], [/(\d)-(\d)/g, "$1 to $2"]];
