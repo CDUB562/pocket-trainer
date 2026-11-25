@@ -41,6 +41,7 @@ struct Dog: Codable, Equatable, Identifiable {
     var days: [Int] = [1, 2, 4, 6]    // 0 = Sunday, as on the web
     var fieldDay: Int? = nil
     var seasons: [String: String] = [:]
+    var gates: [String: String] = [:]  // track id: the day the owner confirmed it
     var legacy = false
 
     init() {}
@@ -58,6 +59,7 @@ struct Dog: Codable, Equatable, Identifiable {
         days = c.value(.days, [1, 2, 4, 6])
         fieldDay = c.value(.fieldDay, nil as Int?)
         seasons = c.value(.seasons, [:])
+        gates = c.value(.gates, [:])
         legacy = c.value(.legacy, false)
     }
 }
@@ -85,6 +87,17 @@ struct SkillProgress: Codable, Equatable {
         best = c.value(.best, [:]); places = c.value(.places, [:]); rdays = c.value(.rdays, [])
         reviews = c.value(.reviews, 0); interval = c.value(.interval, 0)
         reviewDue = c.value(.reviewDue, nil as String?); fails = c.value(.fails, 0)
+    }
+}
+
+struct HelpLog: Codable, Equatable { var day: String; var r: String; var m: Double? }
+struct HelpState: Codable, Equatable {
+    var stopped: String? = nil
+    var log: [HelpLog] = []
+    init() {}
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        stopped = c.value(.stopped, nil as String?); log = c.value(.log, [])
     }
 }
 
@@ -186,6 +199,7 @@ struct DogState: Codable, Equatable {
     var live: LiveSession? = nil
     var sound: [String: SoundState] = [:]
     var hot = ""
+    var help: [String: HelpState] = [:]
 
     init() {}
     init(from decoder: Decoder) throws {
@@ -195,7 +209,7 @@ struct DogState: Codable, Equatable {
         place = c.value(.place, "home"); ratings = c.value(.ratings, []); reviews = c.value(.reviews, [])
         days = c.value(.days, []); passport = c.value(.passport, [:]); potty = c.value(.potty, Potty())
         treatsDay = c.value(.treatsDay, ""); treatsUsed = c.value(.treatsUsed, 0); live = c.value(.live, nil as LiveSession?)
-        sound = c.value(.sound, [:]); hot = c.value(.hot, "")
+        sound = c.value(.sound, [:]); hot = c.value(.hot, ""); help = c.value(.help, [:])
     }
 
     /// Clamp saved progress to the current step lists, so data from another version can never point past the end.

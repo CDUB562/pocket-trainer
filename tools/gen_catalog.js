@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const root = path.join(__dirname, "..");
 const src = fs.readFileSync(path.join(root, "src/catalog.js"), "utf8");
-const C = new Function(src + "; return { TRACKS, PLACES, LEVELS, SKILLS, SOUNDS, SEASONS, PASSPORT, DRIVES, BREEDS };")();
+const C = new Function(src + "; return { TRACKS, PLACES, LEVELS, SKILLS, SOUNDS, SEASONS, PASSPORT, DRIVES, BREEDS, HELPERS, CGC };")();
 
 const proof = (p) => {
   if (!p) return undefined;
@@ -16,7 +16,7 @@ const proof = (p) => {
 };
 const data = {
   tracks: C.TRACKS, places: C.PLACES, levels: C.LEVELS, sounds: C.SOUNDS, seasons: C.SEASONS,
-  passport: C.PASSPORT, drives: C.DRIVES,
+  passport: C.PASSPORT, helpers: C.HELPERS, cgc: C.CGC, drives: C.DRIVES,
   breeds: C.BREEDS.map(([name, drive, size, flat]) => ({ name, drive, size, flat: !!flat })),
   skills: C.SKILLS.map((s) => ({ ...s, proof: proof(s.proof) })),
 };

@@ -25,7 +25,7 @@ const PTAnim = (() => {
     px: 80, pf: 1, pk: 0, pl: 0, ax: NaN, ay: NaN, hs: "open", oh: "side", leash: 0, pole: 0,
     dx: 170, df: -1, dr: 0, dfr: 0, dh: 0, dre: 0, dpaw: 0, dtail: 0.3, dwag: 0.35, dswim: 0, dcar: "", drest: 0, dup: 0,
     tx: 0, ty: 0, ton: 0, ix: 0, iy: 0, ion: 0, item: "bumper", bx: 0, by: 0, bon: 0, door: 0,
-    o2x: -999, o2f: 1, o2r: 0, o2fr: 0, o2h: 0, o2paw: 0, o2tail: 0.3, wx: -999, wf: -1, wk: 0, wax: NaN, way: NaN, hpx: -999, i2x: 0, i2y: 0, i2on: 0, dtilt: 0,
+    o2x: -999, o2f: 1, o2r: 0, o2fr: 0, o2h: 0, o2paw: 0, o2tail: 0.3, wx: -999, wf: -1, wk: 0, wax: NaN, way: NaN, hpx: -999, i2x: 0, i2y: 0, i2on: 0, dtilt: 0, dvest: 0, dgps: 0, dharn: 0, dbow: 0, droll: 0,
   };
   const DISCRETE = new Set(["hs", "oh", "dcar", "item"]);
 
@@ -52,6 +52,8 @@ const PTAnim = (() => {
       POSE.stand[k].y * ws + POSE.sit[k].y * wsit + POSE.down[k].y * wd);
     // Point: the near front paw lifts and folds.
     if (s.dpaw) { J.fe = mix(J.fe, P(9, -25), s.dpaw); J.fp = mix(J.fp, P(13, -15), s.dpaw); }
+    // Bow: elbows down, rear up.
+    if (s.dbow) { J.S = mix(J.S, P(4, -16), s.dbow); J.fe = mix(J.fe, P(10, -5), s.dbow); J.fp = mix(J.fp, P(24, 0), s.dbow); }
     const N = P(J.S.x + 5, J.S.y - 6);
     const th = (48 + s.dh * 0.75) * D;
     const C = P(N.x + Math.cos(th) * 15 + s.dre * 14, N.y - Math.sin(th) * 15);
@@ -176,6 +178,8 @@ const PTAnim = (() => {
     const L = dogLocal(s), f = (s.df >= 0 ? 1 : -1) * Math.max(0.55, Math.abs(s.df)), dy = s.dswim * 16 - (s.dup || 0);
     ctx.save(); ctx.translate(s.dx, dy); ctx.scale(f, 1);
     if (s.dtilt) { ctx.translate(-44, 0); ctx.rotate(-s.dtilt * D); ctx.translate(44, 0); }
+    // Roll over: the lying dog turns through its back (1) and round again (2).
+    if (s.droll) { const c = Math.cos(s.droll * Math.PI); ctx.translate(0, -15); ctx.scale(1, Math.abs(c) < 0.35 ? (c < 0 ? -0.35 : 0.35) : c); ctx.translate(0, 15); }
     const far = opts.far || C.dogFar, sw = Math.sin(ph) * 9 * amp, lift = (q) => -Math.max(0, Math.sin(ph + q)) * 6 * amp;
     const paddle = s.dswim ? Math.sin(t * 9) * 6 : 0;
     // far legs first, darker
@@ -202,8 +206,11 @@ const PTAnim = (() => {
     dot(ctx, P(L.C.x + Math.cos(L.sa) * 3 + 1, L.C.y - Math.sin(L.sa) * 3 - 3), 1.6, C.fg);
     const ea = L.sa + Math.PI * 0.85;
     poly(ctx, [P(L.C.x - 2, L.C.y - 6), P(L.C.x + Math.cos(ea) * 13 - 2, L.C.y - Math.sin(ea) * 13 + 4), P(L.C.x - 7, L.C.y + 2)], far);
+    if (s.dvest) { seg(ctx, mix(L.H, L.S, 0.35), P(L.S.x + 1, L.S.y), 25, C.accent); seg(ctx, mix(L.H, L.S, 0.5), P(mix(L.H, L.S, 0.5).x, L.S.y + 12), 4, C.fg); }
+    if (s.dharn) { const m = mix(L.H, L.S, 0.62); seg(ctx, P(m.x, m.y - 12), P(m.x, m.y + 12), 4, C.toss); seg(ctx, P(m.x, m.y - 10), P(L.S.x + 9, L.S.y + 4), 4, C.toss); }
     // collar
     const cm = mix(L.S, L.C, 0.38); seg(ctx, P(cm.x - 2, cm.y - 6), P(cm.x + 3, cm.y + 5), 3.5, C.toss);
+    if (s.dgps) { seg(ctx, P(cm.x - 5, cm.y - 9), P(cm.x - 9, cm.y - 22), 1.6, C.fg); dot(ctx, P(cm.x - 4, cm.y - 7), 4, C.warn); }
     ctx.restore();
     const w = (p) => P(s.dx + f * p.x, p.y + dy);
     return { snout: w(L.snout), collar: w(cm), head: w(L.C), S: w(L.S), H: w(L.H) };
@@ -247,6 +254,25 @@ const PTAnim = (() => {
       else if (p.k === "launcher") { ctx.strokeStyle = C.muted; ctx.lineWidth = 2.5; ctx.strokeRect(x - 12, -12, 24, 12); }
       else if (p.k === "cutout") { const sc = { ...BASE, dx: x, df: p.f || 1, dpaw: 1, dtail: 1, dwag: 0, dh: -5 }; ctx.globalAlpha = 0.8; drawDog(ctx, { ...C, fg: C.line }, sc, 0, 0, C.line, 0, { far: C.line }); ctx.globalAlpha = 1; }
       else if (p.k === "grass") { ctx.strokeStyle = C.grass; ctx.lineWidth = 2; ctx.globalAlpha = 0.7; for (let gx = p.x0; gx < p.x1; gx += 9) { const h = 10 + ((gx * 7) % 9); ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx - 3, -h); ctx.moveTo(gx + 2, 0); ctx.lineTo(gx + 5, -h * 0.8); ctx.stroke(); } ctx.globalAlpha = 1; }
+      else if (p.k === "wind") { for (let i = 0; i < 3; i++) { const y = -150 + i * 16, o = (i % 2) * 14; seg(ctx, P(x + o, y), P(x + o + p.dir * 46, y), 2.5, C.toss); poly(ctx, [P(x + o + p.dir * 54, y), P(x + o + p.dir * 44, y - 5), P(x + o + p.dir * 44, y + 5)], C.toss); } }
+      else if (p.k === "treats") for (let i = 0; i < 3; i++) dot(ctx, P(x - 5 + i * 5, -3 - (i % 2) * 2), 2.8, C.accent);
+      else if (p.k === "trail") { for (let gx = p.x0; gx < p.x1; gx += 16) if (!p.gap || gx < p.gap[0] || gx > p.gap[1]) dot(ctx, P(gx, -1 + ((gx * 5) % 4)), p.blood ? 2.6 : 2, p.blood ? C.miss : C.muted); }
+      else if (p.k === "rag") { seg(ctx, P(x - 8, -3), P(x + 8, -5), 6, C.warn); }
+      else if (p.k === "hide") { poly(ctx, [P(x - 24, 0), P(x - 14, -12), P(x + 10, -13), P(x + 26, -2), P(x + 24, 0)], "#a9814f"); poly(ctx, [P(x + 12, -12), P(x + 20, -20), P(x + 28, -12), P(x + 22, -6)], "#8b673c"); }
+      else if (p.k === "barrel") { const r = scene.rock ? Math.sin((scene._t || 0) * 5) * 5 : 0; ctx.save(); ctx.translate(x, 0); ctx.rotate(r * D); poly(ctx, [P(-18, 0), P(-21, -22), P(-18, -46), P(18, -46), P(21, -22), P(18, 0)], C.muted); seg(ctx, P(-20, -14), P(20, -14), 2.5, C.bg); seg(ctx, P(-20, -32), P(20, -32), 2.5, C.bg); ctx.restore(); }
+      else if (p.k === "tin") { poly(ctx, [P(x - 8, -8), P(x + 8, -8), P(x + 8, 0), P(x - 8, 0)], C.toss); dot(ctx, P(x - 3, -8), 1.2, C.bg); dot(ctx, P(x + 3, -8), 1.2, C.bg); }
+      else if (p.k === "box") { poly(ctx, [P(x - 13, -18), P(x + 13, -18), P(x + 13, 0), P(x - 13, 0)], "#b58a5a"); seg(ctx, P(x - 13, -18), P(x - 18, -24), 2.5, "#b58a5a"); seg(ctx, P(x + 13, -18), P(x + 18, -24), 2.5, "#b58a5a"); }
+      else if (p.k === "bag") { poly(ctx, [P(x - 15, -24), P(x + 15, -24), P(x + 15, 0), P(x - 15, 0)], C.keep); ctx.strokeStyle = C.keep; ctx.lineWidth = 3; ctx.strokeRect(x - 6, -31, 12, 7); }
+      else if (p.k === "bin") { poly(ctx, [P(x - 14, -26), P(x + 14, -26), P(x + 11, 0), P(x - 11, 0)], C.muted); seg(ctx, P(x - 16, -27), P(x + 16, -27), 4, C.muted); }
+      else if (p.k === "shelf") { seg(ctx, P(x - 22, -96), P(x + 22, -96), 5, C.muted); seg(ctx, P(x + 20, -96), P(x + 20, 0), 3, C.muted); poly(ctx, [P(x - 8, -107), P(x + 6, -107), P(x + 6, -98), P(x - 8, -98)], C.toss); }
+      else if (p.k === "cone") { poly(ctx, [P(x - 9, 0), P(x, -26), P(x + 9, 0)], C.warn); }
+      else if (p.k === "book") { poly(ctx, [P(x - 26, -10), P(x + 16, -10), P(x + 16, 0), P(x - 26, 0)], C.toss); }
+      else if (p.k === "cushion") { ctx.fillStyle = C.toss; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - 52, -12, 92, 12, 6) : ctx.rect(x - 52, -12, 92, 12); ctx.fill(); }
+      else if (p.k === "disc") { ctx.fillStyle = C.toss; ctx.beginPath(); ctx.ellipse(x - 2, -5, 20, 6, 0, 0, 2 * Math.PI); ctx.fill(); }
+      else if (p.k === "pole") { seg(ctx, P(x, 0), P(x, -p.h - 2), 3, C.muted); dot(ctx, P(x, -p.h - 2), 4, C.warn); }
+      else if (p.k === "wall") { seg(ctx, P(x + 8, -150), P(x + 8, 0), 5, C.line); }
+      else if (p.k === "window") { ctx.strokeStyle = C.muted; ctx.lineWidth = 3; ctx.strokeRect(x - 22, -96, 44, 64); if (p.film) { ctx.fillStyle = C.line; ctx.fillRect(x - 20, -94, 40, 60); } else { seg(ctx, P(x, -96), P(x, -32), 2, C.muted); } }
+      else if (p.k === "phone") { seg(ctx, P(x, 0), P(x, -26), 2, C.muted); poly(ctx, [P(x - 5, -44), P(x + 5, -44), P(x + 5, -26), P(x - 5, -26)], C.fg); dot(ctx, P(x + 2, -40), 1.6, C.miss); }
       else if (p.k === "flag") { seg(ctx, P(x, 0), P(x, -34), 2, C.muted); poly(ctx, [P(x, -34), P(x + 14, -29), P(x, -24)], C.warn); }
       else if (p.k === "building") { ctx.strokeStyle = C.line; ctx.lineWidth = 2.5; ctx.strokeRect(x - 60, -120, 120, 120); }
       else if (p.k === "towel") seg(ctx, P(x - 12, -1.5), P(x + 12, -1.5), 4, C.toss);
@@ -277,7 +303,7 @@ const PTAnim = (() => {
     seg(ctx, P(x0 - 20, 1.5), P(x1 + 20, 1.5), 2, C.line);
     if (sc.ruler) { const r = sc.ruler; seg(ctx, P(r.x0, 10), P(r.x1, 10), 1.5, C.muted); seg(ctx, P(r.x0, 6), P(r.x0, 14), 1.5, C.muted); seg(ctx, P(r.x1, 6), P(r.x1, 14), 1.5, C.muted);
       ctx.fillStyle = C.muted; ctx.font = `700 ${11 / k}px system-ui, sans-serif`; ctx.textAlign = "center"; ctx.fillText(r.text, (r.x0 + r.x1) / 2, 10 + 12 / k); }
-    drawProps(ctx, C, sc, s);
+    sc._t = t; drawProps(ctx, C, sc, s);
     // second dog, walker, helper behind the main figures
     if (s.o2x > -900) drawDog(ctx, C, { ...BASE, dx: s.o2x, df: s.o2f, dr: s.o2r, dfr: s.o2fr, dh: s.o2h, dpaw: s.o2paw, dtail: s.o2tail, dwag: 0.3 }, ph.o2, ph.o2a, C.muted, t, { far: C.line });
     if (s.wx > -900) drawHuman(ctx, C, s.wx, s.wf, s.wk, 0, P(s.wax, s.way), "open", "side", ph.w, ph.wa, C.line, {});
@@ -303,7 +329,7 @@ const PTAnim = (() => {
     if (ev.timer !== undefined) { const c = P(dg.head.x, dg.head.y - 26 * u); ctx.strokeStyle = C.line; ctx.lineWidth = 3 * u; ctx.beginPath(); ctx.arc(c.x, c.y, 10 * u, 0, 2 * Math.PI); ctx.stroke();
       ctx.strokeStyle = C.keep; ctx.beginPath(); ctx.arc(c.x, c.y, 10 * u, -Math.PI / 2, -Math.PI / 2 + ev.timer * 2 * Math.PI); ctx.stroke();
       if (ev.timerLabel) { ctx.fillStyle = C.keep; ctx.font = `700 ${10 * u}px system-ui, sans-serif`; ctx.textAlign = "center"; ctx.fillText(ev.timerLabel, c.x, c.y - 14 * u); } }
-    if (ev.say) bubble(ctx, C, ev.sayWho === "h" && s.hpx > -900 ? P(s.hpx, -200) : P(hu.J.head.x, hu.J.head.y - 14), ev.say, u, top, x0, anim.outcome ? x1 : Math.min(x1, padL));
+    if (ev.say) bubble(ctx, C, ev.sayWho === "d" ? P(dg.head.x, dg.head.y - 8) : ev.sayWho === "h" && s.hpx > -900 ? P(s.hpx, -200) : P(hu.J.head.x, hu.J.head.y - 14), ev.say, u, top, x0, anim.outcome ? x1 : Math.min(x1, padL));
     if (ev.whistle) { const o = P(hu.J.head.x + s.pf * 22, hu.J.head.y + 2); ctx.strokeStyle = C.toss; ctx.lineWidth = 2;
       const n = ev.whistle === "come" ? 4 : ev.whistle === "turn" ? 2 : 3;
       for (let i = 0; i < n; i++) { const r = 6 + i * 7 + ev.wU * 8; ctx.globalAlpha = 1 - ev.wU * 0.7; ctx.beginPath(); ctx.arc(o.x, o.y, r, s.pf > 0 ? -0.6 : Math.PI - 0.6, s.pf > 0 ? 0.6 : Math.PI + 0.6); ctx.stroke(); }
@@ -334,7 +360,7 @@ const PTAnim = (() => {
   // ---------- the player: loops one animation on a canvas ----------
 
   function mount(cv, anim, opts = {}) {
-    let C = colors(), raf = 0, t = 0, last = 0, speed = 1, playing = true, cap = null;
+    let C = colors(), raf = 0, t = 0, limit = Infinity, last = 0, speed = 1, playing = true, cap = null;
     const loopT = anim.T + 1.1;
     const ph = { p: 0, pa: 0, d: 0, da: 0, o2: 0, o2a: 0, w: 0, wa: 0 }, prev = { px: null, dx: null, o2x: null, wx: null };
     const reduce = matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -352,7 +378,7 @@ const PTAnim = (() => {
       if (!cv.offsetParent) { last = 0; return; }        // its sheet is closed: rest
       if (cv.width < 2) size();
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 0; last = now;
-      if (playing) t += dt * speed;
+      if (playing) t = Math.min(Math.max(t, limit), t + dt * speed);
       if (t >= loopT) { t = 0; for (const k in prev) prev[k] = null; }
       const tt = Math.min(t, anim.T), s = sample(anim.keys, tt);
       gait("px", "p", "pa", s.px, dt * speed); gait("dx", "d", "da", s.dx, dt * speed); gait("o2x", "o2", "o2a", s.o2x, dt * speed); gait("wx", "w", "wa", s.wx, dt * speed);
@@ -372,6 +398,8 @@ const PTAnim = (() => {
       replay() { t = 0; for (const k in prev) prev[k] = null; playing = true; },
       seek(v) { t = v; for (const k in prev) prev[k] = null; playing = true; },
       setSpeed(v) { speed = v; },
+      /** The voice guide holds the picture at the end of a moment until its line is finished. */
+      setLimit(v) { limit = v; }, get time() { return t; },
       toggle() { playing = !playing; return playing; },
       destroy() { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); mq && mq.removeEventListener && mq.removeEventListener("change", onScheme); },
     };

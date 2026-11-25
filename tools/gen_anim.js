@@ -13,10 +13,13 @@ ${dark}
 html, body { margin: 0; background: transparent; color: var(--fg); font-family: -apple-system, sans-serif; -webkit-user-select: none; user-select: none; }
 :root { --font-body: -apple-system, sans-serif; }
 ${css}</style></head><body><div id="box"></div><script>
+${read("src/catalog.js")}
+${read("src/voice.js")}
 ${read("src/anim.js")}
 ${read("src/anim-steps.js")}
+${read("src/anim-more.js")}
 const q = new URLSearchParams(location.search), box = document.getElementById("box");
-PTSteps.player(box, q.get("skill"), Number(q.get("step")), q.get("dog") || "Name");
+PTSteps.player(box, q.get("skill"), Number(q.get("step")), q.get("dog") || "Name", { auto: q.get("auto") === "1" });
 const tell = () => { try { webkit.messageHandlers.height.postMessage(Math.ceil(box.getBoundingClientRect().height)); } catch (e) {} };
 new ResizeObserver(tell).observe(box); tell();
 </script></body></html>

@@ -3,17 +3,18 @@
 # and into docs/ (the installable offline app served by GitHub Pages).
 #   src/page.html   markup and styles
 #   src/catalog.js  skills, passport, breeds (plain data)
-#   src/anim.js, src/anim-steps.js  step animations (also bundled into the iPhone app as ios/PocketTrainer/anim.html)
+#   src/anim.js, src/anim-steps.js, src/anim-more.js  step animations (also bundled into the iPhone app as ios/PocketTrainer/anim.html)
+#   src/voice.js    the voice guide (clips in voice/, made by tools/voice/prerender.mjs)
 #   src/app.js      the app
 set -e
 cd "$(dirname "$0")"
-node -e 'new Function(["catalog","anim","anim-steps","app"].map(f=>require("fs").readFileSync("src/"+f+".js","utf8")).join("\n"))' # syntax check
+node -e 'new Function(["catalog","voice","anim","anim-steps","anim-more","app"].map(f=>require("fs").readFileSync("src/"+f+".js","utf8")).join("\n"))' # syntax check
 {
   cat src/page.html
   printf '<script>\n'
   cat src/catalog.js
   printf '\n'
-  cat src/anim.js src/anim-steps.js
+  cat src/voice.js src/anim.js src/anim-steps.js src/anim-more.js
   printf '\n'
   cat src/app.js
   printf '</script>\n'
@@ -35,6 +36,7 @@ VERSION=$(cat index.html pwa/sw.js pwa/manifest.webmanifest | sha1sum | cut -c1-
   printf '</body></html>\n'
 } > docs/index.html
 sed "s/__VERSION__/$VERSION/" pwa/sw.js > docs/sw.js
+rm -rf docs/voice ios/PocketTrainer/voice && cp -r voice docs/voice && cp -r voice ios/PocketTrainer/voice
 cp pwa/manifest.webmanifest pwa/icon-*.png docs/
 touch docs/.nojekyll
 echo "built index.html and docs/ ($VERSION)"

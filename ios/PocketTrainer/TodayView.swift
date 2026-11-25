@@ -132,7 +132,10 @@ struct TodayView: View {
     }
 
     @ViewBuilder private var seasons: some View {
-        ForEach(["waterfowl", "upland"], id: \.self) { g in
+        ForEach(Catalog.tracks.filter { $0.gate != nil && ($0.goals ?? []).contains(where: model.hasGoal) }) { t in
+            if let g = model.gate(t) { GateCard(gate: g) { model.confirmGate(t) } }
+        }
+        ForEach(Catalog.data.seasons.keys.sorted(), id: \.self) { g in
             if let i = model.seasonInfo(g), i.days >= -60 {
                 Card {
                     HStack {

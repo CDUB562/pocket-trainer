@@ -15,8 +15,8 @@ struct OnboardingView: View {
     private let sizes: [(String, String)] = [("s", "Small (under 10 kg)"), ("m", "Medium (10-25 kg)"), ("l", "Large (25-45 kg)"), ("g", "Giant (over 45 kg)")]
     private let goals: [(String, String)] = [("foundations", "Good manners"), ("puppy", "Puppy basics"), ("life", "Vet, grooming, car, guests"),
         ("waterfowl", "Duck and goose hunting"), ("upland", "Quail and upland birds (pointing dogs)"),
-        ("hog", "Hog bay dog (coming soon)"), ("tracking", "Blood tracking (coming soon)"), ("shed", "Shed antlers (coming soon)"),
-        ("nosework", "Nose work (coming soon)"), ("tricks", "Tricks (coming soon)")]
+        ("flush", "Pheasant, grouse and quail (flushing dogs)"), ("hog", "Hog bay dog"), ("tracking", "Blood tracking"), ("shed", "Shed antlers"),
+        ("nosework", "Nose work"), ("sport", "Obedience and Canine Good Citizen"), ("tricks", "Tricks")]
     private let rewards: [(String, String)] = [("food", "Food"), ("toy", "Toys"), ("tug", "Tug"), ("ball", "Ball"), ("praise", "Praise")]
     private let quiz: [(String, String)] = [("retrieve", "Carries things around"), ("herd", "Chases things that move"), ("scent", "Tracks with the nose down"), ("point", "Freezes and stares at birds")]
     private let days: [(Int, String)] = [(1, "Mon"), (2, "Tue"), (3, "Wed"), (4, "Thu"), (5, "Fri"), (6, "Sat"), (0, "Sun")]
@@ -65,10 +65,10 @@ struct OnboardingView: View {
                     title("What do you want to work on?")
                     Text("Pick any. The plan leans toward these.").font(.subheadline).foregroundStyle(Theme.muted)
                     Flow { ForEach(goals.indices, id: \.self) { i in Chip(goals[i].1, on: draft.goals.contains(goals[i].0)) { toggleGoal(goals[i].0) } } }
-                    if draft.goals.contains("waterfowl") || draft.goals.contains("upland") {
-                        Text("Opening day (optional). The plan counts down to it and tells you if you're behind.").font(.subheadline).foregroundStyle(Theme.muted)
-                        if draft.goals.contains("waterfowl") { seasonPicker("waterfowl", "Waterfowl opener") }
-                        if draft.goals.contains("upland") { seasonPicker("upland", "Upland opener") }
+                    let withSeason = goals.map(\.0).filter { draft.goals.contains($0) && Catalog.data.seasons[$0] != nil }
+                    if !withSeason.isEmpty {
+                        Text("Opening days (optional). The plan counts down to it and tells you if you're behind.").font(.subheadline).foregroundStyle(Theme.muted)
+                        ForEach(withSeason, id: \.self) { g in seasonPicker(g, Catalog.data.seasons[g]?.name ?? "") }
                     }
                 case 5:
                     title("What does \(nm) love most?")
@@ -77,9 +77,9 @@ struct OnboardingView: View {
                     title("Which days can you train?")
                     Text("A few minutes is enough. Rest days are part of the plan.").font(.subheadline).foregroundStyle(Theme.muted)
                     Flow { ForEach(days.indices, id: \.self) { i in Chip(days[i].1, on: draft.days.contains(days[i].0)) { toggleDay(days[i].0) } } }
-                    if draft.goals.contains("waterfowl") || draft.goals.contains("upland") {
+                    if AppModel.isField(draft.goals) {
                         Text("FIELD OR WATER DAY").font(.display(19)).foregroundStyle(Theme.muted).padding(.top, 8)
-                        Text("One longer session a week where you can throw marks or swim. Optional.").font(.subheadline).foregroundStyle(Theme.muted)
+                        Text("One longer session a week out in the field or at the water. Optional.").font(.subheadline).foregroundStyle(Theme.muted)
                         Flow {
                             Chip("None", on: draft.fieldDay == nil) { draft.fieldDay = nil }
                             ForEach(days.indices, id: \.self) { i in Chip(days[i].1, on: draft.fieldDay == days[i].0) { draft.fieldDay = days[i].0 } }

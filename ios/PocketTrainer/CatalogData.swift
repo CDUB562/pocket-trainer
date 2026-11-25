@@ -57,6 +57,41 @@ struct Track: Codable, Hashable, Identifiable {
     let name: String
     let blurb: String
     let goals: [String]?
+    let field: Bool?
+    let gate: Gate?
+    let checklist: String?
+}
+
+/// Something the owner confirms once per dog before a track opens (usually the law).
+struct Gate: Codable, Hashable {
+    let title: String
+    let text: String
+    let confirm: String
+}
+
+struct HelperStep: Codable, Hashable {
+    let t: String
+    let `do`: String
+}
+struct HelperMeasure: Codable, Hashable {
+    let unit: String
+    let label: String
+}
+/// A behavior helper: a plan for a common problem, not a skill to master.
+struct Helper: Codable, Hashable, Identifiable {
+    let id: String
+    let name: String
+    let uses: [String]
+    let goal: String
+    let stop: String
+    let measure: HelperMeasure?
+    let steps: [HelperStep]
+}
+
+/// One item of the Canine Good Citizen test and the skills that cover it.
+struct CGCItem: Codable, Hashable {
+    let t: String
+    let needs: [String]
 }
 
 struct Place: Codable, Hashable, Identifiable {
@@ -101,6 +136,8 @@ struct CatalogFile: Codable {
     let sounds: [SoundDef]
     let seasons: [String: Season]
     let passport: [PassportGroup]
+    let helpers: [Helper]
+    let cgc: [CGCItem]
     let drives: [String: Drive]
     let breeds: [Breed]
 }

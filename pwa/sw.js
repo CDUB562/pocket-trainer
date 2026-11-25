@@ -1,6 +1,8 @@
 // Offline cache. The build stamps a new version on every change, which clears the old cache.
 const CACHE = "pocket-trainer-__VERSION__";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
+// Voice clips are named by their words, so they never change: kept across versions.
+const VOICE = "pocket-trainer-voice";
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", (e) => {
@@ -11,7 +13,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k !== VOICE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -22,6 +24,13 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   const sameOrigin = url.origin === self.location.origin;
+  if (sameOrigin && url.pathname.endsWith(".m4a")) {
+    e.respondWith(caches.open(VOICE).then(async (c) => {
+      const hit = await c.match(url.pathname); if (hit) return hit;
+      const res = await fetch(req); if (res.status === 200) c.put(url.pathname, res.clone()); return res;
+    }));
+    return;
+  }
   if (!sameOrigin && !FONT_HOSTS.includes(url.host)) return;
   e.respondWith(caches.open(CACHE).then(async (cache) => {
     const hit = await cache.match(req, { ignoreSearch: sameOrigin });

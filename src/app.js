@@ -96,7 +96,11 @@
   const platesClosed = () => { const w = ageWeeks(); return w == null || w >= PLATES[dog.size || "l"]; };
   const platesMonths = () => Math.round(PLATES[dog.size || "l"] / 4.35);
   const hasGoal = (g) => (dog.goals || []).includes(g);
-  const fieldGoal = () => hasGoal("waterfowl") || hasGoal("upland");
+  // Field work: any sport track marked field. Bird goals also bring the gunshot ladder.
+  const fieldGoal = () => TRACKS.some((t) => t.field && t.goals.some(hasGoal));
+  const birdGoal = () => ["waterfowl", "upland", "flush"].some(hasGoal);
+  // Some tracks ask the owner to confirm something (the law, usually) once per dog before they open.
+  const gateFor = (id) => { const t = TRACKS.find((x) => x.id === (skillById(id) || {}).track); return t && t.gate && !(dog.gates || {})[t.id] ? t : null; };
   const breedRow = (name) => BREEDS.find((b) => b[0].toLowerCase() === String(name || "").trim().toLowerCase());
 
   // ---------- Skills, levels and proofing ----------
@@ -136,6 +140,7 @@
   function needMet(n) {
     if (n.includes("|")) return n.split("|").some(needMet);
     if (n.startsWith("sound:")) { const [, sid, lv] = n.split(":"); return sound(sid).level >= +lv && !recentStartle(sid); }
+    if (n === "plates") return platesClosed();
     const [id, rest] = n.split(/[@:]/);
     if (id === "charge") return !!st.charged;
     if (n.includes("@")) return started(id) && (prog(id).step >= +rest || level(id) >= 1);
@@ -143,20 +148,21 @@
     return level(id) >= want;
   }
   // A startle relocks gun work even after it was started, until the gunshot ladder is calm again.
-  const isOpen = (id) => (started(id) && !(id === "gun" && recentStartle("gun"))) || (getSkill(id).needs || []).every(needMet);
+  const isOpen = (id) => !gateFor(id) && ((started(id) && !(id === "gun" && recentStartle("gun"))) || (getSkill(id).needs || []).every(needMet));
   function needText(n) {
     if (n.includes("|")) return n.split("|").map(needText).join(" or ");
     if (n.startsWith("sound:")) {
       const [, sid, lv] = n.split(":"), name = SOUNDS.find((x) => x.id === sid).name;
       return sound(sid).level >= +lv ? `3 calm ${name.toLowerCase()} sessions since the last startle` : `the ${name.toLowerCase()} sound ladder to step ${lv}`;
     }
+    if (n === "plates") return `growth plates close (about ${platesMonths()} months)`;
     const [id, rest] = n.split(/[@:]/);
     if (id === "charge") return "Charge Yes";
     const name = getSkill(id).name;
     if (n.includes("@")) return `${name} to step ${+rest + 1}`;
     return `${name} to ${rest ? rest[0].toUpperCase() + rest.slice(1) : "Fluent"}`;
   }
-  const lockText = (id) => "Opens after " + (getSkill(id).needs || []).filter((n) => !needMet(n)).map(needText).join(" and ");
+  const lockText = (id) => gateFor(id) ? "Read the note above first" : "Opens after " + (getSkill(id).needs || []).filter((n) => !needMet(n)).map(needText).join(" and ");
 
   // The proofing grid: raise the dimension furthest from its target, ease the others one level below their best.
   function proofTarget(id) {
@@ -302,13 +308,13 @@
     const done = (id) => sound(id).log.some((x) => x.day === today());
     const shaken = (id) => { const l = sound(id).log.at(-1); return l && l.r === "startled" && l.day === addDays(today(), -1); };
     let id = null;
-    if (fieldGoal() && sound("gun").level < soundCap()) id = "gun";
+    if (birdGoal() && sound("gun").level < soundCap()) id = "gun";
     else if ((ageWeeks() != null && ageWeeks() < 20) || hasGoal("puppy")) {
       id = ["doorbell", "traffic", "thunder", "fireworks"].filter((x) => sound(x).level < soundCap()).sort((a, b) => sound(a).level - sound(b).level)[0] || null;
     }
     return id && !done(id) && !shaken(id) ? id : null;
   }
-  const FIELD_TRACKS = ["field", "waterfowl", "upland"];
+  const FIELD_TRACKS = TRACKS.filter((t) => t.field).map((t) => t.id);
   const isFieldDay = () => dog.fieldDay != null && dog.fieldDay === new Date().getDay();
   // A field day out at the field or water: obedience warm-up, then up to 4 field blocks (2 when hot) with breaks between.
   function fieldPlan(ranked, hot) {
@@ -638,6 +644,7 @@
   }
   function renderSeasons() {
     const box = $("seasons"); box.replaceChildren();
+    for (const t of TRACKS) if (t.gate && t.goals.some(hasGoal) && !(dog.gates || {})[t.id]) box.append(gateCard(t));
     for (const g of Object.keys(SEASONS)) {
       const date = (dog.seasons || {})[g];
       if (!date || !hasGoal(g)) continue;
@@ -757,6 +764,13 @@
   $("pp-close").addEventListener("click", () => { $("passport").hidden = true; renderToday(); });
 
   // ---------- Skills map ----------
+  function gateCard(t) {
+    const g = el("div", "gate");
+    g.append(el("b", "", t.gate.title), el("p", "", t.gate.text));
+    const ok = el("button", "btn solid", t.gate.confirm); ok.type = "button";
+    ok.addEventListener("click", () => { dog.gates = { ...(dog.gates || {}), [t.id]: today() }; saveDogs(); st.plan = null; saveSt(); renderSkills(); renderToday(); });
+    g.append(ok); return g;
+  }
   function renderSkills() {
     const box = $("modules"); box.replaceChildren();
     if (!dog) { box.append(el("p", "muted", "Set up your dog on Today first.")); return; }
@@ -769,9 +783,12 @@
         add.addEventListener("click", () => { dog.goals = [...new Set([...(dog.goals || []), t.goals[0]])]; saveDogs(); st.plan = null; saveSt(); renderSkills(); });
         sec.append(add); box.append(sec); continue;
       }
+      if (t.gate && !(dog.gates || {})[t.id]) sec.append(gateCard(t));
+      if (t.checklist === "cgc") sec.append(cgcCard());
       for (const s of SKILLS.filter((x) => x.track === t.id)) sec.append(skillRow(s.id));
       box.append(sec);
     }
+    box.append(helperTrack());
     const free = el("div", "track"); free.append(el("h2", "", "Tools"));
     const fb = el("button", "skrow"); fb.type = "button";
     fb.append(el("b", "", "Free clicker"), el("span", "", "Just the marker pad, no plan."));
@@ -800,7 +817,89 @@
     return b;
   }
 
+  // Canine Good Citizen: each test item is ready when its skills are Fluent.
+  function cgcCard() {
+    const d = el("details", "cgc"), ready = CGC.filter((c) => c.needs.every((n) => level(n) >= 1)).length;
+    const sum = el("summary"); sum.append(el("b", "", ready === CGC.length ? "Test ready" : "Canine Good Citizen test"), el("span", "num muted", `${ready} of ${CGC.length} ready`));
+    const bar = el("i", "bar"); bar.style.setProperty("--p", (ready / CGC.length) * 100 + "%");
+    const ol = el("ol");
+    for (const c of CGC) {
+      const li = el("li", c.needs.every((n) => level(n) >= 1) ? "ok" : "");
+      li.append(el("b", "", c.t));
+      const row = el("span", "uses");
+      for (const n of c.needs) { const b = el("button", "", getSkill(n).name + (level(n) >= 1 ? " ✓" : "")); b.type = "button"; b.addEventListener("click", () => openSkill(n)); row.append(b); }
+      li.append(row); ol.append(li);
+    }
+    d.append(sum, bar, ol, el("p", "muted", "Ready means every linked skill is Fluent. A certified evaluator gives the real test."));
+    return d;
+  }
+
+  // ---------- Behavior helpers: plans for common problems ----------
+  // st.help[id] = { stopped: day | null, log: [{ day, r: better | same | worse, m }] }
+  const help = (id) => ((st.help ||= {})[id] ||= { stopped: null, log: [] });
+  function helperTrack() {
+    const sec = el("div", "track");
+    sec.append(el("h2", "", "Behavior helpers"), el("p", "muted", "Short plans for common problems."));
+    for (const h of HELPERS) {
+      const s = (st.help || {})[h.id], b = el("button", "skrow"); b.type = "button"; b.style.gridTemplateColumns = "1fr";
+      b.append(el("b", "", h.name), el("span", "", s && s.stopped ? "Paused: see a professional" : s && s.log.length ? `Last day: ${s.log.at(-1).r}` : h.goal));
+      b.addEventListener("click", () => openHelper(h.id)); sec.append(b);
+    }
+    return sec;
+  }
+  function openHelper(id) {
+    const h = HELPERS.find((x) => x.id === id), s = help(id), box = $("help-body"); box.replaceChildren(); PTVoice.stop();
+    $("help-name").textContent = h.name; $("help-goal").textContent = h.goal;
+    const stopBox = el("div", "gate");
+    if (s.stopped) {
+      stopBox.append(el("b", "", "This plan is paused"), el("p", "", "What you saw needs a person, not an app. See your vet first, because pain and illness change behavior, then a certified behavior consultant or veterinary behaviorist. Until then keep everyone safe: distance, gates, a leash, and nothing that sets it off."));
+      const again = el("button", "btn", "A professional says we can continue"); again.type = "button";
+      again.addEventListener("click", () => { s.stopped = null; s.log = []; saveSt(); openHelper(id); });
+      stopBox.append(again); box.append(stopBox); $("help").hidden = false; $("help").scrollTop = 0; return;
+    }
+    stopBox.append(el("b", "", "Stop and get help if you see"), el("p", "", `A bite, a sudden change in behavior, or panic. Also: ${h.stop[0].toLowerCase() + h.stop.slice(1)}.`));
+    const saw = el("button", "btn", "I've seen this"); saw.type = "button";
+    saw.addEventListener("click", () => { s.stopped = today(); saveSt(); openHelper(id); });
+    stopBox.append(saw); box.append(stopBox);
+    const ol = el("ol", "ladder");
+    h.steps.forEach((step, i) => ol.append(watchRow("help:" + id, i, `${step.t}: ${step.do}`, ol)));
+    box.append(ol);
+    const uses = el("div", "uses"); uses.append(el("span", "muted", "Skills that build this: "));
+    for (const n of h.uses) { const b = el("button", "", getSkill(n).name); b.type = "button"; b.addEventListener("click", () => { $("help").hidden = true; openSkill(n); }); uses.append(b); }
+    box.append(uses, el("h2", "", "How did today go?"));
+    let m = null;
+    if (h.measure) {
+      const f = el("div", "field"), lab = el("label", "", `${h.measure.label} (${h.measure.unit})`), inp = document.createElement("input");
+      inp.type = "number"; inp.min = 0; inp.inputMode = "decimal"; inp.id = "help-m"; lab.htmlFor = "help-m"; f.append(lab, inp); box.append(f); m = inp;
+    }
+    const row = el("div", "row"), T0 = today();
+    for (const [r, l] of [["better", "Better"], ["same", "Same"], ["worse", "Worse"]]) {
+      const b = el("button", "btn" + ((s.log.at(-1) || {}).day === T0 && s.log.at(-1).r === r ? " solid" : ""), l); b.type = "button";
+      b.addEventListener("click", () => {
+        s.log = s.log.filter((x) => x.day !== T0); s.log.push({ day: T0, r, m: m && m.value !== "" ? +m.value : null }); s.log = s.log.slice(-60); saveSt(); openHelper(id); renderSkills();
+        toast(s.log.length >= 3 && s.log.slice(-3).every((x) => x.r === "worse") ? "Worse three times running. Go back to the easiest step, and talk to a certified trainer." : r === "worse" ? "Go back to the easier step tomorrow." : "Logged.", 3600);
+      });
+      row.append(b);
+    }
+    box.append(row);
+    if (s.log.length) box.append(el("p", "muted", s.log.slice(-5).reverse().map((x) => `${x.day.slice(5)}: ${x.r}${x.m != null ? ` (${x.m} ${h.measure.unit})` : ""}`).join(" · ")));
+    $("help").hidden = false; $("help").scrollTop = 0;
+  }
+  $("help-close").addEventListener("click", () => { $("help").hidden = true; PTVoice.stop(); });
+
   let sheetSkill = null, howtoAnim = null;
+  // One line of a step list, with its animation behind Watch.
+  function watchRow(id, i, text, ol) {
+    const li = el("li"), b = el("button", "watch"); b.type = "button"; b.setAttribute("aria-expanded", "false");
+    const w = el("i", "", "Watch"); b.append(el("span", "", text), w);
+    const box = el("div"); box.hidden = true;
+    b.addEventListener("click", () => {
+      const opening = box.hidden; PTVoice.stop();
+      ol.querySelectorAll(".watch").forEach((x) => { x.setAttribute("aria-expanded", "false"); x.lastChild.textContent = "Watch"; x.nextSibling.replaceChildren(); x.nextSibling.hidden = true; });
+      if (opening && PTSteps.player(box, id, i, dog && dog.name, { auto: PTSteps.autoListen() })) { b.setAttribute("aria-expanded", "true"); w.textContent = "Close"; }
+    });
+    li.append(b, box); return li;
+  }
   function openSkill(id) {
     sheetSkill = id;
     const s = getSkill(id), p = peek(id) || { step: 0 }, lv = level(id), open = isOpen(id);
@@ -812,16 +911,9 @@
     $("sk-train").hidden = !open;
     const ol = $("sk-steps"); ol.replaceChildren();
     s.steps.forEach((step, i) => {
-      const li = el("li", lv >= 1 || i < p.step ? "done" : i === p.step && started(id) ? "now" : "", null);
-      const b = el("button", "watch"); b.type = "button"; b.setAttribute("aria-expanded", "false");
-      const w = el("i", "", "Watch"); b.append(el("span", "", `${step.t}: ${step.mark}`), w);
-      const box = el("div"); box.hidden = true;
-      b.addEventListener("click", () => {
-        const opening = box.hidden;
-        ol.querySelectorAll(".watch").forEach((x) => { x.setAttribute("aria-expanded", "false"); x.lastChild.textContent = "Watch"; x.nextSibling.replaceChildren(); x.nextSibling.hidden = true; });
-        if (opening && PTSteps.player(box, id, i, dog && dog.name)) { b.setAttribute("aria-expanded", "true"); w.textContent = "Close"; }
-      });
-      li.append(b, box); ol.append(li);
+      const li = watchRow(id, i, `${step.t}: ${step.mark}`, ol);
+      li.className = lv >= 1 || i < p.step ? "done" : i === p.step && started(id) ? "now" : "";
+      ol.append(li);
     });
     const pw = $("sk-proof"); pw.replaceChildren();
     $("sk-proof-wrap").hidden = !dims(s).length;
@@ -837,8 +929,8 @@
     $("sk-reset").hidden = !started(id);
     $("skill").hidden = false; $("skill").scrollTop = 0;
   }
-  $("sk-close").addEventListener("click", () => { $("skill").hidden = true; });
-  $("sk-train").addEventListener("click", () => { $("skill").hidden = true; startSingle(sheetSkill); });
+  $("sk-close").addEventListener("click", () => { $("skill").hidden = true; PTVoice.stop(); });
+  $("sk-train").addEventListener("click", () => { $("skill").hidden = true; PTVoice.stop(); startSingle(sheetSkill); });
   function resetSkill(id) {
     if (!id || !confirm(`Start ${getSkill(id).name} over from step 1?`)) return false;
     st.progress[id] = { step: 0, reps: [], done: false }; saveSt();
@@ -850,9 +942,8 @@
   const AGES = [["Under 4 months", 10], ["4 to 6 months", 21], ["6 to 18 months", 52], ["1.5 to 7 years", 200], ["8 years or older", 450]];
   const SIZES = [["s", "Small", "under 10 kg"], ["m", "Medium", "10-25 kg"], ["l", "Large", "25-45 kg"], ["g", "Giant", "over 45 kg"]];
   const GOALS = [["foundations", "Good manners"], ["puppy", "Puppy basics"], ["life", "Vet, grooming, car, guests"],
-    ["waterfowl", "Duck and goose hunting"], ["upland", "Quail and upland birds (pointing dogs)"], ["hog", "Hog bay dog"], ["tracking", "Blood tracking"],
-    ["shed", "Shed antlers"], ["nosework", "Nose work"], ["tricks", "Tricks"]];
-  const SOON = new Set(["hog", "tracking", "shed", "nosework", "tricks"]);
+    ["waterfowl", "Duck and goose hunting"], ["upland", "Quail and upland birds (pointing dogs)"], ["flush", "Pheasant, grouse and quail (flushing dogs)"], ["hog", "Hog bay dog"], ["tracking", "Blood tracking"],
+    ["shed", "Shed antlers"], ["nosework", "Nose work"], ["sport", "Obedience and Canine Good Citizen"], ["tricks", "Tricks"]];
   const REWARDS = [["food", "Food"], ["toy", "Toys"], ["tug", "Tug"], ["ball", "Ball"], ["praise", "Praise"]];
   const QUIZ = [["retrieve", "Carries things around"], ["herd", "Chases things that move"], ["scent", "Tracks with the nose down"], ["point", "Freezes and stares at birds"]];
   const DAYS = [[1, "Mon"], [2, "Tue"], [3, "Wed"], [4, "Thu"], [5, "Fri"], [6, "Sat"], [0, "Sun"]];
@@ -896,23 +987,25 @@
     choiceSet("onb-age", AGES.map(([l, w]) => [w, l]), false, (w) => draft.birth && Math.abs(daysBetween(draft.birth, today()) / 7 - w) < 1,
       (w) => { draft.birth = addDays(today(), -w * 7); $("onb-birth").value = draft.birth; });
     choiceSet("onb-size", SIZES.map(([v, l, s]) => [v, l, s]), false, (v) => draft.size === v, (v) => (draft.size = v));
-    choiceSet("onb-goals", GOALS.map(([v, l]) => [v, l + (SOON.has(v) ? " (coming soon)" : "")]), true, (v) => draft.goals.includes(v),
+    choiceSet("onb-goals", GOALS, true, (v) => draft.goals.includes(v),
       (v) => { draft.goals = draft.goals.includes(v) ? draft.goals.filter((g) => g !== v) : [...draft.goals, v]; renderOnb(); });
     choiceSet("onb-reward", REWARDS, false, (v) => draft.reward === v, (v) => (draft.reward = v));
     choiceSet("onb-days", DAYS, true, (v) => draft.days.includes(v), (v) => { draft.days = draft.days.includes(v) ? draft.days.filter((x) => x !== v) : [...draft.days, v]; });
-    // Bird-dog goals add opening days and a weekly field day.
-    const fw = draft.goals.includes("waterfowl"), up = draft.goals.includes("upland");
-    $("onb-seasons").hidden = !(fw || up);
-    $("onb-season-waterfowl-row").hidden = !fw; $("onb-season-upland-row").hidden = !up;
-    $("onb-season-waterfowl").value = (draft.seasons || {}).waterfowl || "";
-    $("onb-season-upland").value = (draft.seasons || {}).upland || "";
-    $("onb-field").hidden = !(fw || up);
+    // Field goals add opening days (where the sport has one) and a weekly field day.
+    const sg = Object.keys(SEASONS).filter((g) => draft.goals.includes(g)), sb = $("onb-season-rows");
+    $("onb-seasons").hidden = !sg.length; sb.replaceChildren();
+    for (const g of sg) {
+      const f = el("div", "field"), l = el("label", "", SEASONS[g].name), inp = document.createElement("input");
+      inp.type = "date"; inp.id = "onb-season-" + g; l.htmlFor = inp.id; inp.value = (draft.seasons || {})[g] || "";
+      inp.addEventListener("change", () => { draft.seasons = { ...(draft.seasons || {}), [g]: inp.value || undefined }; });
+      f.append(l, inp); sb.append(f);
+    }
+    $("onb-field").hidden = !TRACKS.some((t) => t.field && t.goals.some((g) => draft.goals.includes(g)));
     choiceSet("onb-fieldday", [["none", "None"], ...DAYS], false, (v) => (draft.fieldDay == null ? v === "none" : draft.fieldDay === v), (v) => (draft.fieldDay = v === "none" ? null : v));
     choiceSet("onb-quiz-q", QUIZ, true, (v) => draft.drive === v, (v) => { draft.drive = v; driveNote(); });
     driveNote();
   }
   $("onb-birth").addEventListener("change", (e) => { draft.birth = e.target.value || null; renderOnb(); });
-  for (const g of ["waterfowl", "upland"]) $("onb-season-" + g).addEventListener("change", (e) => { draft.seasons = { ...(draft.seasons || {}), [g]: e.target.value || undefined }; });
   $("onb-breed").addEventListener("change", (e) => {
     draft.breed = e.target.value.trim();
     const row = breedRow(draft.breed);
@@ -1005,7 +1098,7 @@
     $("run-mark").classList.toggle("oc", mode === "outcome");
     $("run-mark").classList.toggle("snd", mode === "sound");
     $("whistlebar").hidden = !(s.whistle || FIELD_TRACKS.includes(s.track));
-    $("gps").hidden = !(navigator.geolocation && (mode === "outcome" || s.whistle));
+    $("gps").hidden = !(navigator.geolocation && (mode === "outcome" && FIELD_TRACKS.includes(s.track) || s.whistle));
     $("open-howto").hidden = false;
     if (mode === "sound") { renderSoundBlock(b); return; }
     if (mode === "break") { startBreak(b); return; }
@@ -1450,9 +1543,9 @@
   $("open-guide").addEventListener("click", openGuide);
   for (const id of ["close-guide", "close-guide-2"]) $(id).addEventListener("click", () => (guide.hidden = true));
   $("go-charge").addEventListener("click", () => { if (dog) show("charge"); else openOnboarding(null); });
-  function openHowto() { howto.hidden = false; howto.scrollTop = 0; if (howtoAnim) PTSteps.player($("howto-anim"), howtoAnim[0], howtoAnim[1], dog && dog.name); }
+  function openHowto() { howto.hidden = false; howto.scrollTop = 0; if (howtoAnim) PTSteps.player($("howto-anim"), howtoAnim[0], howtoAnim[1], dog && dog.name, { auto: PTSteps.autoListen() }); }
   $("open-howto").addEventListener("click", openHowto);
-  for (const id of ["close-howto", "close-howto-2"]) $(id).addEventListener("click", () => (howto.hidden = true));
+  for (const id of ["close-howto", "close-howto-2"]) $(id).addEventListener("click", () => { howto.hidden = true; PTVoice.stop(); });
   $("skill-reset").addEventListener("click", () => {
     const b = block(); if (!b || !resetSkill(b.id)) return;
     howto.hidden = true; b.kind = "learn"; b.reps = []; enterBlock();
@@ -1671,6 +1764,14 @@
   $("custom-clear").addEventListener("click", () => {
     customBuf = null; settings.custom = null; saveSettings();
     $("custom-status").textContent = "Using the built-in click for Yes."; $("custom-clear").hidden = true;
+  });
+
+  $("voice-save").addEventListener("click", async () => {
+    const all = [...new Set([...SKILLS.map((s) => s.id), ...HELPERS.map((h) => "help:" + h.id)].flatMap((id) => PTSteps.skillLines(id)))];
+    $("voice-save").disabled = true;
+    const ok = await PTVoice.save(all, (n, of) => { if (n % 20 === 0 || n === of) $("voice-status").textContent = `${n} of ${of}`; });
+    $("voice-save").disabled = false;
+    $("voice-status").textContent = ok === all.length ? "Saved. The whole guide works with no signal." : `Saved ${ok} of ${all.length}. Check your connection and try again.`;
   });
 
   // ---------- Your data: backup, restore, erase ----------

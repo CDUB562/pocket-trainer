@@ -337,6 +337,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
 .anim-bar { display: flex; gap: 8px; margin-top: 8px; }
 .anim-bar button { flex: 1; min-height: 44px; border: 2px solid var(--line); border-radius: 10px; background: transparent; color: var(--fg); font: 700 1rem var(--font-body); }
 .anim-bar button.on { border-color: var(--fg); background: var(--fg); color: var(--bg); }
+.anim-bar .listen { border-color: var(--fg); }
 .anim-steps { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 2px; }
 .anim-steps button { display: flex; gap: 10px; align-items: baseline; width: 100%; min-height: 40px; padding: 8px 10px; border: 0; border-left: 4px solid transparent; background: none; color: var(--muted); font: 400 1rem/1.3 var(--font-body); text-align: left; }
 .anim-steps b { flex: none; min-width: 1.1em; }
@@ -396,6 +397,16 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
 .season .bar::after { content: ""; display: block; height: 100%; width: var(--p, 0%); background: var(--keep); }
 .season .behind { color: var(--warn); font-weight: 700; }
 .trackadd { justify-self: start; }
+.gate { display: grid; gap: 8px; justify-items: start; padding: 12px 14px; border: 2px solid var(--warn); border-radius: 14px; background: var(--surface); }
+.gate p { margin: 0; }
+#help-body { display: grid; gap: 14px; }
+.cgc { padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.cgc summary { display: flex; justify-content: space-between; gap: 10px; min-height: 32px; align-items: center; cursor: pointer; }
+.cgc .bar { display: block; height: 8px; border-radius: 4px; margin-top: 6px; background: linear-gradient(90deg, var(--keep) var(--p), var(--line) var(--p)); }
+.cgc ol { padding-left: 1.3em; display: grid; gap: 8px; }
+.cgc li.ok::marker { color: var(--keep); }
+.uses { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+.uses button { min-height: 40px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--catch); font: 700 .95rem var(--font-body); }
 </style>
 
 <div class="app">
@@ -572,6 +583,12 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
       <p class="muted" id="custom-status">Using the built-in click for Yes.</p>
     </div>
     <div class="card">
+      <h2>Voice guide</h2>
+      <p class="muted">Tap Listen under any animation and a voice talks you through the step. Skills you've listened to keep working with no signal. Going somewhere remote? Save the whole guide first (about 20 MB, use Wi-Fi).</p>
+      <button class="btn" type="button" id="voice-save">Save the whole guide</button>
+      <p class="muted" id="voice-status" aria-live="polite"></p>
+    </div>
+    <div class="card">
       <h2>Feedback</h2>
       <div class="field"><label for="opt-haptic">Vibrate on every mark</label><input class="tog" type="checkbox" id="opt-haptic"></div>
       <div class="field"><label for="opt-flash">Flash the screen (deaf dogs)</label><input class="tog" type="checkbox" id="opt-flash"></div>
@@ -584,6 +601,7 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <div class="card">
       <h2>Help</h2>
       <details class="faq"><summary>No sound</summary><p class="muted">Turn the volume up with the side buttons (sound plays even with the silent switch on, on iOS 17 and later). If it's still quiet, close the app fully and open it again. Using your own recording? Tap "Use built-in click" to rule it out.</p></details>
+      <details class="faq"><summary>The voice guide says No signal</summary><p class="muted">Each skill's voice is downloaded the first time you listen. Get a connection and tap Listen again, or save the whole guide above before you head out.</p></details>
       <details class="faq"><summary>The sound comes late</summary><p class="muted">Use the phone speaker. Bluetooth speakers and AirPods add up to 200 ms, enough to mark the wrong moment. Low Power Mode can also slow it a little.</p></details>
       <details class="faq"><summary>No vibration</summary><p class="muted">iPhone vibration on taps needs iOS 18 and System Haptics on (Settings, Sounds &amp; Haptics). It's a bonus; the sound is what your dog learns from.</p></details>
       <details class="faq"><summary>Record does nothing or the camera is blocked</summary><p class="muted">Allow the camera: Settings, Apps, Safari, Camera, Ask or Allow. Then close the app and open it again. Filming stops if you leave the app or lock the phone.</p></details>
@@ -649,9 +667,8 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <p class="muted">Pick any. The plan leans toward these.</p>
     <div class="choices multi" id="onb-goals"></div>
     <div id="onb-seasons" hidden>
-      <p class="muted">Opening day (optional). The plan counts down to it and tells you if you're behind.</p>
-      <div class="field" id="onb-season-waterfowl-row"><label for="onb-season-waterfowl">Waterfowl opener</label><input type="date" id="onb-season-waterfowl"></div>
-      <div class="field" id="onb-season-upland-row"><label for="onb-season-upland">Upland opener</label><input type="date" id="onb-season-upland"></div>
+      <p class="muted">Opening days (optional). The plan counts down to it and tells you if you're behind.</p>
+      <div id="onb-season-rows"></div>
     </div>
   </div>
   <div class="onbstep" data-q="reward">
@@ -664,12 +681,19 @@ button:focus-visible { outline: 3px solid var(--catch); outline-offset: 2px; }
     <div class="choices multi days" id="onb-days"></div>
     <div id="onb-field" hidden>
       <h2>Field or water day</h2>
-      <p class="muted">One longer session a week where you can throw marks or swim. Optional.</p>
+      <p class="muted">One longer session a week out in the field or at the water. Optional.</p>
       <div class="choices days" id="onb-fieldday"></div>
     </div>
   </div>
   <div class="row onbnav"><button class="btn" type="button" id="onb-back">Back</button><button class="btn solid" type="button" id="onb-next">Next</button></div>
   <button class="linkbtn" type="button" id="onb-delete" hidden style="color:var(--miss);align-self:flex-start">Remove this dog</button>
+</div>
+
+<!-- A behavior helper -->
+<div class="sheet" id="help" hidden role="dialog" aria-label="Behavior helper">
+  <div class="row between"><span class="eyebrow">Behavior helper</span><button class="btn" type="button" id="help-close">Done</button></div>
+  <div><h1 id="help-name"></h1><p class="muted" id="help-goal"></p></div>
+  <div id="help-body"></div>
 </div>
 
 <!-- One skill: level, what's next, the ladder -->

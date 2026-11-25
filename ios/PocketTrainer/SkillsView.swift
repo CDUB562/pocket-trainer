@@ -3,6 +3,7 @@ import SwiftUI
 struct SkillsView: View {
     @EnvironmentObject var model: AppModel
     @State private var open: SkillRef?
+    @State private var helper: Helper?
 
     var body: some View {
         ScrollView {
@@ -18,6 +19,7 @@ struct SkillsView: View {
                     Text("Set up your dog on Today first.").foregroundStyle(Theme.muted)
                 } else {
                     ForEach(Catalog.tracks) { t in track(t) }
+                    helpers
                     tools
                 }
             }
@@ -26,6 +28,14 @@ struct SkillsView: View {
         }
         .background(Theme.bg)
         .sheet(item: $open) { ref in SkillSheet(id: ref.id).environmentObject(model) }
+        .sheet(item: $helper) { h in
+            HelperSheet(helper: h) { id in helper = nil; DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { open = SkillRef(id: id) } }.environmentObject(model)
+        }
+        .onAppear {
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("-openHelper") { helper = Catalog.data.helpers.first { $0.id == "react" } }
+            #endif
+        }
     }
 
     @ViewBuilder private func track(_ t: Track) -> some View {
@@ -40,6 +50,8 @@ struct SkillsView: View {
                 }
                 .buttonStyle(OutlineButtonStyle())
             } else {
+                if let g = model.gate(t) { GateCard(gate: g) { model.confirmGate(t) } }
+                if t.checklist == "cgc" { CGCCard { open = SkillRef(id: $0) } }
                 ForEach(Catalog.skills.filter { $0.track == t.id }) { s in row(s.id, subtitle(s)) { open = SkillRef(id: s.id) } }
             }
         }
@@ -51,6 +63,17 @@ struct SkillsView: View {
         if lv == 0 { return model.started(s.id) ? "Learning · step \(model.prog(s.id).step + 1) of \(s.steps.count)" : "Not started" }
         let due = model.prog(s.id).reviewDue.map { $0 <= model.today } ?? false
         return Catalog.levels[lv] + (due ? " · review due" : "")
+    }
+
+    @ViewBuilder private var helpers: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("BEHAVIOR HELPERS").font(.display(19)).tracking(1).foregroundStyle(Theme.muted).padding(.top, 6)
+            Text("Short plans for common problems.").font(.footnote).foregroundStyle(Theme.muted)
+            ForEach(Catalog.data.helpers) { h in
+                let s = model.st.help[h.id]
+                row("free", s?.stopped != nil ? "Paused: see a professional" : s?.log.last.map { "Last day: \($0.r)" } ?? h.goal, name: h.name, ring: false) { helper = h }
+            }
+        }
     }
 
     @ViewBuilder private var tools: some View {

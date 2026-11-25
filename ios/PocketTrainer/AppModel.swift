@@ -193,7 +193,14 @@ final class AppModel: ObservableObject {
     var platesClosed: Bool { ageWeeks.map { $0 >= Self.plates[dog?.size ?? "l"] ?? 70 } ?? true }
     var platesMonths: Int { Int((Double(Self.plates[dog?.size ?? "l"] ?? 70) / 4.35).rounded()) }
     func hasGoal(_ g: String) -> Bool { dog?.goals.contains(g) ?? false }
-    var fieldGoal: Bool { hasGoal("waterfowl") || hasGoal("upland") }
+    /// Field work: any sport track marked field. Bird goals also bring the gunshot ladder.
+    var fieldGoal: Bool { Self.isField(dog?.goals ?? []) }
+    static func isField(_ goals: [String]) -> Bool { Catalog.tracks.contains { $0.field == true && ($0.goals ?? []).contains(where: goals.contains) } }
+    var birdGoal: Bool { ["waterfowl", "upland", "flush"].contains(where: hasGoal) }
+    /// The track whose note the owner still has to confirm, if any.
+    func gate(_ t: Track) -> Gate? { dog?.gates[t.id] == nil ? t.gate : nil }
+    func gateFor(_ id: String) -> Gate? { Catalog.track(Catalog.any(id).track).flatMap(gate) }
+    func confirmGate(_ t: Track) { updateDog { $0.gates[t.id] = AppModel.day() }; st.plan = nil }
 
     // MARK: Skills and levels
 
@@ -234,6 +241,7 @@ final class AppModel: ObservableObject {
             let p = n.split(separator: ":").map(String.init)
             return sound(p[1]).level >= Int(p[2]) ?? 10 && !recentStartle(p[1])
         }
+        if n == "plates" { return platesClosed }
         let parts = n.split(whereSeparator: { $0 == "@" || $0 == ":" }).map(String.init)
         let id = parts[0]
         if id == "charge" { return st.charged }
@@ -248,6 +256,7 @@ final class AppModel: ObservableObject {
             let name = (Catalog.sounds.first { $0.id == p[1] }?.name ?? p[1]).lowercased()
             return sound(p[1]).level >= Int(p[2]) ?? 10 ? "3 calm \(name) sessions since the last startle" : "the \(name) sound ladder to step \(p[2])"
         }
+        if n == "plates" { return "growth plates close (about \(platesMonths) months)" }
         let parts = n.split(whereSeparator: { $0 == "@" || $0 == ":" }).map(String.init)
         if parts[0] == "charge" { return "Charge Yes" }
         let name = Catalog.any(parts[0]).name
@@ -256,10 +265,10 @@ final class AppModel: ObservableObject {
     }
     /// A startle relocks gun work even after it was started, until the gunshot ladder is calm again.
     func isOpen(_ id: String) -> Bool {
-        (started(id) && !(id == "gun" && recentStartle("gun"))) || Catalog.any(id).needs.allSatisfy(needMet)
+        gateFor(id) == nil && ((started(id) && !(id == "gun" && recentStartle("gun"))) || Catalog.any(id).needs.allSatisfy(needMet))
     }
     func lockText(_ id: String) -> String {
-        "Opens after " + Catalog.any(id).needs.filter { !needMet($0) }.map(needText).joined(separator: " and ")
+        gateFor(id) != nil ? "Read the note above first" : "Opens after " + Catalog.any(id).needs.filter { !needMet($0) }.map(needText).joined(separator: " and ")
     }
     func wantsTrack(_ s: Skill) -> Bool {
         if let g = Catalog.track(s.track)?.goals { return g.contains(where: hasGoal) }
@@ -353,7 +362,7 @@ final class AppModel: ObservableObject {
 
     // MARK: Planner
 
-    static let fieldTracks = ["field", "waterfowl", "upland"]
+    static let fieldTracks = Catalog.tracks.filter { $0.field == true }.map(\.id)
     static let roleNames = ["warm": "Warm-up", "main": "Main", "new": "New", "finish": "Finish", "review": "Review", "only": "Skill", "sound": "Sounds", "break": "Rest"]
     func placeOK(_ s: Skill) -> Bool { s.places.map { $0.contains(st.place) } ?? true }
 
@@ -385,7 +394,7 @@ final class AppModel: ObservableObject {
         func done(_ id: String) -> Bool { sound(id).log.contains { $0.day == today } }
         func shaken(_ id: String) -> Bool { guard let l = sound(id).log.last else { return false }; return l.r == "startled" && l.day == addDays(today, -1) }
         var id: String? = nil
-        if fieldGoal && sound("gun").level < soundCap { id = "gun" }
+        if birdGoal && sound("gun").level < soundCap { id = "gun" }
         else if (ageWeeks.map { $0 < 20 } ?? false) || hasGoal("puppy") {
             id = ["doorbell", "traffic", "thunder", "fireworks"].filter { sound($0).level < soundCap }.min { sound($0).level < sound($1).level }
         }
@@ -585,7 +594,7 @@ final class AppModel: ObservableObject {
     static func demoRoot() -> SavedRoot {
         var r = SavedRoot()
         var d = Dog(); d.name = "Duke"; d.breed = "Labrador Retriever"; d.drive = "retrieve"; d.size = "l"
-        d.birth = AppModel.day(Date().addingTimeInterval(-86400 * 700)); d.goals = ["foundations", "waterfowl"]
+        d.birth = AppModel.day(Date().addingTimeInterval(-86400 * 700)); d.goals = ["foundations", "waterfowl", "hog", "nosework", "sport"]
         d.days = [0, 1, 2, 3, 4, 5, 6]; d.seasons = ["waterfowl": AppModel.day(Date().addingTimeInterval(86400 * 52))]
         var st = DogState(); st.charged = true
         func done(_ step: Int, _ best: [String: Int] = [:]) -> SkillProgress { var p = SkillProgress(); p.step = step; p.done = true; p.passDays = ["a", "b"]; p.best = best; return p }

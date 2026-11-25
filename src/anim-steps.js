@@ -781,7 +781,7 @@ const PTSteps = (() => {
     const b = B({ px: 90, dx: 200, df: -1, dh: 6 }, { props: [{ k: "car", x: 230 }] });
     if (p.stage === "hop") { b.ev({ dx: 140, df: 1 }); b.at(0.3); say(b, "Load up"); b.at(0.6, { dx: 220, dup: 34 }); yes(b, "In the car: YES"); give(b, "mouth", "hand", "Treat in the car"); return b.done(); }
     b.ev({ dup: 34, dx: 225 });
-    if (p.stage === "settle" || p.stage === "ride") { b.at(0.7, { ...POSES.down, cap: p.stage === "ride" ? "A short ride: settled" : "They lie down inside" }); if (p.stage === "ride") b.ev({ timer: 1.4, timerLabel: "5 min" }).at(1.4); yes(b, "Settled: YES"); give(b, "floor", "hand"); return b.done(); }
+    if (p.stage === "settle" || p.stage === "ride") { b.at(0.7, { ...POSES.down, cap: p.stage === "ride" ? "A short ride: settled" : "They lie down inside" }); if (p.stage === "ride") b.ev({ timer: 1.4, timerLabel: p.secs || "5 min" }).at(1.4); yes(b, "Settled: YES"); give(b, "floor", "hand"); return b.done(); }
     b.ev({ dx: 200, df: -1, ...POSES.sit }); b.at(0.4); say(b, "Wait"); b.at(1.0, { cap: "The door open, leash on" });
     yes(b, "Waiting at the open door: YES"); b.at(0.4); say(b, "OK"); b.at(0.6, { dx: 150, dup: 0, dr: 0 });
     return b.done();
@@ -898,7 +898,8 @@ const PTSteps = (() => {
     return out;
   }
   /** Builds the player (picture, controls, numbered moments) inside `box`. Returns false when the step has no animation. */
-  function player(box, skillId, i, dogName, skillLabel) {
+  function player(box, skillId, i, dogName, opts = {}) {
+    PTVoice.stop();
     box.replaceChildren();
     const a = forStep(skillId, i, dogName); box.hidden = !a; if (!a) return false;
     const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
@@ -908,19 +909,55 @@ const PTSteps = (() => {
       const li = mk("li"), b = mk("button", m.mark ? "mark" : ""); b.type = "button";
       b.append(mk("b", "", String(n + 1)), mk("span", "", m.text)); li.append(b); ol.append(li); return b;
     });
-    const bar = mk("div", "anim-bar"), pause = mk("button", "", "Pause"), slow = mk("button", "", "Slow");
-    for (const b of [pause, slow]) { b.type = "button"; bar.append(b); }
+    const bar = mk("div", "anim-bar"), pause = mk("button", "", "Pause"), slow = mk("button", "", "Slow"), listen = mk("button", "listen", "Listen");
+    for (const b of [listen, pause, slow]) { b.type = "button"; bar.append(b); }
     box.append(cv, bar, ol);
     const light = (cap) => btns.forEach((b, n) => b.classList.toggle("on", ms[n].text === cap));
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     let pl = PTAnim.mount(cv, a, { onCaption: light }), running = !still, spd = 0.8; pl.setSpeed(spd);
     if (still) pause.textContent = "Play";
+    let talk = 0;
+    const quiet = () => { if (!talk) return; talk = 0; PTVoice.stop(); pl.setLimit(Infinity); listen.textContent = "Listen"; listen.classList.remove("on"); };
     const go = () => { if (still && !running) { pl.destroy(); pl = PTAnim.mount(cv, a, { onCaption: light, force: true }); pl.setSpeed(spd); } running = true; pause.textContent = "Pause"; };
-    const flip = () => { if (still && !running) return go(); running = pl.toggle(); pause.textContent = running ? "Pause" : "Play"; };
+    const flip = () => { quiet(); if (still && !running) return go(); running = pl.toggle(); pause.textContent = running ? "Pause" : "Play"; };
     pause.addEventListener("click", flip); cv.addEventListener("click", flip);
     slow.addEventListener("click", () => { spd = spd === 0.8 ? 0.4 : 0.8; pl.setSpeed(spd); slow.classList.toggle("on", spd === 0.4); slow.setAttribute("aria-pressed", spd === 0.4); });
-    btns.forEach((b, n) => b.addEventListener("click", () => { go(); pl.seek(ms[n].t); }));
+    btns.forEach((b, n) => b.addEventListener("click", () => { quiet(); go(); pl.seek(ms[n].t); }));
+    // Listen: the setup and what to mark, then the animation moment by moment with each line spoken, then the reward.
+    const here = () => cv.isConnected && cv.offsetParent;
+    async function guide() {
+      const me = talk = Date.now(), L = PTVoice.lines(skillId, i) || { before: [], after: [] }, on = () => talk === me && here();
+      listen.textContent = "Stop"; listen.classList.add("on");
+      PTVoice.save(skillLines(skillId));
+      let heard = 0; const speak = async (x) => { if (await PTVoice.say(x)) heard++; else if (!heard && on()) { talk = 0; listen.textContent = "No signal"; listen.classList.remove("on"); pl.setLimit(Infinity); } };
+      // closing the sheet stops the voice
+      const watch = setInterval(() => { if (talk !== me) return clearInterval(watch); if (!here()) { clearInterval(watch); quiet(); } }, 250);
+      for (const x of L.before) { if (!on()) return; await speak(x); }
+      if (!on()) return;
+      go(); pl.seek(0); pl.setLimit(ms.length ? ms[0].t : a.T);
+      for (let n = 0; n < ms.length && on(); n++) {
+        while (on() && !still && pl.time < ms[n].t - 0.02) await new Promise((r) => setTimeout(r, 60));
+        const end = n + 1 < ms.length ? ms[n + 1].t : a.T;
+        pl.setLimit(end);
+        await speak(PTVoice.spoken(ms[n].text));
+        while (on() && !still && pl.time < end - 0.02) await new Promise((r) => setTimeout(r, 60));
+      }
+      if (talk === me) pl.setLimit(Infinity);
+      for (const x of L.after) { if (!on()) return; await speak(x); }
+      if (on()) quiet();
+    }
+    const lean = (v) => { try { localStorage.setItem("pt.listen", v ? "1" : ""); } catch (e) {} try { webkit.messageHandlers.voice.postMessage({ auto: v }); } catch (e) {} };
+    listen.addEventListener("click", () => { if (talk) { quiet(); lean(false); } else { PTVoice.prime(); lean(true); guide(); } });
+    // Once someone has chosen Listen, the next step's guide starts by itself until they press Stop.
+    if (opts.auto) { PTVoice.prime(); setTimeout(() => here() && guide(), 350); }
     return true;
   }
-  return { forStep, moments, player, M, T };
+  /** Every line spoken for one skill, so its clips can be saved for use without signal. */
+  function skillLines(id) {
+    const out = new Set();
+    (M[id] || []).forEach((_, i) => { const a = forStep(id, i, "Name"), L = PTVoice.lines(id, i); if (a && L) [...L.before, ...moments(a).map((m) => PTVoice.spoken(m.text)), ...L.after].forEach((x) => x && out.add(x)); });
+    return [...out];
+  }
+  const autoListen = () => { try { return !!localStorage.getItem("pt.listen"); } catch (e) { return false; } };
+  return { forStep, moments, player, autoListen, skillLines, M, T, kit: { B, give, yes, badge, say, handAt, rest, nose, part, hum, POSES, outdoor, yd, P } };
 })();

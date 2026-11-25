@@ -165,7 +165,7 @@ struct TrainingView: View {
             }
             Spacer(minLength: 0)
             if model.undoSnap != nil { chip("Undo", color: Theme.fg) { model.undo() } }
-            if mode == "outcome" || s.whistle == true {
+            if mode == "outcome" && AppModel.fieldTracks.contains(s.track) || s.whistle == true {
                 chip(distanceLabel, color: Theme.fg) { gps.startOrReset() }
             }
             chip(recorder.isRecording ? "Recording" : "Record", color: recorder.isRecording ? Theme.miss : Theme.fg, dot: recorder.isRecording) { model.toggleRecording() }

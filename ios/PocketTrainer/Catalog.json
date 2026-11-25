@@ -21,8 +21,10 @@
    "blurb": "Whistles, the retrieve, birds and gunfire. Shared by every bird track.",
    "goals": [
     "waterfowl",
-    "upland"
-   ]
+    "upland",
+    "flush"
+   ],
+   "field": true
   },
   {
    "id": "waterfowl",
@@ -30,7 +32,8 @@
    "blurb": "Ducks and geese: steadiness, marks, water, blinds.",
    "goals": [
     "waterfowl"
-   ]
+   ],
+   "field": true
   },
   {
    "id": "upland",
@@ -38,6 +41,78 @@
    "blurb": "Quail, pheasant, chukar: point, whoa, steady to wing and shot.",
    "goals": [
     "upland"
+   ],
+   "field": true
+  },
+  {
+   "id": "flush",
+   "name": "Upland flushing",
+   "blurb": "Pheasant, grouse, woodcock, quail with spaniels and labs: quarter, hup, steady.",
+   "goals": [
+    "flush"
+   ],
+   "field": true
+  },
+  {
+   "id": "hog",
+   "name": "Hog bay dog",
+   "blurb": "Find it, bay it from a distance, come off on cue. Bay work only: no catching and no contact.",
+   "goals": [
+    "hog"
+   ],
+   "field": true,
+   "gate": {
+    "title": "Before hog work",
+    "text": "This track trains bay dogs only. The dog never touches a hog. Many states restrict hunting hogs with dogs, and hog-dog fights and catch events are crimes in several states. All practice here uses scent and a dummy target. Real hogs are for lawful hunting only, with an experienced mentor and a vest and GPS collar on the dog.",
+    "confirm": "I checked my state's rules. Bay work only."
+   }
+  },
+  {
+   "id": "tracking",
+   "name": "Blood tracking",
+   "blurb": "Recover wounded deer on a long line.",
+   "goals": [
+    "tracking"
+   ],
+   "field": true,
+   "gate": {
+    "title": "Before blood tracking",
+    "text": "Some states ban tracking dogs, and others need a license, a leash, or permission to track after dark or while carrying a gun. Check with your state wildlife agency every season, and get the landowner's permission.",
+    "confirm": "I checked my state's rules"
+   }
+  },
+  {
+   "id": "shed",
+   "name": "Shed antler",
+   "blurb": "Hunt dropped antlers. Check your state's shed season.",
+   "goals": [
+    "shed"
+   ],
+   "field": true
+  },
+  {
+   "id": "nosework",
+   "name": "Nose work",
+   "blurb": "Search boxes, rooms and cars for a scent. Any dog can do it, any age.",
+   "goals": [
+    "nosework"
+   ]
+  },
+  {
+   "id": "sport",
+   "name": "Obedience and Canine Good Citizen",
+   "blurb": "Ready for the test, then tidier than the test asks.",
+   "goals": [
+    "sport"
+   ],
+   "checklist": "cgc"
+  },
+  {
+   "id": "tricks",
+   "name": "Tricks and body awareness",
+   "blurb": "Fun, and the balance that prevents injuries.",
+   "goals": [
+    "tricks"
    ]
   }
  ],
@@ -123,6 +198,34 @@
     "steadywing",
     "steadyshot",
     "range"
+   ]
+  },
+  "flush": {
+   "name": "Flushing opener",
+   "milestones": [
+    "quarter",
+    "hup",
+    "gun",
+    "flushshot",
+    "frange",
+    "uplandret"
+   ]
+  },
+  "tracking": {
+   "name": "Deer season",
+   "milestones": [
+    "trackstart",
+    "bloodline",
+    "findend",
+    "linehand"
+   ]
+  },
+  "shed": {
+   "name": "Shed season",
+   "milestones": [
+    "shedret",
+    "shedsearch",
+    "shedhunt"
    ]
   }
  },
@@ -227,6 +330,253 @@
     "Balloon",
     "Flapping flag",
     "Trash can lid"
+   ]
+  }
+ ],
+ "helpers": [
+  {
+   "id": "jump",
+   "name": "Jumping on people",
+   "uses": [
+    "floor",
+    "mat"
+   ],
+   "goal": "Four paws on the floor earns the hello.",
+   "stop": "Growling, snapping or stiffness when people come close",
+   "steps": [
+    {
+     "t": "Stop paying for jumps",
+     "do": "When they jump, turn away, arms folded, no words. Even \"off\" is attention."
+    },
+    {
+     "t": "Mark the floor",
+     "do": "The moment all four paws are down, say Yes and toss a treat at their feet."
+    },
+    {
+     "t": "Visitors do it too",
+     "do": "Leash on. The visitor turns away on a jump and comes back when the paws are down."
+    },
+    {
+     "t": "A job at the door",
+     "do": "Send them to the mat before the door opens. Treats stay on the mat until the guest sits."
+    }
+   ]
+  },
+  {
+   "id": "pull",
+   "name": "Pulling on the leash",
+   "uses": [
+    "leash",
+    "checkin"
+   ],
+   "goal": "A tight leash stops the walk; a loose one moves it.",
+   "stop": "Choking, coughing or collapse on walks (see a vet)",
+   "steps": [
+    {
+     "t": "The right gear",
+     "do": "A well-fitted harness with a front ring, a 2 m leash. Retractable leashes teach pulling."
+    },
+    {
+     "t": "Tight means stop",
+     "do": "The moment it goes tight, freeze. Walk on the second it goes slack."
+    },
+    {
+     "t": "Pay at the seam",
+     "do": "Say Yes for a slack leash and treat at your pant seam, every few steps at first."
+    },
+    {
+     "t": "Pulling never works",
+     "do": "To reach a bush they want, walk with a loose leash, then \"OK, go sniff\". Sniffing is the pay."
+    }
+   ]
+  },
+  {
+   "id": "barkdoor",
+   "name": "Barking at the door or window",
+   "uses": [
+    "doorbell",
+    "mat"
+   ],
+   "goal": "The bell means mat, not bark.",
+   "stop": "Lunging at the glass or biting anyone near the door",
+   "steps": [
+    {
+     "t": "Block the view",
+     "do": "Frosted film or a closed curtain. Every rehearsal of barking makes it stronger."
+    },
+    {
+     "t": "Mark the quiet",
+     "do": "Stand near them. At the first pause in barking, say Yes and treat. Then treat for longer pauses."
+    },
+    {
+     "t": "Bell, then mat",
+     "do": "Ring the bell yourself, send them to the mat, treat on the mat. Ten easy rings a day."
+    },
+    {
+     "t": "Real visitors",
+     "do": "Same thing with a helper, then a guest. Treats keep coming on the mat until the door shuts."
+    }
+   ]
+  },
+  {
+   "id": "react",
+   "name": "Barking at dogs or people",
+   "uses": [
+    "checkin",
+    "leave",
+    "dogmeet"
+   ],
+   "goal": "Seeing a dog or a stranger means look back at you.",
+   "stop": "A bite, a bite attempt, or reactions that get closer and faster each week",
+   "measure": {
+    "unit": "m",
+    "label": "How far away was it when they first reacted?"
+   },
+   "steps": [
+    {
+     "t": "Find the distance",
+     "do": "How far away can the other dog be while yours can still eat? That's where you train. Farther is always fine."
+    },
+    {
+     "t": "Mark the look",
+     "do": "The moment they look at it and stay quiet, say Yes and treat. Looking pays."
+    },
+    {
+     "t": "The look back",
+     "do": "Wait a second longer. When they look back at you by themselves, say Yes and jackpot."
+    },
+    {
+     "t": "A little closer",
+     "do": "Two good days, then one meter closer. Any barking: turn and walk away, and go back to the easier distance."
+    }
+   ]
+  },
+  {
+   "id": "guard",
+   "name": "Guarding food or toys",
+   "uses": [
+    "drop",
+    "leave"
+   ],
+   "goal": "A person coming near means more, not less.",
+   "stop": "Stiffening, hard staring, growling, snapping, or children in the home",
+   "steps": [
+    {
+     "t": "Make it safe",
+     "do": "Feed alone in a quiet place. Pick up the things they guard. Never take food away to test them."
+    },
+    {
+     "t": "Walk past, drop a treat",
+     "do": "While they eat, walk past at 3 m and toss something better. Keep walking. They should look up happy."
+    },
+    {
+     "t": "A step closer",
+     "do": "Closer by half a meter only after several happy days. Loose body and wagging is the go-ahead."
+    },
+    {
+     "t": "Trade, then give it back",
+     "do": "Offer a better treat for a toy, say \"Drop\", then give the toy back. They lose nothing."
+    }
+   ]
+  },
+  {
+   "id": "leftalone",
+   "name": "Being left alone",
+   "uses": [
+    "alone",
+    "mat",
+    "crate"
+   ],
+   "goal": "Short absences they never worry about.",
+   "stop": "Panic: howling, drooling, scratching at doors, hurting themselves (see a vet)",
+   "measure": {
+    "unit": "min",
+    "label": "Longest calm absence today"
+   },
+   "steps": [
+    {
+     "t": "Watch the first minutes",
+     "do": "Film them alone. When does worry start: pacing, whining, panting? Every absence stays shorter than that."
+    },
+    {
+     "t": "Boring exits",
+     "do": "Keys, coat, sit back down. Again and again until the keys mean nothing."
+    },
+    {
+     "t": "Out and back",
+     "do": "Step out for a few seconds, come back while they're calm. Mix short and shorter."
+    },
+    {
+     "t": "Build slowly",
+     "do": "Add a little on calm days; go back after a bad one. Use a sitter or daycare so they're never left past their limit."
+    }
+   ]
+  }
+ ],
+ "cgc": [
+  {
+   "t": "Accepting a friendly stranger",
+   "needs": [
+    "floor"
+   ]
+  },
+  {
+   "t": "Sitting politely for petting",
+   "needs": [
+    "sit",
+    "floor"
+   ]
+  },
+  {
+   "t": "Appearance and grooming",
+   "needs": [
+    "chin"
+   ]
+  },
+  {
+   "t": "Out for a walk on a loose leash",
+   "needs": [
+    "leash"
+   ]
+  },
+  {
+   "t": "Walking through a crowd",
+   "needs": [
+    "leash",
+    "public"
+   ]
+  },
+  {
+   "t": "Sit and down on cue, staying in place",
+   "needs": [
+    "sit",
+    "down",
+    "stay"
+   ]
+  },
+  {
+   "t": "Coming when called",
+   "needs": [
+    "come"
+   ]
+  },
+  {
+   "t": "Reaction to another dog",
+   "needs": [
+    "dogmeet"
+   ]
+  },
+  {
+   "t": "Reaction to distraction",
+   "needs": [
+    "checkin",
+    "leave"
+   ]
+  },
+  {
+   "t": "Supervised separation",
+   "needs": [
+    "alone"
    ]
   }
  ],
@@ -3792,6 +4142,1268 @@
      "mark": "they come in on the trill from 100 yards in cover.",
      "setup": "Use the distance tracker to check the range.",
      "reward": "Jackpot."
+    }
+   ]
+  },
+  {
+   "id": "quarter",
+   "track": "flush",
+   "name": "Quartering",
+   "goal": "Zigzag in front of you inside gun range.",
+   "cue": "\"Hunt\" to start; two pips = turn",
+   "proofMark": "they cross in front of you inside 25 yards and turn on the pips.",
+   "needs": [
+    "checkin",
+    "whistle"
+   ],
+   "rep": "outcome",
+   "whistle": true,
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a whistle",
+    "treats to hide"
+   ],
+   "steps": [
+    {
+     "t": "Zigzag to hidden treats",
+     "mark": "they cross from one hidden treat to the next as you walk a zigzag.",
+     "setup": "Hide 6 treats in the grass, 3 m left and right of your line. Walk toward each one; they find it.",
+     "reward": "The treats they find."
+    },
+    {
+     "t": "Turn on two pips",
+     "mark": "they turn and cross back on two pips.",
+     "setup": "Pip just before they reach the edge of the zigzag, and turn your body the other way.",
+     "reward": "A treat tossed ahead on the new side."
+    },
+    {
+     "t": "Field within 25 yd",
+     "mark": "they work side to side and stay inside 25 yards.",
+     "setup": "Short cover. Walk slowly, pip at 20 yards.",
+     "reward": "A bumper tossed ahead now and then."
+    },
+    {
+     "t": "Into the wind",
+     "mark": "they quarter into the wind for a full minute.",
+     "setup": "Wind in your face. Plant a wing or a scented bumper every 30 yards.",
+     "reward": "The find, then a short retrieve."
+    },
+    {
+     "t": "Crosswind",
+     "mark": "they keep the pattern with the wind from the side.",
+     "setup": "Same, with the wind on your cheek.",
+     "reward": "The find, then a short retrieve."
+    }
+   ]
+  },
+  {
+   "id": "hup",
+   "track": "flush",
+   "name": "Hup to flush",
+   "goal": "Sit the moment a bird gets up.",
+   "cue": "One blast, or \"Hup\"",
+   "proofMark": "they sit as it flies and stay sitting.",
+   "needs": [
+    "whistle@1"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Sat",
+    "Slow",
+    "Chased"
+   ],
+   "whistle": true,
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "bumpers",
+    "a helper"
+   ],
+   "steps": [
+    {
+     "t": "Dropped bumper",
+     "mark": "they sit as a bumper drops at your feet.",
+     "setup": "On leash, close. Drop it and blow one blast at the same time.",
+     "reward": "Treat while they sit. Pick the bumper up yourself."
+    },
+    {
+     "t": "Thrown bumper",
+     "mark": "they sit as you throw one over their head.",
+     "setup": "Throw, then one blast. Most of the time, fetch it yourself.",
+     "reward": "Treat while they sit; send them one time in three."
+    },
+    {
+     "t": "Launcher",
+     "mark": "they sit as a bumper launcher fires.",
+     "setup": "Launcher 20 yards off, long line on.",
+     "reward": "Treat while they sit."
+    },
+    {
+     "t": "Flushed pigeon, with a mentor",
+     "mark": "they sit as a pigeon flushes in front of them.",
+     "setup": "With an experienced trainer, following your state's rules on birds. Long line on.",
+     "reward": "Treat while they sit, then hunt on."
+    }
+   ]
+  },
+  {
+   "id": "flushshot",
+   "track": "flush",
+   "name": "Steady to flush and shot",
+   "goal": "Stay sitting through the flush and the gun.",
+   "cue": "\"Hup\" if needed",
+   "proofMark": "they sit through the flush and the shot.",
+   "needs": [
+    "hup",
+    "gun@2"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Steady",
+    "Moved",
+    "Broke"
+   ],
+   "places": [
+    "field"
+   ],
+   "gear": [
+    "a launcher",
+    "a blank pistol",
+    "a helper"
+   ],
+   "steps": [
+    {
+     "t": "Blank at 30 yd",
+     "mark": "they stay sitting through the launch and a blank 30 yards away.",
+     "setup": "The helper fires as the launcher goes.",
+     "reward": "Treat while they sit."
+    },
+    {
+     "t": "Blank at 10 yd",
+     "mark": "they stay sitting with the blank 10 yards away.",
+     "setup": "Same.",
+     "reward": "Treat while they sit."
+    },
+    {
+     "t": "Your shot",
+     "mark": "they stay sitting when you shoot after the flush.",
+     "setup": "Gun in a safe direction, the dog well out of your line of fire.",
+     "reward": "Send them by name for the retrieve, or hunt on."
+    }
+   ]
+  },
+  {
+   "id": "frange",
+   "track": "flush",
+   "name": "Range control",
+   "goal": "Never out of gun range, even on hot scent.",
+   "cue": "Two pips = turn; a trill = come",
+   "proofMark": "they turn inside 30 yards without being asked.",
+   "needs": [
+    "quarter",
+    "come:reliable"
+   ],
+   "rep": "outcome",
+   "whistle": true,
+   "places": [
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a whistle",
+    "a long line"
+   ],
+   "steps": [
+    {
+     "t": "Check in at 20 yd",
+     "mark": "they look back or swing in by 20 yards.",
+     "setup": "Light cover. Stand still when they reach 20 yards and wait.",
+     "reward": "Treat at your side, then send them on."
+    },
+    {
+     "t": "Off scent from 40 yd",
+     "mark": "they come in on the trill while working scent 40 yards out.",
+     "setup": "Drag a wing beforehand so there's real scent. Long line on.",
+     "reward": "Jackpot, then send them back to the scent."
+    },
+    {
+     "t": "Turn before 30 yd",
+     "mark": "they turn back before 30 yards with no whistle.",
+     "setup": "Walk and say nothing. Pip only if they pass 30.",
+     "reward": "Hunting on is the reward; a treat now and then."
+    }
+   ]
+  },
+  {
+   "id": "uplandret",
+   "track": "flush",
+   "name": "Upland retrieve",
+   "goal": "Find it in thick cover, bring it back, in the heat too.",
+   "cue": "Their name; \"Dead bird\" for a lost one",
+   "proofMark": "they find it in cover and deliver to hand.",
+   "needs": [
+    "retrieve",
+    "birds@2"
+   ],
+   "rep": "outcome",
+   "youngCap": 1,
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "bumpers with a wing",
+    "a helper"
+   ],
+   "steps": [
+    {
+     "t": "Short grass, 20 yd",
+     "mark": "a clean retrieve from short grass at 20 yards.",
+     "setup": "A helper throws; send by name.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Knee-high cover",
+     "mark": "they hunt it up in knee-high cover and bring it back.",
+     "setup": "Throw 20 to 30 yards into the cover. Let them use their nose; don't walk in.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Lost bird",
+     "mark": "they search on \"Dead bird\" and find one they didn't see fall.",
+     "setup": "Hide it 15 yards into cover, downwind, 2 minutes before.",
+     "reward": "Treat on delivery."
+    },
+    {
+     "t": "Heavy cover, warm day",
+     "mark": "a clean retrieve in heavy cover, with a water break between each.",
+     "setup": "Early morning. Two retrieves, then rest. Stop at the first heavy panting.",
+     "reward": "Water first, then a treat."
+    }
+   ]
+  },
+  {
+   "id": "gearon",
+   "track": "hog",
+   "name": "Gear on",
+   "goal": "Vest and GPS collar mean good things.",
+   "cue": "\"Gear\"",
+   "proofMark": "they stand happily while the vest and collar go on.",
+   "needs": [
+    "handling|chin"
+   ],
+   "gear": [
+    "a cut vest or chest protector",
+    "a GPS collar"
+   ],
+   "steps": [
+    {
+     "t": "Vest on, treats",
+     "mark": "they stay relaxed as the vest goes over their back.",
+     "setup": "Let them sniff it first. One strap at a time, over several sessions.",
+     "reward": "A treat for every strap."
+    },
+    {
+     "t": "Worn 5 minutes",
+     "mark": "they move and play normally in the vest.",
+     "setup": "Fasten it, then play or feed dinner. Check for rubbing.",
+     "reward": "Dinner or a game in the vest."
+    },
+    {
+     "t": "Worn 30 minutes",
+     "mark": "they walk for a while and ignore the vest.",
+     "setup": "A walk at home. Check under the arms when it comes off.",
+     "reward": "Treats along the walk."
+    },
+    {
+     "t": "GPS collar",
+     "mark": "they ignore the GPS collar while moving.",
+     "setup": "Snug enough for two fingers. Short wear first. This is a tracking collar only; no shock.",
+     "reward": "Treats and a walk."
+    },
+    {
+     "t": "Both, in the truck",
+     "mark": "they ride calmly in the vest and collar.",
+     "setup": "Gear on, load up, engine on, then a short ride.",
+     "reward": "Treats in the box, then a fun stop."
+    }
+   ]
+  },
+  {
+   "id": "hogtrail",
+   "track": "hog",
+   "name": "Scent trailing",
+   "goal": "Follow a hog-scent drag to the end, nose down.",
+   "cue": "\"Track\"",
+   "proofMark": "they work the line nose down to the end.",
+   "needs": [
+    "come"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Found",
+    "Needed help",
+    "Lost it"
+   ],
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "hog scent on a rag",
+    "a harness and long line",
+    "flags"
+   ],
+   "steps": [
+    {
+     "t": "50 m, 30 minutes old",
+     "mark": "they follow a 50 m drag to the scent rag.",
+     "setup": "Drag a scented rag 50 m downwind, straight. Flag the start and end. Wait 30 minutes.",
+     "reward": "A jackpot next to the rag at the end."
+    },
+    {
+     "t": "200 m",
+     "mark": "they follow 200 m to the end.",
+     "setup": "Same, longer. Harness and long line.",
+     "reward": "Jackpot at the end."
+    },
+    {
+     "t": "500 m",
+     "mark": "they follow 500 m to the end.",
+     "setup": "Use the distance tracker to lay it.",
+     "reward": "Jackpot at the end."
+    },
+    {
+     "t": "2 hours old",
+     "mark": "they follow a 2-hour-old line to the end.",
+     "setup": "Shorten it to 200 m when you age it.",
+     "reward": "Jackpot at the end."
+    },
+    {
+     "t": "With turns",
+     "mark": "they work two turns without help.",
+     "setup": "Flag each turn so you know the line. Stand still when they check; let them solve it.",
+     "reward": "Jackpot at the end."
+    }
+   ]
+  },
+  {
+   "id": "bay",
+   "track": "hog",
+   "name": "Bay at distance",
+   "goal": "Bark and hold from 5 m or more. Never close in.",
+   "cue": "\"Bay\"",
+   "proofMark": "they bark and hold their distance until you call.",
+   "needs": [
+    "hogtrail@1"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Held off",
+    "Crept in",
+    "Touched it"
+   ],
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a scented dummy or barrel",
+    "a long line",
+    "a helper"
+   ],
+   "steps": [
+    {
+     "t": "Bark at 5 m",
+     "mark": "they bark at a scented, still target from 5 m.",
+     "setup": "A hog-scented barrel or dummy. Long line held so they can't get closer than 5 m. A helper shakes it once to start the barking.",
+     "reward": "Toss treats behind them, away from the target."
+    },
+    {
+     "t": "Hold the bay 10 s",
+     "mark": "they bark for 10 seconds and stay 5 m off.",
+     "setup": "Same, line slack. Step in with the line if they creep.",
+     "reward": "Toss treats behind them."
+    },
+    {
+     "t": "Hold the bay 30 s",
+     "mark": "they bark for 30 seconds and stay back.",
+     "setup": "Same.",
+     "reward": "Call them off to a jackpot."
+    },
+    {
+     "t": "Never closing in",
+     "mark": "they hold their distance when the target moves a little.",
+     "setup": "The helper rocks the target with a rope. Log Touched it if they make contact, and go back a step.",
+     "reward": "Call them off to a jackpot."
+    }
+   ]
+  },
+  {
+   "id": "offbay",
+   "track": "hog",
+   "name": "Off the bay",
+   "goal": "Leave the bay the first time you call.",
+   "cue": "Name + \"Come\", or a trill",
+   "proofMark": "they leave the bay and come on one call.",
+   "needs": [
+    "bay@1",
+    "come:reliable"
+   ],
+   "rep": "outcome",
+   "whistle": true,
+   "outcomes": [
+    "First call",
+    "Second call",
+    "Kept baying"
+   ],
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a scented dummy or barrel",
+    "a whistle",
+    "a long line"
+   ],
+   "steps": [
+    {
+     "t": "Called off, close",
+     "mark": "they turn away from the target and come on one call from 10 m.",
+     "setup": "Let them bay 5 seconds, then call once and back up.",
+     "reward": "Jackpot, then send them back to bay."
+    },
+    {
+     "t": "On the trill",
+     "mark": "they leave the bay on one trill.",
+     "setup": "Trill only. Same distance.",
+     "reward": "Jackpot, then send them back."
+    },
+    {
+     "t": "From 50 m",
+     "mark": "they leave the bay and come 50 m on the trill.",
+     "setup": "Long line dragging, a helper near the target.",
+     "reward": "The best thing you have."
+    }
+   ]
+  },
+  {
+   "id": "loadup",
+   "track": "hog",
+   "name": "Load up",
+   "goal": "Into the box on cue, a quiet ride, out only when told.",
+   "cue": "\"Load up\"",
+   "proofMark": "they load on one cue and settle.",
+   "needs": [
+    "car"
+   ],
+   "gear": [
+    "a dog box or crate in the truck"
+   ],
+   "steps": [
+    {
+     "t": "Into the box",
+     "mark": "they hop into the box on one cue.",
+     "setup": "Truck parked, box open, treats inside.",
+     "reward": "Treat inside the box."
+    },
+    {
+     "t": "Wait for the door",
+     "mark": "they wait inside with the door open.",
+     "setup": "Open slowly. If they come forward, close it and try again.",
+     "reward": "Treat inside, then \"OK\" to get out."
+    },
+    {
+     "t": "Quiet ride",
+     "mark": "they ride 10 minutes quietly.",
+     "setup": "Short rides first. Shade and airflow; never leave a dog in a hot box.",
+     "reward": "A calm stop and a walk."
+    }
+   ]
+  },
+  {
+   "id": "trackstart",
+   "track": "tracking",
+   "name": "Track start",
+   "goal": "Harness on means nose down and work.",
+   "cue": "\"Track\"",
+   "proofMark": "they drop their nose on the line and go.",
+   "needs": [
+    "charge"
+   ],
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a tracking harness",
+    "a 20-30 ft line"
+   ],
+   "steps": [
+    {
+     "t": "Harness means tracking",
+     "mark": "they put their nose down within a few seconds of the harness going on.",
+     "setup": "Use this harness only for tracking. Put it on at the start of a treat scatter in short grass.",
+     "reward": "The treats on the ground."
+    },
+    {
+     "t": "Nose to the spot",
+     "mark": "they sniff a blood spot you point at.",
+     "setup": "A few drops of deer blood on a leaf. Point, say nothing, wait.",
+     "reward": "A treat placed right on the spot."
+    },
+    {
+     "t": "10 m treat trail",
+     "mark": "they follow a 10 m line of blood and treats.",
+     "setup": "A drop of blood every step, a treat every third step.",
+     "reward": "The treats, and a jackpot at the end."
+    }
+   ]
+  },
+  {
+   "id": "bloodline",
+   "track": "tracking",
+   "name": "Blood line",
+   "goal": "Stay on an old line to the deer.",
+   "cue": "\"Track\"",
+   "proofMark": "they stay on the line and work out the losses.",
+   "needs": [
+    "trackstart"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Found",
+    "Needed help",
+    "Lost"
+   ],
+   "places": [
+    "park",
+    "field"
+   ],
+   "gear": [
+    "deer blood (about 2 oz)",
+    "flags or GPS marks",
+    "a harness and line"
+   ],
+   "steps": [
+    {
+     "t": "50 yd, 1 hour",
+     "mark": "they follow a straight 50-yard line, 1 hour old.",
+     "setup": "About 2 oz of blood, dabbed or squirted. Mark the line so you know where it is. Hide a deer hide or hoof at the end.",
+     "reward": "The hide and a jackpot."
+    },
+    {
+     "t": "100 yd, 4 hours",
+     "mark": "they follow 100 yards, 4 hours old.",
+     "setup": "Same amount of blood.",
+     "reward": "The hide and a jackpot."
+    },
+    {
+     "t": "One turn",
+     "mark": "they work one turn on a 150-yard line.",
+     "setup": "A wide, easy bend first. Stand still when they overshoot.",
+     "reward": "The hide and a jackpot."
+    },
+    {
+     "t": "300 yd, 12 hours",
+     "mark": "they follow 300 yards, laid the night before.",
+     "setup": "Lay it at dusk, run it at dawn.",
+     "reward": "The hide and a jackpot."
+    },
+    {
+     "t": "Three turns",
+     "mark": "they work three turns on a 300-yard line.",
+     "setup": "At least one right angle.",
+     "reward": "The hide and a jackpot."
+    },
+    {
+     "t": "A gap in the line",
+     "mark": "they bridge a 10-yard gap with no blood.",
+     "setup": "Leave 10 yards blank, then pick it up again. Let them circle.",
+     "reward": "The hide and a jackpot."
+    },
+    {
+     "t": "500 yd, 24 hours",
+     "mark": "they follow a 500-yard, day-old line with turns.",
+     "setup": "Roughly the length and age of a real recovery.",
+     "reward": "The hide and a jackpot."
+    }
+   ]
+  },
+  {
+   "id": "findend",
+   "track": "tracking",
+   "name": "Find and indicate",
+   "goal": "Stay at the deer until you get there.",
+   "cue": "None",
+   "proofMark": "they stay at the find until you arrive.",
+   "needs": [
+    "bloodline@1"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Stayed",
+    "Came back",
+    "Chewed or left"
+   ],
+   "places": [
+    "yard",
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a deer hide or hoof",
+    "a long line"
+   ],
+   "steps": [
+    {
+     "t": "The hide at the end",
+     "mark": "they stop at the hide when they find it.",
+     "setup": "A short, easy line to a hide. You follow close behind.",
+     "reward": "Jackpot on the ground beside the hide."
+    },
+    {
+     "t": "Wait for you",
+     "mark": "they stay beside it while you walk the last 10 yards.",
+     "setup": "Let the line run through your hands, stop, then walk in.",
+     "reward": "Jackpot beside the hide."
+    },
+    {
+     "t": "Until you arrive",
+     "mark": "they stay at the find until you arrive from 30 yards back.",
+     "setup": "No calling, no hurry. If they chew it, shorten the distance.",
+     "reward": "The best thing you have, beside the hide."
+    }
+   ]
+  },
+  {
+   "id": "linehand",
+   "track": "tracking",
+   "name": "Line handling",
+   "goal": "Your skill: a quiet line and a good read of the dog.",
+   "cue": "None",
+   "proofMark": "you follow at their pace on a slack line.",
+   "needs": [
+    "trackstart"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Smooth",
+    "Some pulling",
+    "Took over"
+   ],
+   "places": [
+    "park",
+    "field"
+   ],
+   "gear": [
+    "a 20-30 ft tracking line",
+    "flags"
+   ],
+   "steps": [
+    {
+     "t": "Slack line",
+     "mark": "you keep the line slack for a whole 50-yard track.",
+     "setup": "Let it run through your hands, over brush rather than around it.",
+     "reward": "They get the find; you get a clean run."
+    },
+    {
+     "t": "Their pace",
+     "mark": "you follow at their pace and never steer.",
+     "setup": "If you know the line, don't show it. Stop when they stop.",
+     "reward": "The find."
+    },
+    {
+     "t": "Read a loss",
+     "mark": "you stop, back up to the last blood and let them restart.",
+     "setup": "Flag the last blood you saw. On a loss, go back to the flag and give it 2 minutes.",
+     "reward": "A treat on the last spot, then on they go."
+    }
+   ]
+  },
+  {
+   "id": "shedret",
+   "track": "shed",
+   "name": "Antler retrieve",
+   "goal": "Antlers are the best toy there is.",
+   "cue": "\"Find the bone\"",
+   "proofMark": "they bring the antler to your hand.",
+   "needs": [
+    "retrieve|hallret"
+   ],
+   "gear": [
+    "an antler-scented toy",
+    "a shed antler"
+   ],
+   "steps": [
+    {
+     "t": "Scented toy",
+     "mark": "they chase and pick up an antler-scented toy.",
+     "setup": "A soft antler-shaped toy or a scented bumper. Short tosses.",
+     "reward": "Another throw."
+    },
+    {
+     "t": "A real shed",
+     "mark": "they pick up a real antler.",
+     "setup": "Start with a small, smooth one. Tips rounded or taped so it never pokes them.",
+     "reward": "Treat, then another throw."
+    },
+    {
+     "t": "To hand",
+     "mark": "they deliver the antler to your hand.",
+     "setup": "Hand low and still. Say \"Give\".",
+     "reward": "Trade for a treat, then throw again."
+    }
+   ]
+  },
+  {
+   "id": "shedsearch",
+   "track": "shed",
+   "name": "Shed search",
+   "goal": "Hunt for an antler with nose and eyes.",
+   "cue": "\"Find the bone\"",
+   "proofMark": "they search until they find it.",
+   "needs": [
+    "shedret"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Found",
+    "Needed help",
+    "Gave up"
+   ],
+   "gear": [
+    "2 or 3 sheds",
+    "gloves"
+   ],
+   "steps": [
+    {
+     "t": "In the house",
+     "mark": "they find an antler hidden in one room.",
+     "setup": "Wear gloves so it doesn't smell like you. Half in view at first.",
+     "reward": "Treat and a game with the antler."
+    },
+    {
+     "t": "In the yard",
+     "mark": "they find one in the yard.",
+     "setup": "Hide it 20 minutes before, downwind.",
+     "reward": "Treat and a throw."
+    },
+    {
+     "t": "Tall grass",
+     "mark": "they find one they can't see.",
+     "setup": "Grass over the antler's height.",
+     "reward": "Treat and a throw."
+    },
+    {
+     "t": "A field",
+     "mark": "they find one in a field the size of a football pitch.",
+     "setup": "Three sheds, spread out. Walk into the wind.",
+     "reward": "Treat and a throw for each find."
+    },
+    {
+     "t": "An old shed",
+     "mark": "they find an antler left outside for a week.",
+     "setup": "Leave it out a week so your scent is gone.",
+     "reward": "Jackpot."
+    }
+   ]
+  },
+  {
+   "id": "shedhunt",
+   "track": "shed",
+   "name": "Field hunt",
+   "goal": "A real shed hunt, working ahead of you.",
+   "cue": "\"Find the bone\"",
+   "proofMark": "they hunt ahead of you and find the antler.",
+   "needs": [
+    "shedsearch",
+    "come"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Found",
+    "Needed help",
+    "Nothing found"
+   ],
+   "places": [
+    "park",
+    "field"
+   ],
+   "gear": [
+    "planted sheds",
+    "water"
+   ],
+   "steps": [
+    {
+     "t": "Quarter the field",
+     "mark": "they work side to side ahead of you on \"Find the bone\".",
+     "setup": "Plant 4 sheds along your route. Walk a zigzag.",
+     "reward": "Treat and a throw for each find."
+    },
+    {
+     "t": "Show or bring",
+     "mark": "they bring it back, or stop and wait by it.",
+     "setup": "Choose one and stick with it. Big antlers: teach them to wait by it.",
+     "reward": "Treat at the antler or on delivery."
+    },
+    {
+     "t": "The real thing",
+     "mark": "a find they made on their own on real ground.",
+     "setup": "Check your state's shed season and the land rules, and leave wintering deer alone. Plant one so they always get a win.",
+     "reward": "Jackpot."
+    }
+   ]
+  },
+  {
+   "id": "odor",
+   "track": "nosework",
+   "name": "Odor intro",
+   "goal": "One smell pays: birch, then anise, then clove.",
+   "cue": "\"Search\"",
+   "proofMark": "they put their nose on the tin and stay there.",
+   "needs": [
+    "charge"
+   ],
+   "gear": [
+    "birch, anise and clove kits",
+    "vented tins",
+    "gloves"
+   ],
+   "steps": [
+    {
+     "t": "Birch and a treat",
+     "mark": "their nose goes to the tin with birch and a treat in it.",
+     "setup": "A scented swab in a vented tin, a treat on top. Gloves on; never let them lick the oil or the swab.",
+     "reward": "The treat, right at the tin."
+    },
+    {
+     "t": "Birch alone",
+     "mark": "their nose goes to the tin with no treat showing.",
+     "setup": "Same tin, treats in your hand.",
+     "reward": "Treat placed at the tin."
+    },
+    {
+     "t": "Anise",
+     "mark": "their nose goes to the anise tin.",
+     "setup": "A fresh swab, its own tin. Keep each odor's kit separate.",
+     "reward": "Treat at the tin."
+    },
+    {
+     "t": "Clove",
+     "mark": "their nose goes to the clove tin.",
+     "setup": "Same.",
+     "reward": "Treat at the tin."
+    }
+   ]
+  },
+  {
+   "id": "boxes",
+   "track": "nosework",
+   "name": "Boxes and containers",
+   "goal": "Find the one that pays.",
+   "cue": "\"Search\"",
+   "proofMark": "they go to the right box and ignore the rest.",
+   "needs": [
+    "odor@1"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Right box",
+    "Needed help",
+    "Wrong box"
+   ],
+   "places": [
+    "home",
+    "yard",
+    "street",
+    "park"
+   ],
+   "gear": [
+    "10 cardboard boxes",
+    "a hide"
+   ],
+   "steps": [
+    {
+     "t": "1 of 3",
+     "mark": "they pick the right box out of 3.",
+     "setup": "Boxes open, a meter apart. Walk past them without pointing.",
+     "reward": "Treat in the right box."
+    },
+    {
+     "t": "1 of 10",
+     "mark": "they pick the right box out of 10.",
+     "setup": "Two rows of 5. Move the hide each time, and keep one box just for the hide.",
+     "reward": "Treat in the right box."
+    },
+    {
+     "t": "Bags and bins",
+     "mark": "they find it in luggage, bins or closed boxes.",
+     "setup": "Lids closed. A few different containers.",
+     "reward": "Treat at the container."
+    },
+    {
+     "t": "A blank search",
+     "mark": "they search all of them and don't alert when there's no hide.",
+     "setup": "No hide this time. Walk the row, then say \"Finish\" and leave.",
+     "reward": "Then one easy search with a hide, right after."
+    }
+   ]
+  },
+  {
+   "id": "searchrooms",
+   "track": "nosework",
+   "name": "Interiors and vehicles",
+   "goal": "Search a room or a car and find the source.",
+   "cue": "\"Search\"",
+   "proofMark": "they search the area and find the source.",
+   "needs": [
+    "boxes"
+   ],
+   "rep": "outcome",
+   "outcomes": [
+    "Found",
+    "Needed help",
+    "Missed it"
+   ],
+   "places": [
+    "home",
+    "yard",
+    "street",
+    "park"
+   ],
+   "gear": [
+    "a hide",
+    "a long line"
+   ],
+   "steps": [
+    {
+     "t": "One room",
+     "mark": "they find the hide in one room.",
+     "setup": "Nose height, easy air. Start them at the door.",
+     "reward": "Treat at the source."
+    },
+    {
+     "t": "Two rooms",
+     "mark": "they search both rooms and find it.",
+     "setup": "Hide in either one.",
+     "reward": "Treat at the source."
+    },
+    {
+     "t": "Around a car",
+     "mark": "they find the hide on the outside of a car.",
+     "setup": "Engine cold, parked off the road, on leash. A hide at the wheel arch or bumper.",
+     "reward": "Treat at the source."
+    },
+    {
+     "t": "High and hidden",
+     "mark": "they work out a hide that's up high or behind something.",
+     "setup": "Chest height first, then inside a drawer.",
+     "reward": "Treat as close to the source as they can get."
+    }
+   ]
+  },
+  {
+   "id": "alert",
+   "track": "nosework",
+   "name": "Alert",
+   "goal": "Freeze with the nose on the source until you call it.",
+   "cue": "None; you say \"Alert!\"",
+   "proofMark": "they freeze on the source until the timer marks it.",
+   "needs": [
+    "odor",
+    "stay"
+   ],
+   "gear": [
+    "a hide"
+   ],
+   "steps": [
+    {
+     "t": "Freeze 1 second",
+     "mark": "they freeze on the source until the timer marks it.",
+     "setup": "A tin on the floor. Wait a beat longer than usual before you pay.",
+     "reward": "Treat at the source.",
+     "hold": [
+      1,
+      1
+     ]
+    },
+    {
+     "t": "Freeze 3 seconds",
+     "mark": "they stay frozen until the timer marks it.",
+     "setup": "Same. If the nose comes off, it's a Miss.",
+     "reward": "Treat at the source.",
+     "hold": [
+      2,
+      4
+     ]
+    },
+    {
+     "t": "Until you call it",
+     "mark": "they hold the freeze while you step back and say \"Alert!\".",
+     "setup": "Stand a little to the side. Say \"Alert!\", then mark.",
+     "reward": "Jackpot at the source."
+    }
+   ]
+  },
+  {
+   "id": "front",
+   "track": "sport",
+   "name": "Front and finish",
+   "goal": "Sit straight in front, then swing to heel.",
+   "cue": "\"Front\", then \"Finish\"",
+   "proofMark": "a straight sit in front, then a tidy swing to heel.",
+   "needs": [
+    "heel@2",
+    "sit"
+   ],
+   "steps": [
+    {
+     "t": "Straight in front",
+     "mark": "they sit straight, close, facing you.",
+     "setup": "Lure them in close between your feet. Stand with your toes as the guide.",
+     "reward": "Treat at your belt, straight above their nose."
+    },
+    {
+     "t": "From 1 m",
+     "mark": "they come in and sit straight from 1 m.",
+     "setup": "Say \"Front\", hands at your belt.",
+     "reward": "Treat at your belt."
+    },
+    {
+     "t": "Swing to heel",
+     "mark": "they swing around to sit at your left side.",
+     "setup": "Lure back along your left leg, then forward into heel.",
+     "reward": "Treat at your left seam."
+    },
+    {
+     "t": "Both, from 3 m",
+     "mark": "a straight front from 3 m, then the finish.",
+     "setup": "Wait 2 seconds between the two so they don't run together.",
+     "reward": "Treat at your left seam."
+    }
+   ]
+  },
+  {
+   "id": "precheel",
+   "track": "sport",
+   "name": "Precision heel",
+   "goal": "Heads up, glued to your leg, sits when you stop.",
+   "cue": "\"Heel\"",
+   "proofMark": "attention and position through turns and halts.",
+   "needs": [
+    "heel:proofed|heel"
+   ],
+   "steps": [
+    {
+     "t": "Heads up",
+     "mark": "they look up at you for 5 steps in heel.",
+     "setup": "Treat held at your left chest. Mark the look, not just the place.",
+     "reward": "Treat at your left seam."
+    },
+    {
+     "t": "Sit at the halt",
+     "mark": "they sit by themselves when you stop.",
+     "setup": "Slow down over two steps, then halt. Help with a hand signal at first.",
+     "reward": "Treat at your left seam while they sit."
+    },
+    {
+     "t": "About-turn",
+     "mark": "they stay with you through an about-turn.",
+     "setup": "Turn to the right, small steps.",
+     "reward": "Treat as they catch your leg."
+    },
+    {
+     "t": "Figure 8",
+     "mark": "they stay in place around two markers.",
+     "setup": "Two cones or people 2.5 m apart. Speed up on the outside, slow down on the inside.",
+     "reward": "Treat at your left seam."
+    }
+   ]
+  },
+  {
+   "id": "spin",
+   "track": "tricks",
+   "name": "Spin and back up",
+   "goal": "A circle each way, and walking straight backward.",
+   "cue": "\"Spin\", \"Back up\"",
+   "proofMark": "they do it on the word.",
+   "needs": [
+    "charge"
+   ],
+   "steps": [
+    {
+     "t": "Lure a circle",
+     "mark": "they turn all the way around after your hand.",
+     "setup": "Treat at the nose, draw a wide circle.",
+     "reward": "Treat as they come back to face you."
+    },
+    {
+     "t": "Signal, both ways",
+     "mark": "they spin on a hand signal, left and right.",
+     "setup": "Empty hand, a smaller circle. Balance both sides.",
+     "reward": "Treat from your other hand."
+    },
+    {
+     "t": "The word",
+     "mark": "they spin on \"Spin\".",
+     "setup": "Word first, then the signal. Fade the signal.",
+     "reward": "Treat."
+    },
+    {
+     "t": "Back up 1 step",
+     "mark": "they take one step backward.",
+     "setup": "Stand close, step toward them gently. Keep the treat low so their spine stays level.",
+     "reward": "Treat under their chin."
+    },
+    {
+     "t": "Back up 3 steps",
+     "mark": "they take three steps back in a row.",
+     "setup": "Same. A wall on one side keeps them straight.",
+     "reward": "Treat tossed between their front paws."
+    },
+    {
+     "t": "Down a hallway",
+     "mark": "they back down a hallway on the word.",
+     "setup": "Narrow hallway. Say \"Back up\", then wait.",
+     "reward": "Toss the treat to them."
+    }
+   ]
+  },
+  {
+   "id": "perch",
+   "track": "tricks",
+   "name": "Perch pivot",
+   "goal": "Front paws up, rear feet walking around. Great for control.",
+   "cue": "\"Perch\"",
+   "proofMark": "their rear feet walk around a full circle.",
+   "needs": [
+    "charge"
+   ],
+   "gear": [
+    "a low, non-slip book or step"
+   ],
+   "steps": [
+    {
+     "t": "Front paws up",
+     "mark": "both front paws are on the book.",
+     "setup": "Book wrapped in non-slip mat. Lure forward over it, or wait for a paw.",
+     "reward": "Treat up high so the paws stay on."
+    },
+    {
+     "t": "One rear step",
+     "mark": "a rear foot steps sideways.",
+     "setup": "Take a small step around the perch, into their shoulder.",
+     "reward": "Treat at once, paws still up."
+    },
+    {
+     "t": "Quarter turn",
+     "mark": "they walk their rear a quarter of the way around.",
+     "setup": "Keep moving in one direction.",
+     "reward": "Treat at your leg."
+    },
+    {
+     "t": "Full circle, each way",
+     "mark": "they pivot all the way around, each way.",
+     "setup": "Do the weaker side first.",
+     "reward": "Treat, then a game."
+    }
+   ]
+  },
+  {
+   "id": "shapes",
+   "track": "tricks",
+   "name": "Paw, bow, roll over",
+   "goal": "Three party tricks, one at a time.",
+   "cue": "\"Paw\", \"Bow\", \"Roll over\"",
+   "proofMark": "they do the one you named.",
+   "needs": [
+    "down"
+   ],
+   "steps": [
+    {
+     "t": "Paw",
+     "mark": "their paw lifts into your hand.",
+     "setup": "Hold a treat in a closed fist at their chest height; wait for a paw.",
+     "reward": "Treat from the other hand."
+    },
+    {
+     "t": "Paw on the word",
+     "mark": "they give a paw when you say \"Paw\".",
+     "setup": "Word, pause, open hand.",
+     "reward": "Treat from the other hand."
+    },
+    {
+     "t": "Bow",
+     "mark": "elbows go down while the rear stays up.",
+     "setup": "From a stand, lure between the front legs. Mark before the rear drops.",
+     "reward": "Treat low, between the paws."
+    },
+    {
+     "t": "Roll onto the side",
+     "mark": "they roll onto one hip and shoulder.",
+     "setup": "From a down, lure the nose to the shoulder. Soft floor; skip it for a sore back or a full stomach.",
+     "reward": "Treat on the floor beside them."
+    },
+    {
+     "t": "All the way over",
+     "mark": "they roll all the way over.",
+     "setup": "Carry the lure across. Go at their speed.",
+     "reward": "Jackpot."
+    }
+   ]
+  },
+  {
+   "id": "balance",
+   "track": "tricks",
+   "name": "Balance and cavaletti",
+   "goal": "Core strength and careful feet, for field dogs most of all.",
+   "cue": "\"Up\", \"Walk\"",
+   "proofMark": "they move slowly and cleanly.",
+   "needs": [
+    "perch",
+    "plates"
+   ],
+   "gear": [
+    "a cushion or wobble disc",
+    "4 low poles"
+   ],
+   "steps": [
+    {
+     "t": "Stand on a cushion",
+     "mark": "they stand with all four feet steady on a cushion.",
+     "setup": "A firm cushion on a non-slip floor. A few seconds at a time.",
+     "reward": "Treat at nose height so they stay level."
+    },
+    {
+     "t": "Wobble disc",
+     "mark": "they hold their balance with front feet on a wobble disc.",
+     "setup": "Half inflated. Help them on; they step off when they want.",
+     "reward": "Slow treats while they balance."
+    },
+    {
+     "t": "Walk the poles",
+     "mark": "they walk over 4 poles without a touch.",
+     "setup": "Poles flat on the floor, a body length apart.",
+     "reward": "Treat at the end of the line."
+    },
+    {
+     "t": "Trot the poles",
+     "mark": "they trot over low poles with even steps.",
+     "setup": "No higher than their wrist. Two or three passes, then rest.",
+     "reward": "Treat at the end of the line."
     }
    ]
   }
