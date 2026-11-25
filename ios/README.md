@@ -1,6 +1,6 @@
 # Pocket Trainer for iPhone
 
-A native SwiftUI app with no third-party dependencies. It is a dog-training clicker and coach: a tap-to-mark YES pad, 10 step-by-step skills that adjust the difficulty on their own, a daily plan, a recall whistle, and session filming with tap-timing review. It works fully offline and collects no data.
+A native SwiftUI app with no third-party dependencies. It is a dog-training clicker and coach: a tap-to-mark YES pad, 79 step-by-step skills in 13 tracks that adjust the difficulty on their own, a daily plan, a recall whistle, and session filming with tap-timing review. It works fully offline and collects no data.
 
 It is a rewrite of the web app in this repo (`../index.html`, live at https://cdub562.github.io/pocket-trainer/) and teaches the same steps.
 
@@ -41,6 +41,9 @@ These need real hardware, and they are the reasons the app is native:
 - [ ] **Gun conditioning:** a "Worried" stops the block and relocks the skill.
 - [ ] **Whistle bar:** the sounds carry outdoors (a phone is quieter than a real whistle; it teaches the pattern).
 - [ ] **Distance chip outdoors:** asks for location once, shows yards and accuracy.
+- [ ] **Animations and voice** (How to set up, or Watch on a skill's step): the picture plays smoothly and isn't cut off. Listen speaks the setup, then each moment in step with the picture, then the reward. Stop, Pause, Slow and tapping a moment work. Closing the sheet stops the voice at once, and a Yes tapped right after is still instant. Works in airplane mode and with the silent switch on. With Reduce Motion on, a still picture until Play.
+- [ ] **Track notes** (add Hog bay dog or Blood tracking): the track stays locked until the note is confirmed.
+- [ ] **Behavior helpers** (Skills, near the bottom): "I've seen this" pauses the plan; Better / Same / Worse logs the day.
 - [ ] **A second dog:** switcher on Today, separate progress.
 
 ## App Store Connect
@@ -65,12 +68,15 @@ These need real hardware, and they are the reasons the app is native:
 
 | File | What it does |
 | --- | --- |
-| `Catalog.json` | Every skill (52 in 6 tracks), the passport, breeds, sounds and seasons. Generated from the web app's `src/catalog.js` by `node ../tools/gen_catalog.js`; never edit by hand. |
+| `Catalog.json` | Every skill (79 in 13 tracks), the behavior helpers, the Canine Good Citizen list, the passport, breeds, sounds and seasons. Generated from the web app's `src/catalog.js` by `node ../tools/gen_catalog.js`; never edit by hand. |
 | `CatalogData.swift` | Codable types that read `Catalog.json` |
 | `Models.swift` | Saved data: settings, dogs, each dog's state. Lenient decoding, so old saves and backups always load. v1 saves migrate to the first dog. |
 | `AppModel.swift` | The engine, a port of the web app's `src/app.js`: levels, prerequisites, proofing grid, spaced reviews, the planner (places, rest days, field days, sound ladder, seasons), puppy tools, backups |
 | `Session.swift` | The running session: blocks, marks, field outcomes, rounds, the sound ladder, breaks, holds, undo, filing the session |
 | `MarkerAudio.swift` | Low-latency sound: pre-rendered buffers, 4 running player nodes, whistles and sound-ladder sounds synthesized at launch, the recorded Yes |
+| `anim.html`, `AnimationView.swift` | The step animations: one generated page (from `src/`, by `build.sh`) in a web view. Voice clips are played natively. |
+| `voice/` | The voice guide: one clip per spoken line, named by a hash of its words. Copied from `../voice` by `build.sh`; made by `tools/voice/prerender.mjs`. |
+| `HelpersView.swift` | Track notes, the Canine Good Citizen card, behavior helpers |
 | `Recorder.swift` | Back-camera filming with tap times saved beside each video |
 | `Location.swift` | GPS distance for field reps, only while the Distance chip is on |
 | `TodayView.swift`, `SkillsView.swift`, `OnboardingView.swift`, `TrainingView.swift`, `SettingsView.swift`, `ChargeView.swift`, `GuideView.swift`, `ReviewView.swift`, `Components.swift` | The screens |
@@ -83,6 +89,6 @@ Data is saved to `Application Support/state-v2.json`. The planner and level logi
 - **Every Yes plays a sound before doing anything else.** Keep `audio.play` first in `AppModel.mark`.
 - **Days are local calendar days** (`AppModel.day`), not UTC.
 - **Changing a step list:**
-  1. Edit `MODULES` in `../index.html`.
-  2. Rerun the generator.
+  1. Edit `src/catalog.js`, and give the step an animation in `src/anim-steps.js` or `src/anim-more.js`.
+  2. Run `node tools/check.js`, `node tools/gen_catalog.js`, `node tools/voice/prerender.mjs`, then `sh build.sh`.
   3. Saved progress is clamped on load, so shorter lists are safe.

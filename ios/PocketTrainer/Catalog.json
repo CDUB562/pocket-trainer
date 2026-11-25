@@ -427,7 +427,7 @@
     "dogmeet"
    ],
    "goal": "Seeing a dog or a stranger means look back at you.",
-   "stop": "A bite, a bite attempt, or reactions that get closer and faster each week",
+   "stop": "Bite attempts, or reactions that get closer and faster each week",
    "measure": {
     "unit": "m",
     "label": "How far away was it when they first reacted?"
@@ -5204,7 +5204,7 @@
    "cue": "\"Heel\"",
    "proofMark": "attention and position through turns and halts.",
    "needs": [
-    "heel:proofed|heel"
+    "heel:proofed"
    ],
    "steps": [
     {

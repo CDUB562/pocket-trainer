@@ -46,6 +46,9 @@ jobs:
           APP=build/Debug-iphonesimulator/PocketTrainer.app
           ID=com.pockettrainer.app
           mkdir -p shots
+          # the voice guide must be inside the app
+          test "$(find "$APP" -name "v*.m4a" | wc -l)" -gt 1500
+          find "$APP" -name "v*.m4a" | head -2
           xcrun simctl install "$UDID" "$APP"
           shot() { out=$1; shift; xcrun simctl terminate "$UDID" $ID 2>/dev/null || true; xcrun simctl launch "$UDID" $ID "$@"; sleep 7; xcrun simctl io "$UDID" screenshot "shots/$out.png"; }
           shot 0-first-launch
